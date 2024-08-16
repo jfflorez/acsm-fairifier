@@ -1,0 +1,20 @@
+input_file_directory: 'raw_datafolder/'
+output_file_directory: 'data_products/'
+
+project: 'Building FAIR data chains for atmospheric observations in the ACTRIS Switzerland Network'  
+contact: 'NoraN'
+group_id: 'APOG'
+
+experiment: 'acsm_campaign' # beamtime, smog_chamber, lab_experiment 
+dataset_startdate: '2024-01-01'
+dataset_enddate: '2024-02-29'
+actris_level: '1'
+
+
+
+instrument_datafolder: 
+  - 'ACSM_TOFWARE'
+
+integration_mode: 'collection'
+# Specify datetimes (YYYY-MM-DD HH-MM-SS) at which experimental steps were created. 
+datetime_steps: []
