@@ -19,6 +19,8 @@ flags_dict = {
         "999" : {"flag_label": 'I', "flag_description": "Missing measurement, unspecified reason"}
         }
 
+dropdown_menu_options = [{'label': flags_dict[key]['flag_description'], 'value': key} for key in flags_dict.keys()]
+
 def create_loaded_file_figure(file_path):
 
     DataOpsAPI = h5de.HDF5DataOpsManager(file_path)        
@@ -28,8 +30,10 @@ def create_loaded_file_figure(file_path):
     diagnostic_channels = DataOpsAPI.file_obj.attrs['diagnostic_channels']['names'][0].decode().split(',')
     diagnostic_loc = DataOpsAPI.file_obj.attrs['diagnostic_channels']['location'][0].decode()
 
-    fig = make_subplots(rows=(len(target_channels+diagnostic_channels)-2), cols=1, shared_xaxes=True)
-
+    #fig = make_subplots(rows=(len(target_channels+diagnostic_channels)-2), cols=1, shared_xaxes=True,
+    #                    row_heights = [1 for i in range(len(target_channels+diagnostic_channels)-2)])
+    fig = make_subplots(rows=(len(target_channels+diagnostic_channels)-2), cols=1,
+                        row_heights = [1 for i in range(len(target_channels+diagnostic_channels)-2)])
     traces = []
     trace_idx = 1
     dataset = DataOpsAPI.file_obj[target_loc]
@@ -42,6 +46,7 @@ def create_loaded_file_figure(file_path):
                                 y = dataset[target_channels[i]][:],
                                 mode = 'lines',
                                 name = target_channels[i]), row=trace_idx, col=1)
+        fig.update_yaxes(row=trace_idx, col=1)
         trace_idx = trace_idx + 1
         
     dataset = DataOpsAPI.file_obj[diagnostic_loc]
@@ -55,6 +60,8 @@ def create_loaded_file_figure(file_path):
         fig.update_yaxes(row=trace_idx, col=1, type="log")
         trace_idx = trace_idx + 1
 
+    fig.update_layout(height=1200, title_text="Multiple Subplots with Shared Y-Axes")
+    
     DataOpsAPI.close_file()
 
     return fig
