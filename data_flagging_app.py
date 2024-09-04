@@ -14,18 +14,20 @@ sys.path.append(os.path.join(root_dir,'dima'))
 
 import dima.src.hdf5_data_extraction as h5de
 import dima.src.metadata_review_lib as ma
-import dima.src.g5505_utils as utils
+import dima.utils.g5505_utils as utils
 
 
 import data_flagging_utils as data_flagging_utils
 
-from dash import Dash, html, dcc, callback, Output, Input, State
+from dash import Dash, html, dcc, callback, Output, Input, State, dash_table
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 import dash_bootstrap_components as dbc
-
+import json
 # Initialize Dash app with Bootstrap theme
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+
+#df = pd.DataFrame.empty()
 
 app.layout = dbc.Container([
     dbc.Row([ 
@@ -60,15 +62,19 @@ app.layout = dbc.Container([
     
     dbc.Row([
         dbc.Col([ dcc.Graph(id='timeseries-plot')],  width=8), 
-        dbc.Col([html.Div(id='flag-record', style={'whiteSpace': 'pre-line'})], width=4), #config={'modeBarButtons': True,                                                         
+        #dbc.Col([html.Div(id='flag-record', style={'whiteSpace': 'pre-line'})], width=4), #config={'modeBarButtons': True,                                                         
                                                                #'modeBarButtonsToAdd':['select2d','lasso2d'], 
                                                                #'modeBarButtonsToRemove': ['zoom', 'pan']}),],  width=12)
+        dbc.Col([dash_table.DataTable(data=[], 
+                                      columns=[{"name": i, "id": i} for i in ['id','startdate','enddate','value']], 
+                                      id='tbl',
+                                      style_header={'textAlign': 'center'},)], width=4)
         
     ],justify="center", align="center"),
 
     dbc.Row([ # row 3
         dbc.Col([
-            dcc.Store(id='memory-output'),
+            dcc.Store(id='memory-output'),            
             html.Div(id='textarea-example-output', style={'whiteSpace': 'pre-line'})
         ], width=12)
     ],justify="center", align="center"),
@@ -102,7 +108,7 @@ def load_data(filename, contents):
 
 @app.callback(
     Output('timeseries-plot', 'figure', allow_duplicate=True),
-    Output('textarea-example-output','children'),
+    #Output('textarea-example-output','children'),
     Input('flag-button', 'n_clicks'),
     State('timeseries-plot', 'figure'),
     State('memory-output', 'data'),
@@ -117,7 +123,8 @@ def create_flag(n_clicks, fig, data):
                           'doubleClick' : 'reset'
                           })
     value = '{} amigos'.format(n_clicks)
-    return fig, f'You have entered: \n{value}'
+    #return fig, f'You have entered: \n{value}'
+    return fig
 
 #@app.callback(
 #    Output('timeseries-plot', 'figure', allow_duplicate=True),
@@ -180,15 +187,74 @@ def clear_flag(n_clicks, fig, data):
     else:
         return dash.no_update, dash.no_update
 
-@callback(Output('flag-record', 'children'),
+@callback(Output('tbl', 'data'),
           Input('commit-flag-button','n_clicks'),
+          State('flag-options','value'),
           State('timeseries-plot','selectedData'),
           prevent_initial_call=True)
 
-def commit_flag(n_clicks,selected_Data):
+
+def commit_flag(n_clicks,flag_value,selected_Data):
 
     value = selected_Data
-    return f'You have entered: \n{value}'
+    if (selected_Data is None) and (not isinstance(selected_Data,dict)):
+        return []
+    elif not selected_Data.get('range',[]): # verify if there is a flag's time interval to commit
+        return []
+
+    # TODO: modify the name path/to/name to reflect the directory provenance
+    flagfolderpath = 'flags/'
+
+    if not os.path.isdir(flagfolderpath):
+        os.makedirs(flagfolderpath)
+
+    #dirlist = os.listdir(flagfolderpath)
+    # Get all files in the directory with their full paths
+    files = [os.path.join(flagfolderpath, f) for f in os.listdir(flagfolderpath)]
+
+    # Sort files by creation time
+    dirlist_sorted_by_creation = sorted(files, key=os.path.getctime)
+
+    #dirlist = dirlist.sort(key=lambda x: int(x.split('_')[1].split('.')[0]))
+
+    display_flag_registry = True
+    if not display_flag_registry:
+        data = []
+    else:
+        data = []
+        for pathtofile in dirlist_sorted_by_creation:
+            if '.json' in pathtofile:
+                with open(pathtofile,'r') as f:
+                    data.append(json.load(f))
+
+    number_of_existing_flags = len(dirlist_sorted_by_creation)
+    flagid =  number_of_existing_flags+1
+    flag_filename = os.path.join(flagfolderpath,f'flag_{flagid}.json')
+
+    #if not os.path.exists(flag_filename):
+    #    with open(flag_filename,'r') as open_flagsfile:
+    #        json_flagsobject = json.load(open_flagsfile)   
+    #        data = [json_flagsobject[key] for key in json_flagsobject.keys()]     
+
+
+    #return f'You have entered: \n{value}'
+    for key, value in selected_Data['range'].items():
+        if 'x' in key:
+            new_row = {'id':flagid,'startdate':value[0],'enddate':value[1],'value': flag_value}
+            data.append(new_row)
+            #data = [{'startdate':value[0],'enddate':value[1],'value':90}]
+    
+    if not os.path.exists(flag_filename):
+        with open(flag_filename,'w') as flagsfile:
+            #json_flagsobject = json.dump({'row'+str(len(data)): new_row}, flagsfile)
+            json.dump(new_row, flagsfile)
+    #else:
+    #    with open(flag_filename,'a') as flagsfile:
+    #        json.dump(new_row, flagsfile)
+            #json.dump({'row'+str(len(data)): new_row}, flagsfile)    
+            #data = [json_flagsobject[key] for key in json_flagsobject.keys()] 
+
+    return data
 if __name__ == '__main__':
     app.run_server(debug=True)
 
