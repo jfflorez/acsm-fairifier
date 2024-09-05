@@ -3,12 +3,11 @@
 * When `Create Flag` is clicked, modify the title to indicate that we are in flagging mode and ROIs can be drawn by dragging.
 
 * Update `Commit Flag` logic:
-    1. Only commit the flag while in `Create-flag` mode, `selectedData` is not null, and a valid flag has been selected.
-    2. Display the committed flag on the table on the right (replace the current text component).
+    3. Update recorded flags directory, and add provenance information to each flag (which instrument and channel belongs to).
 
 * Record collected flag information initially in a YAML or JSON file. Is this faster than writing directly to the HDF5 file?
 
-* Should we actively transfer collected flags by clicking a button?
+* Should we actively transfer collected flags by clicking a button? after commit button is pressed, each flag is now stored in an independent json file
 
 * Enable some form of chunk storage and visualization from the HDF5 file. Iterate over chunks for faster display versus access time.
     1. Do I need to modify DIMA?
