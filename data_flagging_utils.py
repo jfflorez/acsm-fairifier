@@ -1,8 +1,11 @@
 
-import dima.src.hdf5_data_extraction as h5de
+import dima.src.hdf5_ops as h5de
 from plotly.subplots import make_subplots
 import plotly.graph_objs as go
+import base64
+import os
 
+UPLOAD_DIRECTORY = 'data_products/'
 
 flags_dict = {
         "000" : {"flag_label": 'V', "flag_description": "Valid measurement"},
@@ -21,14 +24,23 @@ flags_dict = {
 
 dropdown_menu_options = [{'label': flags_dict[key]['flag_description'], 'value': key} for key in flags_dict.keys()]
 
-def create_loaded_file_figure(file_path):
+def save_file(name, content):
+    # Decode the content and save the file
+    content_type, content_string = content.split(',')
+    decoded = base64.b64decode(content_string)
+    file_path = os.path.join(UPLOAD_DIRECTORY, name)
+    with open(file_path, "wb") as f:
+        f.write(decoded)
+    return file_path
+
+def create_loaded_file_figure(file_path, instfolder):
 
     DataOpsAPI = h5de.HDF5DataOpsManager(file_path)        
 
-    target_channels = DataOpsAPI.file_obj.attrs['target_channels']['names'][0].decode().split(',')
-    target_loc = DataOpsAPI.file_obj.attrs['target_channels']['location'][0].decode()
-    diagnostic_channels = DataOpsAPI.file_obj.attrs['diagnostic_channels']['names'][0].decode().split(',')
-    diagnostic_loc = DataOpsAPI.file_obj.attrs['diagnostic_channels']['location'][0].decode()
+    target_channels = DataOpsAPI.file_obj[instfolder].attrs['target_channels']['names'][0].decode().split(',')
+    target_loc = DataOpsAPI.file_obj[instfolder].attrs['target_channels']['location'][0].decode()
+    diagnostic_channels = DataOpsAPI.file_obj[instfolder].attrs['diagnostic_channels']['names'][0].decode().split(',')
+    diagnostic_loc = DataOpsAPI.file_obj[instfolder].attrs['diagnostic_channels']['location'][0].decode()
 
     #fig = make_subplots(rows=(len(target_channels+diagnostic_channels)-2), cols=1, shared_xaxes=True,
     #                    row_heights = [1 for i in range(len(target_channels+diagnostic_channels)-2)])
