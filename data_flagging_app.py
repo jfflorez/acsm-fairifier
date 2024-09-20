@@ -12,10 +12,6 @@ root_dir = os.path.abspath(os.curdir)
 sys.path.append(root_dir)
 sys.path.append(os.path.join(root_dir,'dima'))
 
-import dima.src.hdf5_data_extraction as h5de
-import dima.src.metadata_review_lib as ma
-import dima.utils.g5505_utils as utils
-
 
 import data_flagging_utils as data_flagging_utils
 
@@ -24,6 +20,7 @@ import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 import dash_bootstrap_components as dbc
 import json
+import dima.src.hdf5_ops as hdf5_ops
 # Initialize Dash app with Bootstrap theme
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -66,7 +63,7 @@ app.layout = dbc.Container([
                                                                #'modeBarButtonsToAdd':['select2d','lasso2d'], 
                                                                #'modeBarButtonsToRemove': ['zoom', 'pan']}),],  width=12)
         dbc.Col([dash_table.DataTable(data=[], 
-                                      columns=[{"name": i, "id": i} for i in ['id','startdate','enddate','value']], 
+                                      columns=[{"name": i, "id": i} for i in ['id','startdate','enddate','flag_description']], 
                                       id='tbl',
                                       style_header={'textAlign': 'center'},)], width=4)
         
@@ -91,12 +88,19 @@ def load_data(filename, contents):
     data = {'data_loaded_flag': False}
     if filename and contents and filename.endswith('.h5'):
         try:
-            content_type, content_string = contents.split(',')
-            decoded = base64.b64decode(content_string)
-            file_path = io.BytesIO(decoded)
-            fig = data_flagging_utils.create_loaded_file_figure(file_path)
+            path_to_file = data_flagging_utils.save_file(filename,contents)
+            #content_type, content_string = contents.split(',')
+            #decoded = base64.b64decode(content_string)
+            #file_path = io.BytesIO(decoded)
+            DataOps = hdf5_ops.HDF5DataOpsManager(path_to_file)
+            df = DataOps.retrieve_dataframe_of_dataset_names()
+            # TODO: allow selection of instrument folder
+            instfolder = df['parent_instrument'].unique()[0]
+            fig = data_flagging_utils.create_loaded_file_figure(path_to_file, instfolder)
             
             data['data_loaded_flag'] = True
+            data['path_to_uploaded_file'] = path_to_file
+            data['instfolder'] = instfolder
             
             return data, fig
         
@@ -191,10 +195,9 @@ def clear_flag(n_clicks, fig, data):
           Input('commit-flag-button','n_clicks'),
           State('flag-options','value'),
           State('timeseries-plot','selectedData'),
+          State('memory-output', 'data'),
           prevent_initial_call=True)
-
-
-def commit_flag(n_clicks,flag_value,selected_Data):
+def commit_flag(n_clicks,flag_value,selected_Data, data):
 
     value = selected_Data
     if (selected_Data is None) and (not isinstance(selected_Data,dict)):
@@ -203,7 +206,8 @@ def commit_flag(n_clicks,flag_value,selected_Data):
         return []
 
     # TODO: modify the name path/to/name to reflect the directory provenance
-    flagfolderpath = 'flags/'
+    instfolder = data['instfolder']
+    flagfolderpath = os.path.join(os.path.splitext(data['path_to_uploaded_file'])[0],f'{instfolder}_flags')
 
     if not os.path.isdir(flagfolderpath):
         os.makedirs(flagfolderpath)
@@ -240,7 +244,8 @@ def commit_flag(n_clicks,flag_value,selected_Data):
     #return f'You have entered: \n{value}'
     for key, value in selected_Data['range'].items():
         if 'x' in key:
-            new_row = {'id':flagid,'startdate':value[0],'enddate':value[1],'value': flag_value}
+            new_row = {'id':flagid,'startdate':value[0],'enddate':value[1],'flag_code': flag_value}
+            new_row.update(data_flagging_utils.flags_dict[flag_value])
             data.append(new_row)
             #data = [{'startdate':value[0],'enddate':value[1],'value':90}]
     
