@@ -27,6 +27,12 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 #df = pd.DataFrame.empty()
 
 app.layout = dbc.Container([
+    html.Div(children=[
+                html.Div(children=[
+                html.H1('QC/QA Data Flagging App'),
+                html.H6('All measurements are assumed valid unless checked otherwise.')
+                ]
+            )],style={'textAlign': 'center'}),
     dbc.Row([ 
 
         dbc.Col([
@@ -49,23 +55,44 @@ app.layout = dbc.Container([
                 options=data_flagging_utils.dropdown_menu_options,
                 )],
                 width=12
-        )],justify="center", align="center"),
+        ),
+        #],justify="center", align="center"),
 
-    dbc.Row([
+    #dbc.Row([
         dbc.Col([dbc.Button('Create Flag', id='flag-button', color="primary", className="mt-2")],width=2),
         dbc.Col([dbc.Button('Reset Flag', id='reset-flag-button', color="secondary", className="mt-2")],width=2),
         dbc.Col([dbc.Button('Commit Flag', id='commit-flag-button', color="secondary", className="mt-2")],width=2)
-    ], justify="center", align="center"),
+    ], justify="center", align="center",style={'background-color': '#f8f9fa', 'padding': '20px', 'text-align': 'center'}),
     
     dbc.Row([
-        dbc.Col([ dcc.Graph(id='timeseries-plot')],  width=8), 
+        dbc.Col([ 
+            html.Div([
+                    dcc.Graph(id='timeseries-plot',
+                              style={'height': '1200px','width' : '100%'})
+                    ],
+                    style={'height': '1000px', 'overflowY': 'auto'})        
+        ],  
+        width=8,
+        style={'background-color': '#e9ecef', 'padding': '20px', 'text-align': 'center','height': '1000px'}), 
         #dbc.Col([html.Div(id='flag-record', style={'whiteSpace': 'pre-line'})], width=4), #config={'modeBarButtons': True,                                                         
                                                                #'modeBarButtonsToAdd':['select2d','lasso2d'], 
                                                                #'modeBarButtonsToRemove': ['zoom', 'pan']}),],  width=12)
-        dbc.Col([dash_table.DataTable(data=[], 
-                                      columns=[{"name": i, "id": i} for i in ['id','startdate','enddate','flag_description']], 
-                                      id='tbl',
-                                      style_header={'textAlign': 'center'},)], width=4)
+        dbc.Col([
+                html.Div([
+                            dash_table.DataTable(data=[], 
+                                        columns=[{"name": i, "id": i} for i in ['id','startdate','enddate','flag_description']], 
+                                        id='tbl',
+                                        style_header={'textAlign': 'center'},
+                                        fixed_rows={'headers': True},  # Fixed table headers
+                                        style_table={'height': '1000px'},  # Make table scrollable
+                                        style_cell={'textAlign': 'left', 'padding': '10px'},  # Cell styling
+                                        )
+                        ],
+                          style={'height': '1000px','overflowY': 'auto'}),  # Set a fixed height for the div
+                ], 
+
+                width=4,
+                style={'background-color': '#dee2e6', 'padding': '20px', 'text-align': 'center','height': '1000px'},)
         
     ],justify="center", align="center"),
 
@@ -245,7 +272,7 @@ def commit_flag(n_clicks,flag_value,selected_Data, data):
     for key, value in selected_Data['range'].items():
         if 'x' in key:
             new_row = {'id':flagid,'startdate':value[0],'enddate':value[1],'flag_code': flag_value}
-            new_row.update(data_flagging_utils.flags_dict[flag_value])
+            new_row.update(data_flagging_utils.flags_dict.get(flag_value,{}))
             data.append(new_row)
             #data = [{'startdate':value[0],'enddate':value[1],'value':90}]
     

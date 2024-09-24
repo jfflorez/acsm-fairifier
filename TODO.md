@@ -3,8 +3,6 @@
     1. Define data manager obj with apply flags behavior. How does that affect dataset and metadata values (actris level, processing_script)? 
     2. Define metadata answering who did the flagging and quality assurance tests?
 
-* Indicate all measurements are assumed to be valid unless checked otherwise (Should this be in the title? this may overlap with the following item.)
-
 * When `Create Flag` is clicked, modify the title to indicate that we are in flagging mode and ROIs can be drawn by dragging.
 
 * Update `Commit Flag` logic:
