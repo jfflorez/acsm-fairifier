@@ -20,7 +20,15 @@ import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 import dash_bootstrap_components as dbc
 import json
+
 import dima.src.hdf5_ops as hdf5_ops
+#import dima.instruments.readers.filereader_registry as filereader_registry
+#import instruments_.readers.flag_reader as flag_reader
+
+#filereader_registry.file_extensions.append('.json') 
+#filereader_registry.file_readers.update({'ACSM_TOFWARE_flags_json' : lambda x: flag_reader.read_jsonflag_as_dict(x)})
+
+
 # Initialize Dash app with Bootstrap theme
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -120,7 +128,8 @@ def load_data(filename, contents):
             #decoded = base64.b64decode(content_string)
             #file_path = io.BytesIO(decoded)
             DataOps = hdf5_ops.HDF5DataOpsManager(path_to_file)
-            df = DataOps.retrieve_dataframe_of_dataset_names()
+            DataOps.load_dataset_metadata()
+            df = DataOps.dataset_metadata_df
             # TODO: allow selection of instrument folder
             instfolder = df['parent_instrument'].unique()[0]
             fig = data_flagging_utils.create_loaded_file_figure(path_to_file, instfolder)
