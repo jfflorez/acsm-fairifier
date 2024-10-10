@@ -122,13 +122,17 @@ app.layout = dbc.Container([
 def load_data(filename, contents):
     data = {'data_loaded_flag': False}
     if filename and contents and filename.endswith('.h5'):
+
         try:
             path_to_file = data_flagging_utils.save_file(filename,contents)
+
+            DataOps = hdf5_ops.HDF5DataOpsManager(path_to_file)
+            DataOps.load_file_obj()
+
             #content_type, content_string = contents.split(',')
             #decoded = base64.b64decode(content_string)
             #file_path = io.BytesIO(decoded)
-            DataOps = hdf5_ops.HDF5DataOpsManager(path_to_file)
-            DataOps.load_dataset_metadata()
+            DataOps.extract_and_load_dataset_metadata()
             df = DataOps.dataset_metadata_df
             # TODO: allow selection of instrument folder
             instfolder = df['parent_instrument'].unique()[0]
@@ -137,12 +141,16 @@ def load_data(filename, contents):
             data['data_loaded_flag'] = True
             data['path_to_uploaded_file'] = path_to_file
             data['instfolder'] = instfolder
-            
+
+            DataOps.unload_file_obj()
+
             return data, fig
         
         except Exception as e:
+            DataOps.unload_file_obj()
             print(f"Error processing file: {e}")
             return data, dash.no_update
+        
 
     return data, dash.no_update
 
