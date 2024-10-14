@@ -170,6 +170,9 @@ def create_flag(n_clicks, fig, data):
                           'activeselection' : dict(fillcolor='yellow'),
                           'doubleClick' : 'reset'
                           })
+    
+    fig['layout'].update({'title':"Flagging Mode Enabled: Select ROI to Define Flagging Interval."})
+
     value = '{} amigos'.format(n_clicks)
     #return fig, f'You have entered: \n{value}'
     return fig
@@ -231,6 +234,8 @@ def clear_flag(n_clicks, fig, data):
         selected_data = None
         fig['layout'].update({'dragmode': 'zoom', 'activeselection': None,
                               'selections':{'line': None}})
+        instFolder =data['instfolder']
+        fig['layout'].update({'title': f'{instFolder}: Target and Diagnostic Channels'})
         return selected_data, fig
     else:
         return dash.no_update, dash.no_update
