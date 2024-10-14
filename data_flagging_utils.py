@@ -79,7 +79,7 @@ def create_loaded_file_figure(file_path, instfolder):
         fig.update_yaxes(row=trace_idx, col=1, type="log")
         trace_idx = trace_idx + 1
 
-    fig.update_layout(height=1200, title_text="Multiple Subplots with Shared Y-Axes")
+    fig.update_layout(height=1200, title_text=f"{instfolder} : Target and Diagnostic Channels")
     
     DataOpsAPI.unload_file_obj()
 
