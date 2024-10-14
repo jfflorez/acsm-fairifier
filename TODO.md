@@ -1,6 +1,6 @@
 # TODO
 * Implement flagging-app specific data operations such as:
-    1. ~~Define data manager obj with apply flags behavior. ~~
+    1. ~~Define data manager obj with apply flags behavior.~~
     2. Define metadata answering who did the flagging and quality assurance tests?
     3. Update intruments/dictionaries/ACSM_TOFWARE_flags.yaml and instruments/readers/flag_reader.py to describe metadata elements based on dictionary.  
     4. ~~Update DIMA data integration pipeline to allowed user-defined file naming template~~
