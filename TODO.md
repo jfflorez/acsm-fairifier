@@ -1,12 +1,14 @@
 # TODO
 * Implement flagging-app specific data operations such as:
-    1. Define data manager obj with apply flags behavior. How does that affect dataset and metadata values (actris level, processing_script)? 
+    1. ~~Define data manager obj with apply flags behavior. ~~
     2. Define metadata answering who did the flagging and quality assurance tests?
     3. Update intruments/dictionaries/ACSM_TOFWARE_flags.yaml and instruments/readers/flag_reader.py to describe metadata elements based on dictionary.  
-    4. Update DIMA data integration pipeline to allowed user-defined file naming template
+    4. ~~Update DIMA data integration pipeline to allowed user-defined file naming template~~
     5. Design and implement flag visualization feature: click flag on table and display on figure shaded region when feature is enabled
+    6. Implement schema validator on yaml/json representation of hdf5 metadata
+    7. Implement updates to 'actris level' and 'processing_script' after operation applied to data/file? 
 
-* When `Create Flag` is clicked, modify the title to indicate that we are in flagging mode and ROIs can be drawn by dragging.
+* ~~When `Create Flag` is clicked, modify the title to indicate that we are in flagging mode and ROIs can be drawn by dragging.~~
 
 * Update `Commit Flag` logic:
     3. Update recorded flags directory, and add provenance information to each flag (which instrument and channel belongs to).
