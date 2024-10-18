@@ -1,5 +1,5 @@
-input_file_directory: 'raw_datafolder/'
-output_file_directory: 'data_products/'
+input_file_directory: '//fs00/LAC_ORD/Data/'
+output_file_directory: '//fs00/LAC_ORD/DataProducts/'
 
 project: 'Building FAIR data chains for atmospheric observations in the ACTRIS Switzerland Network'  
 contact: 'NoraN'
@@ -10,6 +10,10 @@ dataset_startdate: '2024-01-01'
 dataset_enddate: '2024-02-29'
 actris_level: '1'
 
+# Define an (output) filename format of a resulting hdf5 file
+station : 'JFJ'
+year : '2024'
+filename_format : "station,year,experiment,contact"
 
 
 instrument_datafolder: 
