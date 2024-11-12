@@ -41,7 +41,7 @@ Otherwise, set up an appropriate Python interpreter by running the following com
 Run the following command to start the dashboard app:
 
    ```bash
-   python data_flagging_app.py open
+   python data_flagging_app.py
    ```
 
 This command will launch the data flagging app.
@@ -51,6 +51,6 @@ This command will launch the data flagging app.
 Run the following command to stop the dashboard app:
 
    ```bash
-   python data_flagging_app.py exit
+   CTRL + C
    ```
 This command will terminate the server process running the app.
