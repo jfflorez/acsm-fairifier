@@ -26,8 +26,6 @@ flags_dict = {
         "999" : {"flag_label": 'I', "flag_description": "Missing measurement, unspecified reason"}
         }
 
-dropdown_menu_options = [{'label': flags_dict[key]['flag_description'], 'value': key} for key in flags_dict.keys()]
-
 def save_file(name, content):
     # Decode the content and save the file
     content_type, content_string = content.split(',')
@@ -36,6 +34,23 @@ def save_file(name, content):
     with open(file_path, "wb") as f:
         f.write(decoded)
     return file_path
+
+def filter_flags_by_label(flags_dict, label):
+    """
+    Filters the flags dictionary by the specified label.
+
+    Parameters:
+    -----------
+        flags_dict (dict): The dictionary containing flags.
+        label (str): The label to filter by ('I' or 'V').
+
+    Returns:
+    --------
+        list: A list of dictionaries with 'label' and 'value' for the specified label.
+    """
+    return [{'label': value['flag_description'], 'value': code} 
+            for code, value in flags_dict.items() if value['flag_label'] == label]
+
 
 def create_loaded_file_figure(file_path, instfolder):
 
@@ -165,7 +180,12 @@ class FlaggingAppDataManager():
                 flag_obj = file_obj[f'{instFolder}_flags'][flag]['data_table']
 
                 # Replace values indicated by flag NaN if flag label refers to invalidated data.
-                if flag_obj['flag_label'][0].decode() == 'I':
+                if not flag_obj['flag_code'][0].decode() is 'None':
+                    flag_label = ''
+                else:
+                    flag_label = flag_obj['flag_label'][0].decode()
+
+                if flag_label == 'I':
                     t1 = pd.to_datetime(flag_obj['startdate'][0].decode(), format=flag_datetime_format)
                     t2 = pd.to_datetime(flag_obj['enddate'][0].decode(), format=flag_datetime_format)
 
@@ -201,7 +221,7 @@ class FlaggingAppDataManager():
 
         except Exception as e:
             self._data_ops_obj.unload_file_obj()
-            print(f"An unexpected error occurred: {e}."
+            print(f"An unexpected error occurred: {e}"
                    "The file object has been properly closed.")
 
 

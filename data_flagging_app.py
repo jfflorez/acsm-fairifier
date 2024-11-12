@@ -28,7 +28,6 @@ import dima.src.hdf5_ops as hdf5_ops
 #filereader_registry.file_extensions.append('.json') 
 #filereader_registry.file_readers.update({'ACSM_TOFWARE_flags_json' : lambda x: flag_reader.read_jsonflag_as_dict(x)})
 
-
 # Initialize Dash app with Bootstrap theme
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -60,7 +59,7 @@ app.layout = dbc.Container([
                 }),
                 dcc.Dropdown(
                 id='flag-options',
-                options=data_flagging_utils.dropdown_menu_options,
+                options= data_flagging_utils.filter_flags_by_label(data_flagging_utils.flags_dict,'I'), # displays only flags to invalidate
                 )],
                 width=12
         ),
@@ -309,6 +308,6 @@ def commit_flag(n_clicks,flag_value,selected_Data, data):
             #data = [json_flagsobject[key] for key in json_flagsobject.keys()] 
 
     return data
-if __name__ == '__main__':
-    app.run_server(debug=True)
 
+if __name__ == '__main__':
+    app.run_server(debug=True, use_reloader=False)
