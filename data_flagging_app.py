@@ -98,9 +98,51 @@ app.layout = dbc.Container([
                                         fixed_rows={'headers': True},  # Fixed table headers
                                         style_table={'height': '1000px'},  # Make table scrollable
                                         style_cell={'textAlign': 'left', 'padding': '10px'},  # Cell styling
-                                        )
-                        ],
+                                        ),
+                                        dbc.Container([
+                            # Row 1
+                            dbc.Row([
+                                dbc.Col(html.Div("Visualize Flags"), width=6),
+                                dbc.Col(dcc.RadioItems(
+                                    id='yes-no-radio',
+                                    options=[
+                                        {'label': 'Yes', 'value': 'Yes'},
+                                        {'label': 'No', 'value': 'No'}
+                                    ],
+                                    value='Yes',
+                                    inline=True
+                                ), width=6),
+                            ]),
+                            
+                            # Row 2
+                            dbc.Row([
+                                dbc.Col(html.Div("Review Status"), width=6),
+                                dbc.Col(dcc.RadioItems(
+                                    id='pass-nopass-radio',
+                                    options=[
+                                        {'label': 'Pass', 'value': 'Pass'},
+                                        {'label': 'NoPass', 'value': 'NoPass'}
+                                    ],
+                                    value='Pass',
+                                    inline=True
+                                ), width=6),
+                            ]),
+                            
+                            # Row 3
+                            dbc.Row([
+                                dbc.Col(html.Div("Transfer Flags"), width=6),
+                                dbc.Col(dbc.Button("Button 1", id='button-1', color='primary'), width=6),
+                            ]),
+                            
+                            # Row 4
+                            dbc.Row([
+                                dbc.Col(html.Div("Apply Flags"), width=6),
+                                dbc.Col(dbc.Button("Button 2", id='button-2', color='secondary'), width=6),
+                            ]),
+                            ], fluid=True)
+                                ],
                           style={'height': '1000px','overflowY': 'auto'}),  # Set a fixed height for the div
+            
                 ], 
 
                 width=4,
