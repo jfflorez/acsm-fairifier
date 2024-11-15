@@ -28,6 +28,10 @@ import dima.src.hdf5_ops as hdf5_ops
 #filereader_registry.file_extensions.append('.json') 
 #filereader_registry.file_readers.update({'ACSM_TOFWARE_flags_json' : lambda x: flag_reader.read_jsonflag_as_dict(x)})
 
+import threading
+import webbrowser
+from time import sleep
+
 # Initialize Dash app with Bootstrap theme
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -73,7 +77,8 @@ app.layout = dbc.Container([
     
     dbc.Row([
         dbc.Col([ 
-            html.Div([
+            html.Div([                
+                    html.Div(id='flag-mode-title', style={'whiteSpace': 'pre-line'}),
                     dcc.Graph(id='timeseries-plot',
                               style={'height': '1200px','width' : '100%'})
                     ],
@@ -155,7 +160,7 @@ def load_data(filename, contents):
 
 @app.callback(
     Output('timeseries-plot', 'figure', allow_duplicate=True),
-    #Output('textarea-example-output','children'),
+    Output('flag-mode-title','children'),
     Input('flag-button', 'n_clicks'),
     State('timeseries-plot', 'figure'),
     State('memory-output', 'data'),
@@ -170,11 +175,12 @@ def create_flag(n_clicks, fig, data):
                           'doubleClick' : 'reset'
                           })
     
-    fig['layout'].update({'title':"Flagging Mode Enabled: Select ROI to Define Flagging Interval."})
+    #fig['layout'].update({'title':"Flagging Mode Enabled: Select ROI to Define Flagging Interval."})
 
-    value = '{} amigos'.format(n_clicks)
-    #return fig, f'You have entered: \n{value}'
-    return fig
+    #value = '{} amigos'.format(n_clicks)
+    title = "Flagging Mode Enabled: Select ROI to Define Flagging Interval."
+    return fig, title
+    #return fig
 
 #@app.callback(
 #    Output('timeseries-plot', 'figure', allow_duplicate=True),
@@ -219,14 +225,13 @@ def create_flag(n_clicks, fig, data):
 
 @app.callback(
     [Output('timeseries-plot', 'selectedData'),
-     Output('timeseries-plot', 'figure', allow_duplicate=True)],
+     Output('timeseries-plot', 'figure', allow_duplicate=True),
+     Output('flag-mode-title', 'children',allow_duplicate=True)],     
     [Input('reset-flag-button', 'n_clicks'),
      State('timeseries-plot', 'figure'),
      State('memory-output', 'data')],
      prevent_initial_call = True)
-def clear_flag(n_clicks, fig, data):
-
-    
+def clear_flag(n_clicks, fig, data):    
 
     if n_clicks > 0 and data.get('data_loaded_flag', False):
         # Clear selection
@@ -235,9 +240,33 @@ def clear_flag(n_clicks, fig, data):
                               'selections':{'line': None}})
         instFolder =data['instfolder']
         fig['layout'].update({'title': f'{instFolder}: Target and Diagnostic Channels'})
-        return selected_data, fig
+        flagging_mode_message = ''
+        return selected_data, fig, flagging_mode_message
     else:
-        return dash.no_update, dash.no_update
+        return dash.no_update, dash.no_update, dash.no_update
+    
+@app.callback(
+    [Output('timeseries-plot', 'figure', allow_duplicate=True),
+     Output('timeseries-plot', 'selectedData',allow_duplicate=True),
+     Output('flag-mode-title', 'children',allow_duplicate=True)],     
+    [Input('timeseries-plot', 'relayoutData'),
+     State('timeseries-plot', 'figure'),
+     State('memory-output', 'data')],
+     prevent_initial_call = True)
+def clear_flag_mode_title(relayoutData, fig, data):    
+
+    if data.get('data_loaded_flag', False) and not fig['layout'].get('dragmode',None) == 'select':
+        # Clear selection
+        selected_data = None
+        fig['layout'].update({'dragmode': 'zoom', 'activeselection': None,
+                              'selections':{'line': None}})
+        #instFolder =data['instfolder']
+        #fig['layout'].update({'title': f'{instFolder}: Target and Diagnostic Channels'})
+        flagging_mode_message = ''
+        return fig, selected_data, flagging_mode_message
+    else:
+        return dash.no_update, dash.no_update, dash.no_update
+
 
 @callback(Output('tbl', 'data'),
           Input('commit-flag-button','n_clicks'),
@@ -309,5 +338,14 @@ def commit_flag(n_clicks,flag_value,selected_Data, data):
 
     return data
 
+def open_browser():
+    """Wait for the server to start, then open the browser."""
+    sleep(1)  # Wait briefly to ensure the server is starting
+    webbrowser.open_new("http://127.0.0.1:8050/")
+
 if __name__ == '__main__':
+    # Start the browser-opening function in a separate thread
+    threading.Thread(target=open_browser).start()
+    
+    # Run the Dash app server
     app.run_server(debug=True, use_reloader=False)
