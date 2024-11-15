@@ -1,5 +1,5 @@
-input_file_directory: '//fs00/LAC_ORD/Data/'
-output_file_directory: '//fs00/LAC_ORD/DataProducts/'
+input_file_directory: '//fs00/LAC_ORD/data/'
+output_file_directory: 'data/'
 
 project: 'Building FAIR data chains for atmospheric observations in the ACTRIS Switzerland Network'  
 contact: 'NoraN'
@@ -13,7 +13,7 @@ actris_level: '1'
 # Define an (output) filename format of a resulting hdf5 file
 station : 'JFJ'
 year : '2024'
-filename_format : "station,year,experiment,contact"
+filename_format : "station,year,contact"
 
 
 instrument_datafolder: 
