@@ -80,7 +80,7 @@ def create_loaded_file_figure(file_path, instfolder):
                                 y = dataset[target_channels[i]][:],
                                 mode = 'lines',
                                 name = target_channels[i]), row=trace_idx, col=1)
-        fig.update_yaxes(row=trace_idx, col=1)
+        fig.update_yaxes(title_text= target_channels[i], row=trace_idx, col=1)
         trace_idx = trace_idx + 1
         
     dataset = DataOpsAPI.file_obj[diagnostic_loc]
@@ -91,10 +91,10 @@ def create_loaded_file_figure(file_path, instfolder):
                                 y = dataset[diagnostic_channels[i]][:],
                                 mode = 'lines',
                                 name = diagnostic_channels[i]), row=trace_idx, col=1)
-        fig.update_yaxes(row=trace_idx, col=1, type="log")
+        fig.update_yaxes(title_text= diagnostic_channels[i], row=trace_idx, col=1, type="log")
         trace_idx = trace_idx + 1
 
-    fig.update_layout(height=1200, title_text=f"{instfolder} : Target and Diagnostic Channels")
+    fig.update_layout(height=1200, title_text=f"{instfolder} : Target and Diagnostic Channels", showlegend=False)
     
     DataOpsAPI.unload_file_obj()
 
@@ -145,6 +145,9 @@ class FlaggingAppDataManager():
 
             if not instFolder in file_obj:
                 raise ValueError(f'Invalid instrument name. Instrument folder {instFolder} was not found in file {self.file_path}.')
+            
+            if '_'.join([instFolder,'flags']) not in flag_obj:
+                raise RuntimeWarning(f'There is no flags to apply. ')
             
             if not ('diagnostic_channels' in file_obj[instFolder].attrs and 'target_channels' in file_obj[instFolder].attrs):
                 raise ValueError(
@@ -201,13 +204,13 @@ class FlaggingAppDataManager():
             )
 
 
-            #dt.strftime(ref_datetime_format).apply(lambda x: x.tobytes() if pd.notnull(x) else b'')
-
+            # Split full datasetname instFolder/fileName/datatable --> [instFolder, filename, datatable]
             dataset_name_parts = dataset_name.split('/')
+            # Create new instFolder name to store dataset after applying flags
             newInstFolder = '_'.join([dataset_name_parts[0],'cleaned'])
             dataset_name_parts.remove(dataset_name_parts[0])
+            # Put together relative datasetname. Note that instFolder is now missing.
             flagged_dataset_name = '/'.join(dataset_name_parts)
-
 
             dataset_dict = {'attributes':{},
                             'name':flagged_dataset_name,
