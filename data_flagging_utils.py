@@ -31,9 +31,14 @@ def save_file(name, content):
     content_type, content_string = content.split(',')
     decoded = base64.b64decode(content_string)
     file_path = os.path.join(UPLOAD_DIRECTORY, name)
-    with open(file_path, "wb") as f:
-        f.write(decoded)
-    return file_path
+    if not os.path.exists(file_path):
+        with open(file_path, "wb") as f:
+            f.write(decoded)
+        print(f"File saved successfully at {file_path}")
+        return file_path
+    else:
+        print(f'File already exists at {file_path}.\nTo maintain the integrity of the existing file, it will not be overwritten.')
+        return file_path
 
 def filter_flags_by_label(flags_dict, label):
     """
