@@ -84,6 +84,7 @@ ReviewOpsPannel =  dbc.Col([
                             # Row 3
                             dbc.Row([
                                      #dbc.Col(dbc.Button("Load Flags", id='button-1', color='primary'),width=4),
+                                     dbc.Col(dbc.Button("Delete Flag", id='delete-flag-button', color='primary'),width=4),
                                      dbc.Col(dbc.Button("Record Flags", id='button-2', color='primary'),width=4),
                                      dbc.Col(dbc.Button("Apply Flags", id='button-3', color='primary'),width=4)],
                                      justify="center", align="center"),
