@@ -102,8 +102,79 @@ def create_loaded_file_figure(file_path, instfolder):
     fig.update_layout(height=1200, title_text=f"{instfolder} : Target and Diagnostic Channels", showlegend=False)
     
     DataOpsAPI.unload_file_obj()
+    target_channels.remove(target_channels[0])
+    diagnostic_channels.remove(diagnostic_channels[0])
+    return fig, [','.join([item,target_loc]) for item in target_channels] + [','.join([item,diagnostic_loc]) for item in diagnostic_channels]
 
-    return fig
+#import os
+import json
+import h5py
+
+def load_flags(filePath, instFolder, dry_run : bool = False):
+    """
+    Returns a list of flags (dictionaries) based on the provided filePath and instFolder.
+    
+    Parameters:
+    -----------
+        filePath (str): The path to the uploaded file, expected to have an .h5 extension.
+        instFolder (str): The name of the instrument folder, which must exist as a group in the HDF5 file.
+        dry_run (bool): If True, performs all operations except loading file contents.
+    
+    Returns:
+    --------
+        list: A list of dictionaries containing flag data (or file paths in dry_run mode), 
+              or None if conditions are not met.
+    """
+    # Ensure the input file is an .h5 file
+    if not filePath.endswith('.h5'):
+        print(f"Invalid file extension: {filePath}. Expected a .h5 file.")
+        return None
+
+    # Ensure the instFolder exists as a group in the HDF5 file
+    try:
+        with h5py.File(filePath, 'r') as h5file:
+            if instFolder not in h5file:
+                print(f"Instrument folder '{instFolder}' not found in HDF5 file.")
+                return None
+    except (OSError, IOError) as e:
+        print(f"Error reading HDF5 file: {e}")
+        return None
+
+    # Construct the flags folder path
+    flagFolderPath = os.path.join(os.path.splitext(filePath)[0], f'{instFolder}_flags')
+
+    # Return None if the flags folder does not exist
+    if not os.path.exists(flagFolderPath):
+        return None
+
+    # List files in the flags folder
+    files = [os.path.join(flagFolderPath, f) for f in os.listdir(flagFolderPath)]
+
+    # If no files found, return None
+    if not files:
+        return None
+
+    # Sort files by creation time
+    sortedFiles = sorted(files, key=os.path.getctime)
+
+    if dry_run:
+        print(f"Dry run: Found {len(sortedFiles)} files in the flags folder:")
+        for filePath in sortedFiles:
+            print(f" - {filePath}")
+        return sortedFiles  # Return file paths in dry run mode
+
+    # Process and load JSON files
+    flagDataList = []
+    for filePath in sortedFiles:
+        if filePath.endswith('.json'):
+            try:
+                with open(filePath, 'r') as file:
+                    flagDataList.append(json.load(file))
+            except (json.JSONDecodeError, FileNotFoundError) as e:
+                print(f"Error loading file {filePath}: {e}")
+                continue  # Skip invalid or missing files
+
+    return flagDataList
 
 class FlaggingAppDataManager():
 
