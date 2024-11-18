@@ -58,7 +58,7 @@ FlagVisTable =  html.Div(dash_table.DataTable(data=[],
 
 ReviewOpsPannel =  dbc.Col([
                             # Row 1
-                            dbc.Row([html.Div("Flagging Status", style={'font-size': 20})]),
+                            dbc.Row([html.H2("Flagging workflow pannel", style={'font-size': 20})]),
                                 
 
                             # Row 2
