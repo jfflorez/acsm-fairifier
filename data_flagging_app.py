@@ -32,6 +32,69 @@ import threading
 import webbrowser
 from time import sleep
 
+EnableVisCheckbox = dbc.Col(dbc.Row([dbc.Col(dcc.Checklist(
+                                            id='enable-flag-checkbox',
+                                            options=[{'label': html.Span('Enable Flag Visualization', style={'font-size': 15, 'padding-left': 10}), 'value': True}],
+                                            value=[],
+                                            inline=True),width=6),
+                                    dbc.Col(dbc.Button("Load Flags", id='load-flags-button', color='primary'),width=4)],
+                                    justify="center", align="center"),
+                    width=12)
+
+FlagVisTable =  html.Div(dash_table.DataTable(data=[], 
+                                            columns=[{"name": i, "id": i} for i in ['id','startdate','enddate','flag_description','parent_ch_pos','parent_channel']], 
+                                            id='tbl',
+                                            style_header={'textAlign': 'center'},
+                                            fixed_rows={'headers': True},  # Fixed table headers
+                                            style_table={'height': '1000px'},  # Make table scrollable
+                                            style_cell={'textAlign': 'left', 'padding': '10px'},  # Cell styling
+                                            ),
+                        style={
+                        'background-color': '#f0f0f0',  # Background color for the table
+                        #'height': '1000px',  # Match the table's height
+                        'padding': '5px',  # Optional padding around the table
+                        'border': '1px solid #ccc',  # Optional border around the background
+                         } )
+
+ReviewOpsPannel =  dbc.Col([
+                            # Row 1
+                            dbc.Row([html.Div("Flagging Status", style={'font-size': 20})]),
+                                
+
+                            # Row 2
+                            dbc.Row([
+                                #dbc.Col(html.Div("Review Status"), width=6),
+                                dcc.Checklist(
+                                    id='flag-review-status-checklist',
+                                    options=[
+                                        {'label': [html.Span("Verify Flags", style={'font-size': 15, 'padding-left': 2})], 'value': 'will review'},
+                                        {'label': [html.Span("Ready to Record Flags", style={'font-size': 15, 'padding-left': 2})], 'value': 'will transfer'},
+                                        {'label': [html.Span("Finalize Flagging", style={'font-size': 15, 'padding-left': 2})], 'value': 'will apply'}
+                                    ],
+                                    value=[],
+                                    #inline=True,
+                                    style={
+                                    "display": "flex",          # Flexbox for left alignment
+                                    "flexDirection": "column",  # Arrange the items vertically
+                                    "alignItems": "flex-start"  # Align the items to the left
+    }
+                                ),
+                            ]),
+                            
+                            # Row 3
+                            dbc.Row([
+                                     #dbc.Col(dbc.Button("Load Flags", id='button-1', color='primary'),width=4),
+                                     dbc.Col(dbc.Button("Record Flags", id='button-2', color='primary'),width=4),
+                                     dbc.Col(dbc.Button("Apply Flags", id='button-3', color='primary'),width=4)],
+                                     justify="center", align="center"),
+                            
+                            # Row 4
+                            #dbc.Row([
+                            #    dbc.Col(html.Div("Apply Flags"), width=6),
+                            #    dbc.Col(dbc.Button("Button 2", id='button-2', color='secondary'), width=6),
+                            #]),
+                            ],width=12)
+
 # Initialize Dash app with Bootstrap theme
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -91,58 +154,11 @@ app.layout = dbc.Container([
                                                                #'modeBarButtonsToRemove': ['zoom', 'pan']}),],  width=12)
         dbc.Col([
                 html.Div([
-                            dash_table.DataTable(data=[], 
-                                        columns=[{"name": i, "id": i} for i in ['id','startdate','enddate','flag_description']], 
-                                        id='tbl',
-                                        style_header={'textAlign': 'center'},
-                                        fixed_rows={'headers': True},  # Fixed table headers
-                                        style_table={'height': '1000px'},  # Make table scrollable
-                                        style_cell={'textAlign': 'left', 'padding': '10px'},  # Cell styling
-                                        ),
-                                        dbc.Container([
-                            # Row 1
-                            dbc.Row([
-                                dbc.Col(html.Div("Visualize Flags"), width=6),
-                                dbc.Col(dcc.RadioItems(
-                                    id='yes-no-radio',
-                                    options=[
-                                        {'label': 'Yes', 'value': 'Yes'},
-                                        {'label': 'No', 'value': 'No'}
-                                    ],
-                                    value='Yes',
-                                    inline=True
-                                ), width=6),
-                            ]),
-                            
-                            # Row 2
-                            dbc.Row([
-                                dbc.Col(html.Div("Review Status"), width=6),
-                                dbc.Col(dcc.RadioItems(
-                                    id='pass-nopass-radio',
-                                    options=[
-                                        {'label': 'Pass', 'value': 'Pass'},
-                                        {'label': 'NoPass', 'value': 'NoPass'}
-                                    ],
-                                    value='Pass',
-                                    inline=True
-                                ), width=6),
-                            ]),
-                            
-                            # Row 3
-                            dbc.Row([
-                                dbc.Col(html.Div("Transfer Flags"), width=6),
-                                dbc.Col(dbc.Button("Button 1", id='button-1', color='primary'), width=6),
-                            ]),
-                            
-                            # Row 4
-                            dbc.Row([
-                                dbc.Col(html.Div("Apply Flags"), width=6),
-                                dbc.Col(dbc.Button("Button 2", id='button-2', color='secondary'), width=6),
-                            ]),
-                            ], fluid=True)
-                                ],
-                          style={'height': '1000px','overflowY': 'auto'}),  # Set a fixed height for the div
-            
+                            EnableVisCheckbox,
+                            FlagVisTable,                            
+                            ReviewOpsPannel,
+                        ], 
+                        style={'height': '1000px','overflowY': 'auto'}),  # Set a fixed height for the div            
                 ], 
 
                 width=4,
@@ -182,11 +198,12 @@ def load_data(filename, contents):
             df = DataOps.dataset_metadata_df
             # TODO: allow selection of instrument folder
             instfolder = df['parent_instrument'].unique()[0]
-            fig = data_flagging_utils.create_loaded_file_figure(path_to_file, instfolder)
+            fig, channel_names = data_flagging_utils.create_loaded_file_figure(path_to_file, instfolder)
             
             data['data_loaded_flag'] = True
             data['path_to_uploaded_file'] = path_to_file
             data['instfolder'] = instfolder
+            data['channel_names'] = channel_names
 
             DataOps.unload_file_obj()
 
@@ -309,6 +326,8 @@ def clear_flag_mode_title(relayoutData, fig, data):
     else:
         return dash.no_update, dash.no_update, dash.no_update
 
+def extract_number(s):
+    return int(s[1:])-1 if s[1:].isdigit() else 0
 
 @callback(Output('tbl', 'data'),
           Input('commit-flag-button','n_clicks'),
@@ -325,8 +344,10 @@ def commit_flag(n_clicks,flag_value,selected_Data, data):
         return []
 
     # TODO: modify the name path/to/name to reflect the directory provenance
-    instfolder = data['instfolder']
-    flagfolderpath = os.path.join(os.path.splitext(data['path_to_uploaded_file'])[0],f'{instfolder}_flags')
+    instFolder = data['instfolder']
+    filePath = data['path_to_uploaded_file']
+
+    flagfolderpath = os.path.join(os.path.splitext(data['path_to_uploaded_file'])[0],f'{instFolder}_flags')
 
     if not os.path.isdir(flagfolderpath):
         os.makedirs(flagfolderpath)
@@ -342,13 +363,15 @@ def commit_flag(n_clicks,flag_value,selected_Data, data):
 
     display_flag_registry = True
     if not display_flag_registry:
-        data = []
+        tableData = []
     else:
-        data = []
-        for pathtofile in dirlist_sorted_by_creation:
-            if '.json' in pathtofile:
-                with open(pathtofile,'r') as f:
-                    data.append(json.load(f))
+        tableData = data_flagging_utils.load_flags(filePath, instFolder)
+
+        #tableData = []
+        #for pathtofile in dirlist_sorted_by_creation:
+        #    if '.json' in pathtofile:
+        #        with open(pathtofile,'r') as f:
+        #            tableData.append(json.load(f))
 
     number_of_existing_flags = len(dirlist_sorted_by_creation)
     flagid =  number_of_existing_flags+1
@@ -361,12 +384,19 @@ def commit_flag(n_clicks,flag_value,selected_Data, data):
 
 
     #return f'You have entered: \n{value}'
+    channel_names = data.get('channel_names', [])
     for key, value in selected_Data['range'].items():
         if 'x' in key:
             new_row = {'id':flagid,'startdate':value[0],'enddate':value[1],'flag_code': flag_value}
             new_row.update(data_flagging_utils.flags_dict.get(flag_value,{}))
-            data.append(new_row)
+            if channel_names:
+                channel_pos =  extract_number(key)
+                parent_channel, parent_dataset = tuple(channel_names[channel_pos].split(','))
+                new_row.update({'parent_ch_pos': str(channel_pos), 'parent_channel':parent_channel, 'parent_dataset': parent_dataset})
+            
+            tableData.append(new_row)
             #data = [{'startdate':value[0],'enddate':value[1],'value':90}]
+
     
     if not os.path.exists(flag_filename):
         with open(flag_filename,'w') as flagsfile:
@@ -378,7 +408,136 @@ def commit_flag(n_clicks,flag_value,selected_Data, data):
             #json.dump({'row'+str(len(data)): new_row}, flagsfile)    
             #data = [json_flagsobject[key] for key in json_flagsobject.keys()] 
 
-    return data
+    return tableData
+
+#@callback(Output('memory-output','data',allow_duplicate=True), 
+#          [Input('enable-flag-checkbox', 'value'), State('memory-output','data')],
+#          prevent_initial_call=True)
+          #[Input('tbl','active_cell'), Input('enable-flag-checkbox', 'value') State('timeseries-plot', 'figure'), State('tbl','data')],)
+#def enable_flag_visualization(value, memory):
+#    if isinstance(memory,dict):
+#        memory.update({'vis_enabled' : value})
+
+#        return memory
+    
+#    return dash.no_update
+
+@callback(Output('timeseries-plot', 'figure',allow_duplicate=True), 
+          [Input('enable-flag-checkbox', 'value'), State('timeseries-plot', 'figure')],
+          prevent_initial_call = True)
+def clear_flags_from_figure(value, figure):
+
+    vis_enabled = value[0] if value and isinstance(value, list) else False
+
+    if not vis_enabled and figure:
+        shapes = figure.get('layout', {}).get('shapes', [])
+        
+        if shapes:  # If there are shapes in the figure, clear them
+            new_figure = figure.copy()  # Create a copy to avoid mutation
+            new_figure['layout']['shapes'] = []
+            return new_figure
+    
+    return dash.no_update
+
+
+@callback(Output('timeseries-plot', 'figure',allow_duplicate=True), 
+          [Input('tbl','active_cell'), 
+           State('enable-flag-checkbox', 'value'), State('timeseries-plot', 'figure'), State('tbl','data')],
+          prevent_initial_call = True)
+def visualize_flag_on_figure(active_cell, value, figure, data):
+
+    if value:
+        vis_enabled = value[0]
+    else:
+        vis_enabled = False
+    
+
+    if active_cell and vis_enabled:
+        row = active_cell['row']
+        startdate = data[row]['startdate']
+        enddate = data[row]['enddate']
+        parent_ch_pos = data[row].get('parent_ch_pos',None)
+
+        if parent_ch_pos != None:
+            # Ensure that startdate and enddate are parsed correctly
+            #startdate = pd.to_datetime(startdate)
+            #enddate = pd.to_datetime(enddate)
+
+            # Determine y-axis range directly from layout
+            yaxis_key = f"yaxis{int(parent_ch_pos) + 1}" if int(parent_ch_pos) > 0 else "yaxis"
+            xaxis_key = f"xaxis{int(parent_ch_pos) + 1}" if int(parent_ch_pos) > 0 else "xaxis"
+            #y_min = figure['layout'].get(yaxis_key, {}).get('range', [0, 1])[0]
+            #y_max = figure['layout'].get(yaxis_key, {}).get('range', [0, 1])[1]
+
+            # Add a vertical region to the specified subplot
+            figure['layout']['shapes'] = figure['layout'].get('shapes', []) + [
+                dict(
+                    type="rect",
+                    xref=xaxis_key.replace('axis', ''),
+                    yref=yaxis_key.replace('axis', ''),
+                    x0=startdate,
+                    x1=enddate,
+                    y0=figure['layout'][yaxis_key]['range'][0],
+                    y1=figure['layout'][yaxis_key]['range'][1],
+                    line=dict(color="rgba(50, 171, 96, 1)", width=2),
+                    fillcolor="rgba(50, 171, 96, 0.3)",
+                )
+            ]
+        return figure
+    
+    return dash.no_update
+
+@callback(Output('tbl', 'data',allow_duplicate=True),
+          [Input('load-flags-button','n_clicks'),State('enable-flag-checkbox', 'value'),State('memory-output', 'data')],
+          prevent_initial_call = True)
+def visualize_flags_on_table(n_clicks,value,memoryData):
+
+    
+    instFolder = memoryData.get('instfolder', '')
+    filePath = memoryData.get('path_to_uploaded_file', '')
+    
+    #flagfolderpath = os.path.join(os.path.splitext(memoryData['path_to_uploaded_file'])[0],f'{instfolder}_flags')
+
+    if not filePath:
+        return dash.no_update
+    
+
+
+       
+    #flagfolderpath = os.path.join(os.path.splitext(memoryData['path_to_uploaded_file'])[0],f'{instfolder}_flags')
+    ## Return no table update if there is no flags folder
+    #if not os.path.exists(flagfolderpath):
+    #    return dash.no_update
+    
+    #files = [os.path.join(flagfolderpath, f) for f in os.listdir(flagfolderpath)]
+
+    vis_enabled = value[0] if value and isinstance(value, list) else False
+
+    if n_clicks > 0 and vis_enabled: # and len(files) > 0:
+
+        tableData = data_flagging_utils.load_flags(filePath, instFolder)
+
+        if not tableData:
+            return dash.no_update    
+        else:        
+            return tableData
+        
+    #    # Sort files by creation time
+    #    dirlist_sorted_by_creation = sorted(files, key=os.path.getctime)
+    #    tableData = []
+    #    for pathtofile in dirlist_sorted_by_creation:
+    #        if '.json' in pathtofile:
+    #            try:
+    #                with open(pathtofile,'r') as f:
+    #                    tableData.append(json.load(f))
+    #            except (json.JSONDecodeError, FileNotFoundError) as e:
+    #                print(e)
+    #                continue  # Skip invalid or missing files
+
+    #    return tableData
+    
+    return dash.no_update
+
 
 def open_browser():
     """Wait for the server to start, then open the browser."""
