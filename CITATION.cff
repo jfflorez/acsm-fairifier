@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+title: >-
+  QC/QA flagging app for acsm experimental campaigns
+message: >-
+  If you use our code and datasets, please cite our
+  repository and related paper. 
+type: software
+authors:
+  - given-names: Juan Felipe
+    family-names: Florez-Ospina
+    email: juanflo16@gmail.com
+    orcid: 'https://orcid.org/0000-0001-5971-9042'
+  - given-names: Robbin Lewis
+    family-names: Modini
+    email: robin.modini@psi.ch
+    orcid: https://orcid.org/0000-0002-2982-1369
+date-released: 26-11-2024
+url: "https://gitlab.psi.ch/apog/acsmnode.git"
+doi:
+license:
