@@ -1,4 +1,4 @@
-input_file_directory: '//fs00/LAC_ORD/data/'
+input_file_directory: '//fs00/LAC_ORD/Data/'
 output_file_directory: 'data/'
 
 project: 'Building FAIR data chains for atmospheric observations in the ACTRIS Switzerland Network'  
@@ -15,9 +15,8 @@ station : 'JFJ'
 year : '2024'
 filename_format : "station,year,contact"
 
-
 instrument_datafolder: 
-  - 'ACSM_TOFWARE'
+  - "ACSM_TOFWARE/2024"
 
 integration_mode: 'collection'
 # Specify datetimes (YYYY-MM-DD HH-MM-SS) at which experimental steps were created. 
