@@ -1,5 +1,17 @@
 import sys, os
 
+try:
+    thisFilePath = os.path.abspath(__file__)
+    print(thisFilePath)
+except NameError:
+    print("[Notice] The __file__ attribute is unavailable in this environment (e.g., Jupyter or IDLE).")
+    print("When using a terminal, make sure the working directory is set to the script's location to prevent path issues (for the DIMA submodule)")
+    #print("Otherwise, path to submodule DIMA may not be resolved properly.")
+    thisFilePath = os.getcwd()  # Use current directory or specify a default
+
+dimaPath = os.path.normpath(os.path.join(thisFilePath, "..",'..'))  # Move up to project root
+
+print(dimaPath)
 import pandas as pd
 import numpy as np
 
@@ -175,6 +187,8 @@ app.layout = dbc.Container([
     ],justify="center", align="center"),
 ],  
 )
+
+#@app.callback()
 
 @app.callback(
     Output('memory-output','data'),
