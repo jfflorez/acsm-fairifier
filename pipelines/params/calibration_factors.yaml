@@ -1,0 +1,22 @@
+standard : 
+  num: { IE : 145.9, AB_ref_correct: 254000} 
+  den: { IE_correct : 146.9, ABRefWave : 254001}
+
+#all_dat[, SO4_correct := (SO4_11000 * IE * RIE_SO4 * AB_ref_correct) / (IE_correct * RIE_SO4_correct * ABRefWave)]; 
+SO4_11000 : 
+  num: { IE : 145.9, AB_ref_correct: 254000, RIE_SO4 : 0.63} 
+  den: { IE_correct : 146.9, ABRefWave : 254001, RIE_SO4_correct : 0.73}
+
+SO4_98_11000 : 
+  num: { one : 1 } 
+  den: { CE_annual_avg : 1, RIE_SO4_annual_avg : 1 }
+
+#all_dat[, NH4_correct := (NH4_11000 * IE * RIE_NH4 * AB_ref_correct) / (IE_correct * RIE_NH4_correct * ABRefWave)]; 
+NH4_11000 : 
+  num: { IE : 145.9, AB_ref_correct: 254000, RIE_NH4 : 3.495} 
+  den: { IE_correct : 146.9, ABRefWave : 254001, RIE_NH4_correct : 3.595}
+
+Org_44_110000 : 
+  num: { one : 1} 
+  den: { CE : 1, RIE_Org : 1.4 }
+
