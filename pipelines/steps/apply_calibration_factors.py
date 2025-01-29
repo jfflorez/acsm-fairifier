@@ -49,28 +49,56 @@ def apply_calibration_factors(data_table, calibration_factors):
     # Loop through the column names in the data table
     for variable_name in new_data_table.select_dtypes(include=["number"]).columns:
 
-        if not variable_name in calibration_factors.keys(): # use standard calibration factor
+        if variable_name in calibration_factors['variables'].keys(): # use standard calibration factor
             # Extract numerator and denominator values
-            numerator = prod(value for key, value in calibration_factors['standard']['num'].items())
-            denominator = prod(value for key, value in calibration_factors['standard']['den'].items())
+            numerator = prod(calibration_factors[variable_name]['num'])
+            denominator = prod(calibration_factors[variable_name]['den'])
+            
+            # Apply calibration to each variable
+            new_data_table[variable_name] = new_data_table[variable_name].mul((numerator / denominator))
+
+            # Add renaming entry
+            variable_rename_dict[variable_name] = f"{variable_name}_correct"
 
         else: # use specifies dependent calibration factor
+            print(f'There is no calibration factors for variable {variable_name}. The variable will remain the same.')
 
-            #print(variable_name)
-            #print([key for key in calibration_factors[variable_name]])
-            numerator = prod(value for key, value in calibration_factors[variable_name]['num'].items())
-            denominator = prod(value for key, value in calibration_factors[variable_name]['den'].items())
 
-        # Apply calibration to each variable
-        new_data_table[variable_name] = new_data_table[variable_name].mul((numerator / denominator))
-
-        # Add renaming entry
-        variable_rename_dict[variable_name] = f"{variable_name}_correct"
 
     # Rename the columns in the new data table
     new_data_table.rename(columns=variable_rename_dict, inplace=True)
 
     return new_data_table
+
+def record_data_lineage(path_to_output_file, metadata):
+    
+    path_to_output_dir, output_file = os.path.split(path_to_output_file)
+         
+    path_to_metadata_file = '/'.join([path_to_output_dir,'data_lineage_metadata.json'])
+    # Ensure the file exists
+    if not os.path.exists(path_to_metadata_file):
+        with open(path_to_metadata_file, 'w') as f:
+            json.dump({}, f)  # Initialize empty JSON
+
+    # Read the existing JSON
+    with open(path_to_metadata_file, 'r') as metadata_file:
+        try:
+            json_dict = json.load(metadata_file)
+        except json.JSONDecodeError:
+            json_dict = {}  # Start fresh if file is invalid
+
+    # Compute relative output file path and update the JSON object
+    relpath_to_output_file = os.path.relpath(path_to_output_file, start=projectPath).replace(os.sep, '/')
+    json_dict[relpath_to_output_file] = metadata
+
+    # Write updated JSON back to the file
+    with open(path_to_metadata_file, 'w') as metadata_file:
+        json.dump(json_dict, metadata_file, indent=4)
+        
+    
+    print(f"Metadata for calibrated data saved to {path_to_metadata_file}")
+    
+    return 0    
 
 if __name__ == '__main__':
 
@@ -130,8 +158,8 @@ if __name__ == '__main__':
         path_to_output_file, ext = os.path.splitext('/'.join([path_to_output_dir,parent_instrument,parent_file]))    
         path_to_calibrated_file = ''.join([path_to_output_file, '_calibrated.csv'])
         
-        path_tail, path_head = os.path.split(path_to_calibrated_file)
-        path_to_metadata_file = '/'.join([path_tail, 'data_lineage_metadata.json'])
+        #path_tail, path_head = os.path.split(path_to_calibrated_file)
+        #path_to_metadata_file = '/'.join([path_tail, 'data_lineage_metadata.json'])
         
         print('Path to output file :', path_to_calibrated_file)
         import dima.utils.g5505_utils as utils
@@ -139,29 +167,11 @@ if __name__ == '__main__':
         calibrated_table = apply_calibration_factors(data_table, calibration_factors)  
         metadata['processing_date'] = utils.created_at()
         calibrated_table.to_csv(path_to_calibrated_file, index=False)
+        
+        status = record_data_lineage(path_to_calibrated_file, metadata)
 
-        # Ensure the file exists
-        if not os.path.exists(path_to_metadata_file):
-            with open(path_to_metadata_file, 'w') as f:
-                json.dump({}, f)  # Initialize empty JSON
-
-        # Read the existing JSON
-        with open(path_to_metadata_file, 'r') as metadata_file:
-            try:
-                json_dict = json.load(metadata_file)
-            except json.JSONDecodeError:
-                json_dict = {}  # Start fresh if file is invalid
-
-        # Update the JSON object
-        outputfileRelPath = os.path.relpath(path_to_calibrated_file, start=projectPath).replace(os.sep, '/')
-        json_dict[outputfileRelPath] = metadata
-
-        # Write updated JSON back to the file
-        with open(path_to_metadata_file, 'w') as metadata_file:
-            json.dump(json_dict, metadata_file, indent=4)
 
         print(f"Calibrated data saved to {path_to_calibrated_file}")
-        print(f"Metadata for calibrated data saved to {path_to_metadata_file}")
     except Exception as e:
         print(f"Error during calibration: {e}")
         exit(1)
