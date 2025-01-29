@@ -50,9 +50,11 @@ def apply_calibration_factors(data_table, calibration_factors):
     for variable_name in new_data_table.select_dtypes(include=["number"]).columns:
 
         if variable_name in calibration_factors['variables'].keys(): # use standard calibration factor
+
+            #print(variable_name)
             # Extract numerator and denominator values
-            numerator = prod(calibration_factors[variable_name]['num'])
-            denominator = prod(calibration_factors[variable_name]['den'])
+            numerator = prod(calibration_factors['variables'][variable_name]['num'])
+            denominator = prod(calibration_factors['variables'][variable_name]['den'])
             
             # Apply calibration to each variable
             new_data_table[variable_name] = new_data_table[variable_name].mul((numerator / denominator))
