@@ -15,6 +15,9 @@ operational_range:
     FlowRate_ccs : 
       lower_lim : 1.23 
       upper_lim : 1.45 
+      ### TODO: For this variable we want to define the range as a percentage around the alias variable &flow_ref_correct defined in the other
+      ### yaml file. 
+
 
     FilamentEmission_mA : 
       lower_lim : 0.65 
