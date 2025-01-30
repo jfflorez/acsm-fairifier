@@ -1,11 +1,11 @@
 # Define common factors
 
 # Get values from data/<station>/<year>/config_acsm_<year>.r, values used in Tofware analysis.
-IE: &IE 145.9
-ABRefWave: &ABRefWave 254000
-RIE_SO4: &RIE_SO4 0.63
-RIE_NH4: &RIE_NH4 3.495
-RIE_Org: &RIE_Org 1.4
+IE_tofware: &IE 145.9
+ABRefWave_tofware: &ABRefWave 254000
+RIE_SO4_tofware: &RIE_SO4 0.63
+RIE_NH4_tofware: &RIE_NH4 3.495
+RIE_Org_tofware: &RIE_Org 1.4
 
 # Get values from data/<station>/<year>/cal.csv
 IE_correct: &IE_correct 145.9
