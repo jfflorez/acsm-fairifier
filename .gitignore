@@ -1,3 +1,6 @@
 data/
 envs/
 logs/
+*.pyc
+__pycache__/
+*.h5
