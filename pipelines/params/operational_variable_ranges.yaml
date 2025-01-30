@@ -1,0 +1,22 @@
+# Get values from data/<station>/<year>/global_config.r
+# Define operational ranges for diagnostic variables
+operational_range:
+  description : "Defines the value range of a particular variable"
+  variables:
+    VaporizerTemp_C :
+      lower_lim : 400 
+      upper_lim : 610 
+      description : "heater temperature"
+
+    ABsamp : 
+      lower_lim : 20000 
+      upper_lim : 500000 
+
+    FlowRate_ccs : 
+      lower_lim : 1.23 
+      upper_lim : 1.45 
+
+    FilamentEmission_mA : 
+      lower_lim : 0.65 
+      upper_lim : 1.5 
+
