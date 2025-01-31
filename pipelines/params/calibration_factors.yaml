@@ -1,11 +1,16 @@
 # Define common factors
 
 # Get values from data/<station>/<year>/config_acsm_<year>.r, values used in Tofware analysis.
-IE: &IE 145.9
-ABRefWave: &ABRefWave 254000
-RIE_SO4: &RIE_SO4 0.63
-RIE_NH4: &RIE_NH4 3.495
-RIE_Org: &RIE_Org 1.4
+IE_tofware: &IE 145.9
+ABRefWave_tofware: &ABRefWave 254000
+RIE_SO4_tofware: &RIE_SO4 0.63
+RIE_NH4_tofware: &RIE_NH4 3.495
+RIE_Org_tofware: &RIE_Org 1.4
+RIE_NO3_tofware: &RIE_NO3 1.05
+RIE_Chl_tofware: &RIE_Chl 1.0
+CE_tofware: &CE 1.0
+flow_ref_tofware: &flow_ref 1.36
+
 
 # Get values from data/<station>/<year>/cal.csv
 IE_correct: &IE_correct 145.9
@@ -13,86 +18,92 @@ AB_ref_correct: &AB_ref_correct 254000
 RIE_SO4_correct: &RIE_SO4_correct 0.63
 RIE_NH4_correct: &RIE_NH4_correct 3.495
 RIE_Org_correct: &RIE_Org_correct 1.4
+RIE_NO3_correct: &RIE_NO3_correct 1.05
+RIE_Chl_correct: &RIE_Chl_correct 1.0
+CE_correct: &CE_correct 1.0
 flow_ref_correct: &flow_ref_correct 1.36
 
 # Define mappings for associated variables
 variables:
   # all_dat[, NO3_correct := (NO3_11000 * IE * AB_ref_correct) / (IE_correct * ABRefWave)]
   NO3_11000:
-    num: [*IE, *AB_ref_correct]
-    den: [*IE_correct, *ABRefWave]
+    num: [*IE, *RIE_NO3, *AB_ref_correct, *CE]
+    den: [*IE_correct, *RIE_NO3_correct, *ABRefWave, *CE_correct]
 
   # all_dat[, SO4_correct := (SO4_11000 * IE * RIE_SO4 * AB_ref_correct) / (IE_correct * RIE_SO4_correct * ABRefWave)]
   SO4_11000:
-    num: [*IE, *RIE_SO4, *AB_ref_correct]
-    den: [*IE_correct, *RIE_SO4_correct, *ABRefWave]
+    num: [*IE, *RIE_SO4, *AB_ref_correct, *CE]
+    den: [*IE_correct, *RIE_SO4_correct, *ABRefWave, *CE_correct]
 
   # all_dat[, NH4_correct := (NH4_11000 * IE * RIE_NH4 * AB_ref_correct) / (IE_correct * RIE_NH4_correct * ABRefWave)]
   NH4_11000:
-    num: [*IE, *RIE_NH4, *AB_ref_correct]
-    den: [*IE_correct, *RIE_NH4_correct, *ABRefWave]
+    num: [*IE, *RIE_NH4, *AB_ref_correct, *CE]
+    den: [*IE_correct, *RIE_NH4_correct, *ABRefWave, *CE_correct]
 
   # all_dat[, Org_correct := (Org_11000 * IE * AB_ref_correct) / (IE_correct * ABRefWave)]
   Org_11000:
-    num: [*IE, *AB_ref_correct]
-    den: [*IE_correct, *ABRefWave]  
+    num: [*IE, *RIE_Org, *AB_ref_correct, *CE]
+    den: [*IE_correct, *RIE_Org_correct, *ABRefWave, *CE_correct]  
   
   # all_dat[, Chl_correct := (Chl_11000 * IE * AB_ref_correct) / (IE_correct * ABRefWave)]
   Chl_11000:
-    num: [*IE, *AB_ref_correct]
-    den: [*IE_correct, *ABRefWave]
+    num: [*IE, *RIE_Chl, *AB_ref_correct, *CE]
+    den: [*IE_correct, *RIE_Chl_correct, *ABRefWave, *CE_correct]
+
+
+# m/z levels columns are treated differently to those above 
 
   # all_dat[, Org_44_11000_correct := (Org_44_11000 * IE * AB_ref_correct) / (IE_correct * ABRefWave)]
   Org_44_11000:
-    num: [*IE, *AB_ref_correct]
-    den: [*IE_correct, *ABRefWave]
+    num: [*IE, *RIE_Org, *AB_ref_correct, *CE]
+    den: [*IE_correct, *RIE_Org_correct, *ABRefWave, *CE, *RIE_Org, *CE_correct]
 
   # all_dat[, Org_43_11000_correct := (Org_43_11000 * IE * AB_ref_correct) / (IE_correct * ABRefWave)]
   Org_43_11000:
-    num: [*IE, *AB_ref_correct]
-    den: [*IE_correct, *ABRefWave]
+    num: [*IE, *RIE_Org, *AB_ref_correct, *CE]
+    den: [*IE_correct, *RIE_Org_correct, *ABRefWave, *CE, *RIE_Org, *CE_correct]
 
   # all_dat[, Org_60_11000_correct := (Org_60_11000 * IE * AB_ref_correct) / (IE_correct * ABRefWave)]
 
   Org_60_11000:
-    num: [*IE, *AB_ref_correct]
-    den: [*IE_correct, *ABRefWave]
+    num: [*IE, *RIE_Org, *AB_ref_correct, *CE]
+    den: [*IE_correct, *RIE_Org_correct, *ABRefWave, *CE, *RIE_Org, *CE_correct]
 
   # all_dat[, NO3_30_11000_correct := (NO3_30_11000 * IE * AB_ref_correct) / (IE_correct * ABRefWave)]
 
   NO3_30_11000:
-    num: [*IE, *AB_ref_correct]
-    den: [*IE_correct, *ABRefWave]
+    num: [*IE, *RIE_NO3, *AB_ref_correct, *CE]
+    den: [*IE_correct, *RIE_NO3_correct, *ABRefWave, *CE, *RIE_NO3, *CE_correct]
 
   # all_dat[, SO4_98_11000_correct := (SO4_98_11000 * IE * RIE_SO4 * AB_ref_correct) / (IE_correct * RIE_SO4_correct * ABRefWave)]
 
   SO4_98_11000:
-    num: [*IE, *RIE_SO4, *AB_ref_correct]
-    den: [*IE_correct, *RIE_SO4_correct, *ABRefWave]
+    num: [*IE, *RIE_SO4, *AB_ref_correct, *CE]
+    den: [*IE_correct, *RIE_SO4_correct, *ABRefWave, *CE, *RIE_SO4, *CE_correct]
 
   # all_dat[, SO4_81_11000_correct := (SO4_81_11000 * IE * RIE_SO4 * AB_ref_correct) / (IE_correct * RIE_SO4_correct * ABRefWave)]
 
   SO4_81_11000:
-    num: [*IE, *RIE_SO4, *AB_ref_correct]
-    den: [*IE_correct, *RIE_SO4_correct, *ABRefWave]
+    num: [*IE, *RIE_SO4, *AB_ref_correct, *CE]
+    den: [*IE_correct, *RIE_SO4_correct, *ABRefWave, *CE, *RIE_SO4, *CE_correct]
 
   # all_dat[, SO4_82_11000_correct := (SO4_82_11000 * IE * RIE_SO4 * AB_ref_correct) / (IE_correct * RIE_SO4_correct * ABRefWave)]
 
   SO4_82_11000:
-    num: [*IE, *RIE_SO4, *AB_ref_correct]
-    den: [*IE_correct, *RIE_SO4_correct, *ABRefWave]
+    num: [*IE, *RIE_SO4, *AB_ref_correct, *CE]
+    den: [*IE_correct, *RIE_SO4_correct, *ABRefWave, *CE, *RIE_SO4, *CE_correct]
 
   # all_dat[, SO4_62_11000_correct := (SO4_62_11000 * IE * RIE_SO4 * AB_ref_correct) / (IE_correct * RIE_SO4_correct * ABRefWave)]
 
   SO4_62_11000:
-    num: [*IE, *RIE_SO4, *AB_ref_correct]
-    den: [*IE_correct, *RIE_SO4_correct, *ABRefWave]
+    num: [*IE, *RIE_SO4, *AB_ref_correct, *CE]
+    den: [*IE_correct, *RIE_SO4_correct, *ABRefWave, *CE, *RIE_SO4, *CE_correct]
 
   # all_dat[, SO4_48_11000_correct := (SO4_48_11000 * IE * RIE_SO4 * AB_ref_correct) / (IE_correct * RIE_SO4_correct * ABRefWave)]
 
   SO4_48_11000:
-    num: [*IE, *RIE_SO4, *AB_ref_correct]
-    den: [*IE_correct, *RIE_SO4_correct, *ABRefWave]
+    num: [*IE, *RIE_SO4, *AB_ref_correct, *CE]
+    den: [*IE_correct, *RIE_SO4_correct, *ABRefWave, *CE, *RIE_SO4, *CE_correct]
 
 
 
