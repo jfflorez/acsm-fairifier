@@ -9,7 +9,6 @@ RIE_Org_tofware: &RIE_Org 1.4
 RIE_NO3_tofware: &RIE_NO3 1.05
 RIE_Chl_tofware: &RIE_Chl 1.0
 CE_tofware: &CE 1.0
-flow_ref_tofware: &flow_ref 1.36
 
 
 # Get values from data/<station>/<year>/cal.csv
@@ -21,7 +20,6 @@ RIE_Org_correct: &RIE_Org_correct 1.4
 RIE_NO3_correct: &RIE_NO3_correct 1.05
 RIE_Chl_correct: &RIE_Chl_correct 1.0
 CE_correct: &CE_correct 1.0
-flow_ref_correct: &flow_ref_correct 1.36
 
 # Define mappings for associated variables
 variables:
@@ -51,7 +49,7 @@ variables:
     den: [*IE_correct, *RIE_Chl_correct, *ABRefWave, *CE_correct]
 
 
-# m/z levels columns are treated differently to those above 
+  # m/z levels columns are treated differently to those above 
 
   # all_dat[, Org_44_11000_correct := (Org_44_11000 * IE * AB_ref_correct) / (IE_correct * ABRefWave)]
   Org_44_11000:
