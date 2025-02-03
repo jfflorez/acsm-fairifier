@@ -2,7 +2,7 @@
 
 calibration_params:
   # TODO: this path will be updated to be relative with respect to a experimental campaign folder to be analized
-  path_to_file: "calibration_params.yaml" 
+  path_to_file: "pipelines/params/calibration_params.yaml" 
 
 # Define mappings for associated variables
 variables:
