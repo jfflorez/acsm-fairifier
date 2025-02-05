@@ -22,7 +22,7 @@ sys.path.append(dimaPath)
 import dima.src.hdf5_ops as dataOps 
 
 
-def create_flags_for_diagnostic_vars(data_table, variable_limits):
+def create_flags_for_diagnostic_vars(data_table, validity_thresholds_dict):
     """
     Create indicator variables that check whether a particular diagnostic variable is within
     pre-specified/acceptable limits, which are defined by `variable_limits`.
@@ -47,15 +47,16 @@ def create_flags_for_diagnostic_vars(data_table, variable_limits):
 
     # Loop through the column names in the data table
     for diagnostic_variable in data_table.columns:
-
+        print(diagnostic_variable)
         # Skip if the diagnostic variable is not in variable_limits
-        if diagnostic_variable not in variable_limits:
-            print(f'Diagnostic variable {diagnostic_variable} has not defined limits in {variable_limits}.')
+        if diagnostic_variable not in validity_thresholds_dict['validity_thresholds']['variables']:
+            print(f'Diagnostic variable {diagnostic_variable} has not defined limits in {validity_thresholds_dict}.')
             continue
 
         # Get lower and upper limits for diagnostic_variable from variable limits dict
-        lower_lim = variable_limits[diagnostic_variable]['lower_lim']['value']
-        upper_lim = variable_limits[diagnostic_variable]['upper_lim']['value']
+        variable_ranges = validity_thresholds_dict['validity_thresholds']['variables'][diagnostic_variable]
+        lower_lim = variable_ranges['lower_lim']
+        upper_lim = variable_ranges['upper_lim']
         
         # Create an indicator variable for the current diagnostic variable
         tmp = data_table[diagnostic_variable]
@@ -136,6 +137,7 @@ if __name__ == '__main__':
         print('Path to output file :', path_to_calibrated_file)
         import dima.utils.g5505_utils as utils
         import json
+        print(calibration_factors.keys())
         calibrated_table = create_flags_for_diagnostic_vars(data_table, calibration_factors)  
         metadata['processing_date'] = utils.created_at()
         calibrated_table.to_csv(path_to_calibrated_file, index=False)
