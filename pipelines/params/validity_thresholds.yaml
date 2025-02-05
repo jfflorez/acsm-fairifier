@@ -1,6 +1,8 @@
 
-flow_ref_tofware: &flow_ref 1.36
-flow_ref_correct: &flow_ref_correct 1.36
+
+calibration_params:
+  # TODO: this path will be updated to be relative with respect to a experimental campaign folder to be analized
+  path_to_file: "pipelines/params/calibration_params.yaml" 
 
 # Get values from data/<station>/<year>/global_config.r
 # Define operational ranges for diagnostic variables
@@ -8,8 +10,8 @@ validity_thresholds:
   description : "Defines the value range of a particular variable"
   variables:
     VaporizerTemp_C :
-      lower_lim : 400 
-      upper_lim : 610 
+      lower_lim : 538 
+      upper_lim : 600 
       description : "heater temperature"
 
     ABsamp : 
@@ -17,11 +19,11 @@ validity_thresholds:
       upper_lim : 500000 
 
     FlowRate_ccs :
-    # TODO: Define the range as a percentage around the alias variable &flow_ref_correct above defined.
-      lower_lim : 1.23 
-      upper_lim : 1.45 
+    # TODO: Define the range as a percentage around the alias variable &flow_ref_correct defined in calibration parameters.
+      lower_lim : 2.1 
+      upper_lim : 2.3
 
     FilamentEmission_mA : 
-      lower_lim : 0.65 
+      lower_lim : 0.75 
       upper_lim : 1.5 
 
