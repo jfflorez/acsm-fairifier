@@ -1,41 +1,45 @@
 # Get values from data/<station>/<year>/config_acsm_<year>.r, values used in Tofware analysis.
 default_params: &default_params
-  IE_tofware: 145.9
-  ABRefWave_tofware: 254000
-  RIE_SO4_tofware: 0.63
-  RIE_NH4_tofware: 3.495
+  IE_tofware: 183.1
+  ABRefWave_tofware: 174139
+  RIE_SO4_tofware: 0.88
+  RIE_NH4_tofware: 3.183
   RIE_Org_tofware: 1.4
   RIE_NO3_tofware: 1.05
   RIE_Chl_tofware: 1.0
   CE_tofware: 1.0
+  flow_ref_tofware: 2.21
+
 
 
 # Get values from data/<station>/<year>/cal.csv
 calibration_intervals: # Specify datetimes (YYYY-MM-DD HH-MM-SS)
   interval_1:
-    start_datetime : '2024-01-16 00-00-00' # date and time where calibration was concluded 
-    end_datetime : '2024-06-16 00-00-00'
+    start_datetime : '2024-01-01 00-00-00' # date and time where calibration was concluded 
+    end_datetime : '2024-12-09 14-00-00'
    
-    IE_correct: 145.9
-    AB_ref_correct: 254000
-    RIE_SO4_correct: 0.63
-    RIE_NH4_correct: 3.495
+    IE_correct: 238.85
+    AB_ref_correct: 117359
+    RIE_SO4_correct: 0.915
+    RIE_NH4_correct: 2.895
     RIE_Org_correct: 1.4
     RIE_NO3_correct: 1.05
     RIE_Chl_correct: 1.0
     CE_correct: 1.0
+    flow_ref_correct: 2.315
     << : *default_params
 
   interval_2 : 
-    start_datetime : '2024-06-16 00-00-00'
-    end_datetime : '2024-12-31 00-00-00' 
+    start_datetime : '2024-12-09 14-00-01'
+    end_datetime : '2024-12-31 23-59-59' 
          
-    IE_correct: 145.9
-    AB_ref_correct: 254000
-    RIE_SO4_correct: 0.63
-    RIE_NH4_correct: 3.495
+    IE_correct: 206.3
+    AB_ref_correct: 347000
+    RIE_SO4_correct: 0.81
+    RIE_NH4_correct: 3.76
     RIE_Org_correct: 1.4
     RIE_NO3_correct: 1.05
     RIE_Chl_correct: 1.0
     CE_correct: 1.0
+    flow_ref_correct: 2.24
     << : *default_params
