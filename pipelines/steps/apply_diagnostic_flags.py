@@ -20,7 +20,9 @@ projectPath = os.path.normpath(os.path.join(dimaPath,'..'))
 print(dimaPath)
 sys.path.append(dimaPath)
 import dima.src.hdf5_ops as dataOps 
-
+import pipelines.steps.utils as stepUtils
+import dima.utils.g5505_utils as utils
+import json
 
 def compute_diagnostic_variable_flags(data_table, validity_thresholds_dict):
     """
@@ -135,32 +137,15 @@ if __name__ == '__main__':
         path_to_metadata_file = '/'.join([path_tail, 'data_lineage_metadata.json'])
         
         print('Path to output file :', path_to_calibrated_file)
-        import dima.utils.g5505_utils as utils
-        import json
+
         print(calibration_factors.keys())
         calibrated_table = compute_diagnostic_variable_flags(data_table, calibration_factors)  
         metadata['processing_date'] = utils.created_at()
         calibrated_table.to_csv(path_to_calibrated_file, index=False)
 
-        # Ensure the file exists
-        if not os.path.exists(path_to_metadata_file):
-            with open(path_to_metadata_file, 'w') as f:
-                json.dump({}, f)  # Initialize empty JSON
+        status = stepUtils.record_data_lineage(path_to_calibrated_file, projectPath, metadata)
 
-        # Read the existing JSON
-        with open(path_to_metadata_file, 'r') as metadata_file:
-            try:
-                json_dict = json.load(metadata_file)
-            except json.JSONDecodeError:
-                json_dict = {}  # Start fresh if file is invalid
 
-        # Update the JSON object
-        outputfileRelPath = os.path.relpath(path_to_calibrated_file, start=projectPath).replace(os.sep, '/')
-        json_dict[outputfileRelPath] = metadata
-
-        # Write updated JSON back to the file
-        with open(path_to_metadata_file, 'w') as metadata_file:
-            json.dump(json_dict, metadata_file, indent=4)
 
         print(f"Calibrated data saved to {path_to_calibrated_file}")
         print(f"Metadata for calibrated data saved to {path_to_metadata_file}")

@@ -25,6 +25,7 @@ import yaml
 sys.path.append(dimaPath)
 
 import dima.src.hdf5_ops as dataOps
+import pipelines.steps.utils as stepUtils
 
 import numpy as np
 import pandas as pd
@@ -167,35 +168,7 @@ def apply_calibration_factors(data_table, datetime_var_name, calibration_file):
 
 
 
-def record_data_lineage(path_to_output_file, metadata):
     
-    path_to_output_dir, output_file = os.path.split(path_to_output_file)
-         
-    path_to_metadata_file = '/'.join([path_to_output_dir,'data_lineage_metadata.json'])
-    # Ensure the file exists
-    if not os.path.exists(path_to_metadata_file):
-        with open(path_to_metadata_file, 'w') as f:
-            json.dump({}, f)  # Initialize empty JSON
-
-    # Read the existing JSON
-    with open(path_to_metadata_file, 'r') as metadata_file:
-        try:
-            json_dict = json.load(metadata_file)
-        except json.JSONDecodeError:
-            json_dict = {}  # Start fresh if file is invalid
-
-    # Compute relative output file path and update the JSON object
-    relpath_to_output_file = os.path.relpath(path_to_output_file, start=projectPath).replace(os.sep, '/')
-    json_dict[relpath_to_output_file] = metadata
-
-    # Write updated JSON back to the file
-    with open(path_to_metadata_file, 'w') as metadata_file:
-        json.dump(json_dict, metadata_file, indent=4)
-        
-    
-    print(f"Metadata for calibrated data saved to {path_to_metadata_file}")
-    
-    return 0    
 
 if __name__ == '__main__':
 
@@ -275,8 +248,8 @@ if __name__ == '__main__':
         calibrated_table.to_csv(path_to_calibrated_file, index=False)
         calibration_factor_table.to_csv(path_to_calibration_factors_file, index=False)
         
-        status = record_data_lineage(path_to_calibrated_file, metadata)
-        status = record_data_lineage(path_to_calibration_factors_file, metadata)
+        status = stepUtils.record_data_lineage(path_to_calibrated_file, projectPath, metadata)
+        status = stepUtils.record_data_lineage(path_to_calibration_factors_file, projectPath, metadata)
 
 
         print(f"Calibrated data saved to {path_to_calibrated_file}")
