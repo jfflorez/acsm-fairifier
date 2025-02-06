@@ -22,7 +22,7 @@ sys.path.append(dimaPath)
 import dima.src.hdf5_ops as dataOps 
 
 
-def create_flags_for_diagnostic_vars(data_table, validity_thresholds_dict):
+def compute_diagnostic_variable_flags(data_table, validity_thresholds_dict):
     """
     Create indicator variables that check whether a particular diagnostic variable is within
     pre-specified/acceptable limits, which are defined by `variable_limits`.
@@ -138,7 +138,7 @@ if __name__ == '__main__':
         import dima.utils.g5505_utils as utils
         import json
         print(calibration_factors.keys())
-        calibrated_table = create_flags_for_diagnostic_vars(data_table, calibration_factors)  
+        calibrated_table = compute_diagnostic_variable_flags(data_table, calibration_factors)  
         metadata['processing_date'] = utils.created_at()
         calibrated_table.to_csv(path_to_calibrated_file, index=False)
 
