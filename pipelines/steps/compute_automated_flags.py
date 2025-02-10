@@ -15,14 +15,24 @@ import argparse
 
 import yaml, json
 
-dimaPath = os.path.normpath(os.path.join(thisFilePath, "..", "..",'..'))  # Move up to project root
-projectPath = os.path.normpath(os.path.join(dimaPath,'..'))
-print(dimaPath)
-sys.path.append(dimaPath)
+projectPath = os.path.normpath(os.path.join(thisFilePath, "..", "..",'..'))  # Move up to project root
+#print('Project path:', projectPath)
+dimaPath = os.path.normpath('/'.join([projectPath,'dima']))
+#print('DIMA path:', dimaPath)
+
+
+# Set up project root directory
+sys.path.insert(0,projectPath)
+sys.path.insert(0,dimaPath)
 import dima.src.hdf5_ops as dataOps 
 import pipelines.steps.utils as stepUtils
 import dima.utils.g5505_utils as utils
 import json
+
+def compute_cpc_flags():
+    # TODO: ask rob where to find this information.
+
+    return 0
 
 def compute_diagnostic_variable_flags(data_table, validity_thresholds_dict):
     """
@@ -46,6 +56,8 @@ def compute_diagnostic_variable_flags(data_table, validity_thresholds_dict):
 
     # Initialize a dictionary to store indicator variables
     indicator_variables = {}
+
+    indicator_variables['t_base'] = data_table['t_base']
 
     # Loop through the column names in the data table
     for diagnostic_variable in data_table.columns:
