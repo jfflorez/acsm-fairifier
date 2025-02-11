@@ -20,8 +20,8 @@ def record_data_lineage(path_to_output_file, projectPath, metadata):
             json_dict = {}  # Start fresh if file is invalid
 
     # Compute relative output file path and update the JSON object
-    relpath_to_output_file = os.path.relpath(path_to_output_file, start=projectPath).replace(os.sep, '/')
-    json_dict[relpath_to_output_file] = metadata
+    #relpath_to_output_file = os.path.relpath(path_to_output_file, start=projectPath).replace(os.sep, '/')
+    json_dict[output_file] = metadata
 
     # Write updated JSON back to the file
     with open(path_to_metadata_file, 'w') as metadata_file:
