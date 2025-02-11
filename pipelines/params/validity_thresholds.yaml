@@ -18,7 +18,7 @@ validity_thresholds:
       lower_lim : 20000 
       upper_lim : 500000 
 
-    FlowRate_ccs :
+    FlowRate_ccs : 
     # TODO: Define the range as a percentage around the alias variable &flow_ref_correct defined in calibration parameters.
       lower_lim : 2.1 
       upper_lim : 2.3
