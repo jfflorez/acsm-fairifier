@@ -93,7 +93,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Calibrate species data using calibration factors.")
     parser.add_argument('data_file', type=str, help="Path to the input HDF5 file containing the data table.")
     parser.add_argument('dataset_name', type=str, help ='Relative path to data_table (i.e., dataset name) in HDF5 file')
-    parser.add_argument('calibration_file', type=str, help="Path to the input YAML file containing calibration factors.")
+    parser.add_argument('validity_thersholds_file', type=str, help="Path to the input YAML file containing calibration factors.")
     #parser.add_argument('output_file', type=str, help="Path to save the output calibrated data as a CSV file.")
 
     args = parser.parse_args()
@@ -119,10 +119,10 @@ if __name__ == '__main__':
         parent_file = data_table_metadata.loc[dataset_name_idx,'parent_file'].values[0]
         
         dataManager.unload_file_obj()        
-        print(args.calibration_file)
+        print(args.validity_thersholds_file)
 
-        with open(args.calibration_file, 'r') as stream:
-            calibration_factors = yaml.load(stream, Loader=yaml.FullLoader)
+        with open(args.validity_thersholds_file, 'r') as stream:
+            validity_thersholds_dict = yaml.load(stream, Loader=yaml.FullLoader)
     except Exception as e:
         print(f"Error loading input files: {e}")
         exit(1)
@@ -135,32 +135,45 @@ if __name__ == '__main__':
 
     # Perform calibration
     try:
+        # Define output directory of apply_calibration_factors() step
+        suffix = 'flags'
+        if len(parent_instrument.split('/')) >= 2:
+            instFolder = parent_instrument.split('/')[0]
+            category = parent_instrument.split('/')[1]
+        else:
+            instFolder = parent_instrument.split('/')[0]
+            category = ''
 
+        path_to_output_folder, ext = os.path.splitext('/'.join([path_to_output_dir,f'{instFolder}_{suffix}',category]))    
         processingScriptRelPath = os.path.relpath(thisFilePath,start=projectPath)
 
-        print(processingScriptRelPath)
+        if not os.path.exists(path_to_output_folder):
+            os.makedirs(path_to_output_folder)
 
-        metadata = {'actris_level' : 1, 'processing_script': processingScriptRelPath.replace(os.sep,'/')}
+        print('Processing script %s:', processingScriptRelPath)
+        print('Output directory: %s', path_to_output_folder)
 
-        path_to_output_file, ext = os.path.splitext('/'.join([path_to_output_dir,parent_instrument,parent_file]))    
-        path_to_calibrated_file = ''.join([path_to_output_file, '_flags.csv'])
+        # Compute diagnostic flags based on validity thresholds defined in configuration_file_dict
+
+        flags_table = compute_diagnostic_variable_flags(data_table, validity_thersholds_dict) 
+        metadata = {'actris_level' : 1, 
+                     'processing_script': processingScriptRelPath.replace(os.sep,'/'),
+                     'processing_date' : utils.created_at()
+                     } 
         
-        path_tail, path_head = os.path.split(path_to_calibrated_file)
-        path_to_metadata_file = '/'.join([path_tail, 'data_lineage_metadata.json'])
+        # Save output tables to csv file and save/or update data lineage record
+        filename, ext = os.path.splitext(parent_file)
+        path_to_flags_file = '/'.join([path_to_output_folder, f'{filename}_flags.csv'])
+        #path_to_calibration_factors_file = '/'.join([path_to_output_folder, f'{filename}_calibration_factors.csv'])
         
-        print('Path to output file :', path_to_calibrated_file)
+        flags_table.to_csv(path_to_flags_file, index=False)
+        
+        status = stepUtils.record_data_lineage(path_to_flags_file, projectPath, metadata)
 
-        print(calibration_factors.keys())
-        calibrated_table = compute_diagnostic_variable_flags(data_table, calibration_factors)  
-        metadata['processing_date'] = utils.created_at()
-        calibrated_table.to_csv(path_to_calibrated_file, index=False)
+        print(f"Flags saved to {path_to_flags_file}")
+        print(f"Data lineage saved to {path_to_output_dir}")
 
-        status = stepUtils.record_data_lineage(path_to_calibrated_file, projectPath, metadata)
-
-
-
-        print(f"Calibrated data saved to {path_to_calibrated_file}")
-        print(f"Metadata for calibrated data saved to {path_to_metadata_file}")
     except Exception as e:
         print(f"Error during calibration: {e}")
         exit(1)
+
