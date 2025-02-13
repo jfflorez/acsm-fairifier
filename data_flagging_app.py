@@ -150,13 +150,49 @@ app.layout = dbc.Container([
         dbc.Col([dbc.Button('Reset Flag', id='reset-flag-button', color="secondary", className="mt-2")],width=2),
         dbc.Col([dbc.Button('Commit Flag', id='commit-flag-button', color="secondary", className="mt-2")],width=2)
     ], justify="center", align="center",style={'background-color': '#f8f9fa', 'padding': '20px', 'text-align': 'center'}),
+
+    dbc.Row([
+        html.H3("Instrument Dashboard"),
+        
+        # First Dropdown (Instrument Folders)
+        dcc.Dropdown(
+            id="instrument-dropdown",
+            options=[{"label": i, "value": i} for i in []],
+            placeholder="Select an Instrument Folder",
+        ),
+        
+        # Spinner wrapping the second and third dropdowns
+        dcc.Loading(
+            type="circle",  # Spinner style
+            children=[
+                # Second Dropdown (Files)
+                dcc.Dropdown(
+                    id="file-dropdown",
+                    placeholder="Select a File",
+                    disabled=True  # Initially disabled
+                ),
+                
+                # Third Dropdown (Sub-selection)
+                dcc.Dropdown(
+                    id="sub-dropdown",
+                    placeholder="Select Variables",
+                    multi = True,
+                    disabled=True
+                )
+            ]
+        )
+    ], 
+    justify="center", align="center",style={'background-color': '#f8f9fa', 'padding': '20px', 'text-align': 'center'}),
     
     dbc.Row([
         dbc.Col([ 
             html.Div([                
                     html.Div(id='flag-mode-title', style={'whiteSpace': 'pre-line'}),
+                    dcc.Loading(
+                    type="circle",  # Spinner style
+                    children=[
                     dcc.Graph(id='timeseries-plot',
-                              style={'height': '1200px','width' : '100%'})
+                              style={'height': '1200px','width' : '100%'})])
                     ],
                     style={'height': '1000px', 'overflowY': 'auto'})        
         ],  
@@ -191,8 +227,204 @@ app.layout = dbc.Container([
 #@app.callback()
 
 @app.callback(
+    Output('memory-output','data', allow_duplicate=True),
+    Output("instrument-dropdown", "options"),
+    Output("instrument-dropdown", "disabled"),
+    [Input('upload-image','filename'),
+    Input('upload-image','contents')],
+    prevent_initial_call=True
+)
+def load_data(filename, contents):
+    data = {'data_loaded_flag': False}
+    if filename and contents and filename.endswith('.h5'):
+
+        try:
+            path_to_file = data_flagging_utils.save_file(filename,contents)
+
+            DataOps = hdf5_ops.HDF5DataOpsManager(path_to_file)
+            DataOps.load_file_obj()
+
+            #content_type, content_string = contents.split(',')
+            #decoded = base64.b64decode(content_string)
+            #file_path = io.BytesIO(decoded)
+            DataOps.extract_and_load_dataset_metadata()
+            df = DataOps.dataset_metadata_df.copy()
+            DataOps.unload_file_obj()
+
+            # TODO: allow selection of instrument folder
+            
+            instrument_list = [{"label": instFolder, "value": instFolder} for instFolder in df['parent_instrument'].unique()]
+
+            # Create list of file names in dict format for the first instFolder
+            instFolderName = df['parent_instrument'].unique()[0]
+            instFolderFileList = list(df.loc[df['parent_instrument']==instFolderName,'parent_file'].to_numpy())
+            
+            #file_list = [{"label": fileName, "value": fileName} for fileName in child_files]
+
+            #fig, channel_names = data_flagging_utils.create_loaded_file_figure(path_to_file, instfolder)
+            
+            data['data_loaded_flag'] = True
+            data['path_to_uploaded_file'] = path_to_file
+            data['dataset_metadata_table'] = {}# df.to_dict()
+            data[instFolderName] = instFolderFileList
+
+
+            data['instFolder'] = instFolderName
+            #data['channel_names'] = channel_names
+
+            
+
+            
+
+            return data, instrument_list, False
+        
+        except Exception as e:
+            
+            DataOps.unload_file_obj()
+            print(f"Error processing file: {e}")
+            return data, [], False
+        
+
+    return data, [], False
+
+@app.callback(
+    Output("file-dropdown", "options"),
+    Output("file-dropdown", "disabled"),
+    Input("instrument-dropdown", "value"), 
+    State('memory-output','data'),     
+    prevent_initial_call=True
+)
+def update_file_dropdown(instFolderName, data):
+
+    
+    # Verify if dataset_metadata from uploaded HDF5 file was loaded correctly
+    if not all([instFolderName, data]):
+        return [], False
+    
+    if not 'dataset_metadata_table' in data.keys():
+        return [], False
+    
+
+    file_list = []
+    # Get files in instFolder
+    instFolderFileList = data.get(instFolderName,[]) 
+
+    # Otherwise, if there is no precomputed file list associated with a instFolder, compute that from dataset_metadata
+    if instFolderFileList:        
+        file_list = [{"label": fileName, "value": fileName} for fileName in instFolderFileList]
+    else:
+        path_to_file = data['path_to_uploaded_file']
+        DataOps = hdf5_ops.HDF5DataOpsManager(path_to_file)
+        DataOps.load_file_obj()
+
+        #content_type, content_string = contents.split(',')
+        #decoded = base64.b64decode(content_string)
+        #file_path = io.BytesIO(decoded)
+        DataOps.extract_and_load_dataset_metadata()
+        tmp = DataOps.dataset_metadata_df.copy()
+        DataOps.unload_file_obj()
+
+        instFolderFileList = tmp.loc[tmp['parent_instrument']==instFolderName,'parent_file'].to_numpy()
+        file_list = [{"label": fileName, "value": fileName} for fileName in instFolderFileList]
+
+    return file_list, False
+
+@app.callback(
+    Output("sub-dropdown", "options"),
+    Output("sub-dropdown", "disabled"),
+    Output("sub-dropdown", "value"),
+    Input("instrument-dropdown", "value"), 
+    Input("file-dropdown", "value"), 
+    State('memory-output','data'),     
+    prevent_initial_call=True,
+)
+def update_variable_dropdown(instFolderName, fileName, data):
+
+    
+    # Verify if dataset_metadata from uploaded HDF5 file was loaded correctly
+    #if not isinstance(data,dict):
+    #    return [], False
+    
+    if not all([instFolderName, fileName, data]):
+        return [], False, []
+   
+
+    #file_list = []
+    # Get files in instFolder
+    #instFolderFileList = data.get(instFolderName,[]) 
+
+    # Otherwise, if there is no precomputed file list associated with a instFolder, compute that from dataset_metadata
+    try:
+        path_to_file = data['path_to_uploaded_file']
+        DataOps = hdf5_ops.HDF5DataOpsManager(path_to_file)
+        DataOps.load_file_obj()
+
+        dataset_name = '/'.join([instFolderName,fileName,'data_table'])
+        # Get attributes for data table 
+        datetime_var, datetime_var_format = DataOps.infer_datetime_variable(dataset_name)
+        metadata_dict = DataOps.get_metadata(dataset_name)
+
+        #content_type, content_string = contents.split(',')
+        #decoded = base64.b64decode(content_string)
+        #file_path = io.BytesIO(decoded)
+        #DataOps.extract_and_load_dataset_metadata()
+        #tmp = DataOps.dataset_metadata_df.copy()
+        #DataOps.unload_file_obj()
+
+        
+
+        #instFolderFileList = tmp.loc[tmp['parent_instrument']==instFolderName,'parent_file'].to_numpy()
+        variableList = []
+        for var_name in metadata_dict.keys():
+            if var_name != datetime_var:
+                variableList.append(var_name)
+
+        DataOps.unload_file_obj()
+    except Exception as e:
+        DataOps.unload_file_obj()
+        print(f"Error processing dataset_name: {e}")
+        return [], False, [] 
+
+    return [{"label": var_name, "value": var_name} for var_name in variableList] , False, variableList
+
+@app.callback(    
+    Output('timeseries-plot', 'figure'),
+    Output('memory-output','data'),
+    Input('instrument-dropdown', 'value'),
+    Input('file-dropdown', 'value'),
+    Input('sub-dropdown', 'value'),
+    Input('memory-output', 'data'),
+    prevent_initial_call=True
+)
+def update_figure(instFolderName, fileName, variableList, data):
+    # Check if any input is None or empty
+    if not all([instFolderName, fileName, variableList, data]):
+        return go.Figure(), dash.no_update  # Return an empty figure to prevent crashes
+
+    path_to_file = data.get('path_to_uploaded_file')
+    if not path_to_file:
+        return go.Figure(), dash.no_update
+
+    DataOps = hdf5_ops.HDF5DataOpsManager(path_to_file)
+    DataOps.load_file_obj()
+    dataset_name = '/'.join([instFolderName, fileName, 'data_table'])
+
+    # Get attributes for data table 
+    datetime_var, datetime_var_format = DataOps.infer_datetime_variable(dataset_name)
+    DataOps.unload_file_obj()
+
+    fig, channel_names = data_flagging_utils.create_loaded_file_figure(
+        path_to_file, instFolderName, dataset_name, datetime_var, datetime_var_format, variableList
+    )
+    data['channel_names'] = channel_names
+    return fig, data
+
+
+"""@app.callback(
     Output('memory-output','data'),
     Output('timeseries-plot', 'figure'),
+    Output("instrument-dropdown", "options"),
+    Output("instrument-dropdown", "disabled"),
     [Input('upload-image','filename')],
     [Input('upload-image','contents')]
 )
@@ -210,27 +442,32 @@ def load_data(filename, contents):
             #decoded = base64.b64decode(content_string)
             #file_path = io.BytesIO(decoded)
             DataOps.extract_and_load_dataset_metadata()
-            df = DataOps.dataset_metadata_df
+            df = DataOps.dataset_metadata_df.copy()
             # TODO: allow selection of instrument folder
             instfolder = df['parent_instrument'].unique()[0]
-            fig, channel_names = data_flagging_utils.create_loaded_file_figure(path_to_file, instfolder)
+            instrument_list = [{"label": instFolder, "value": instFolder} for instFolder in df['parent_instrument'].unique()]
+
+            #fig, channel_names = data_flagging_utils.create_loaded_file_figure(path_to_file, instfolder)
             
             data['data_loaded_flag'] = True
             data['path_to_uploaded_file'] = path_to_file
             data['instfolder'] = instfolder
-            data['channel_names'] = channel_names
+            #data['channel_names'] = channel_names
 
             DataOps.unload_file_obj()
 
-            return data, fig
+            
+
+            return data, dash.no_update, instrument_list, False
         
         except Exception as e:
+            
             DataOps.unload_file_obj()
             print(f"Error processing file: {e}")
-            return data, dash.no_update
+            return data, dash.no_update, instrument_list, False
         
 
-    return data, dash.no_update
+    return data, dash.no_update, [], False"""
 
 @app.callback(
     Output('timeseries-plot', 'figure', allow_duplicate=True),
@@ -238,10 +475,12 @@ def load_data(filename, contents):
     Input('flag-button', 'n_clicks'),
     State('timeseries-plot', 'figure'),
     State('memory-output', 'data'),
-    prevent_initial_call=True
+    prevent_initial_call=True,
 )
 def create_flag(n_clicks, fig, data):
-    if not data or not data.get('data_loaded_flag', False):
+    #if not data or not data.get('data_loaded_flag', False):
+
+    if not all([n_clicks, fig, data]):
         return dash.no_update, dash.no_update
     
     fig['layout'].update({'dragmode' : 'select', 
@@ -312,7 +551,7 @@ def clear_flag(n_clicks, fig, data):
         selected_data = None
         fig['layout'].update({'dragmode': 'zoom', 'activeselection': None,
                               'selections':{'line': None}})
-        instFolder =data['instfolder']
+        instFolder =data['instFolder']
         fig['layout'].update({'title': f'{instFolder}: Target and Diagnostic Channels'})
         flagging_mode_message = ''
         return selected_data, fig, flagging_mode_message
@@ -327,7 +566,9 @@ def clear_flag(n_clicks, fig, data):
      State('timeseries-plot', 'figure'),
      State('memory-output', 'data')],
      prevent_initial_call = True)
-def clear_flag_mode_title(relayoutData, fig, data):    
+def clear_flag_mode_title(relayoutData, fig, data):   
+    if not all([relayoutData, fig, data]):
+        return dash.no_update, dash.no_update, dash.no_update
 
     if data.get('data_loaded_flag', False) and not fig['layout'].get('dragmode',None) == 'select':
         # Clear selection
@@ -359,7 +600,7 @@ def commit_flag(n_clicks,flag_value,selected_Data, data):
         return []
 
     # TODO: modify the name path/to/name to reflect the directory provenance
-    instFolder = data['instfolder']
+    instFolder = data['instFolder']
     filePath = data['path_to_uploaded_file']
 
     flagfolderpath = os.path.join(os.path.splitext(data['path_to_uploaded_file'])[0],f'{instFolder}_flags')
@@ -376,7 +617,7 @@ def commit_flag(n_clicks,flag_value,selected_Data, data):
 
     #dirlist = dirlist.sort(key=lambda x: int(x.split('_')[1].split('.')[0]))
 
-    display_flag_registry = True
+    display_flag_registry = False
     if not display_flag_registry:
         tableData = []
     else:
