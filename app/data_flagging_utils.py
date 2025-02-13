@@ -112,7 +112,7 @@ def create_loaded_file_figure(file_path, instFolder, dataset_name, datetime_var,
 import json
 import h5py
 
-def load_flags(filePath, instFolder, dry_run : bool = False):
+def load_flags(flagFolderPath, dry_run : bool = False): #filePath, instFolder, dry_run : bool = False):
     """
     Returns a list of flags (dictionaries) based on the provided filePath and instFolder.
     
@@ -127,24 +127,6 @@ def load_flags(filePath, instFolder, dry_run : bool = False):
         list: A list of dictionaries containing flag data (or file paths in dry_run mode), 
               or None if conditions are not met.
     """
-    # Ensure the input file is an .h5 file
-    if not filePath.endswith('.h5'):
-        print(f"Invalid file extension: {filePath}. Expected a .h5 file.")
-        return None
-
-    # Ensure the instFolder exists as a group in the HDF5 file
-    try:
-        with h5py.File(filePath, 'r') as h5file:
-            if instFolder not in h5file:
-                print(f"Instrument folder '{instFolder}' not found in HDF5 file.")
-                return None
-    except (OSError, IOError) as e:
-        print(f"Error reading HDF5 file: {e}")
-        return None
-
-    # Construct the flags folder path
-    flagFolderPath = os.path.join(os.path.splitext(filePath)[0], f'{instFolder}_flags')
-    
 
     # Return None if the flags folder does not exist
     if not os.path.exists(flagFolderPath):
