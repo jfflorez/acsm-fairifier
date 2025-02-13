@@ -9,9 +9,14 @@ except NameError:
     #print("Otherwise, path to submodule DIMA may not be resolved properly.")
     thisFilePath = os.getcwd()  # Use current directory or specify a default
 
-dimaPath = os.path.normpath(os.path.join(thisFilePath, "..",'..'))  # Move up to project root
+projectPath = os.path.normpath(os.path.join(thisFilePath, "..",".."))
 
-print(dimaPath)
+print(projectPath)
+
+if not projectPath in sys.path:
+    sys.path.insert(0,projectPath)
+
+#print(dimaPath)
 import pandas as pd
 import numpy as np
 
@@ -20,9 +25,9 @@ import dash
 import io
 
 # Set up project root directory
-root_dir = os.path.abspath(os.curdir)
-sys.path.append(root_dir)
-sys.path.append(os.path.join(root_dir,'dima'))
+#root_dir = os.path.abspath(os.curdir)
+#sys.path.append(root_dir)
+#sys.path.append(os.path.join(root_dir,'dima'))
 
 
 import data_flagging_utils as data_flagging_utils

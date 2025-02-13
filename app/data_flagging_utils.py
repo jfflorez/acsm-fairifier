@@ -57,54 +57,56 @@ def filter_flags_by_label(flags_dict, label):
             for code, value in flags_dict.items() if value['flag_label'] == label]
 
 
-def create_loaded_file_figure(file_path, instfolder):
+def create_loaded_file_figure(file_path, instFolder, dataset_name, datetime_var, datetime_var_format, variables):
 
     DataOpsAPI = h5de.HDF5DataOpsManager(file_path)
 
     if not DataOpsAPI.file_obj:
         DataOpsAPI.load_file_obj()        
 
-    target_channels = DataOpsAPI.file_obj[instfolder].attrs['target_channels']['names'][0].decode().split(',')
-    target_loc = DataOpsAPI.file_obj[instfolder].attrs['target_channels']['location'][0].decode()
-    diagnostic_channels = DataOpsAPI.file_obj[instfolder].attrs['diagnostic_channels']['names'][0].decode().split(',')
-    diagnostic_loc = DataOpsAPI.file_obj[instfolder].attrs['diagnostic_channels']['location'][0].decode()
+    #target_channels = DataOpsAPI.file_obj[instfolder].attrs['target_channels']['names'][0].decode().split(',')
+    #target_loc = DataOpsAPI.file_obj[instfolder].attrs['target_channels']['location'][0].decode()
+    #diagnostic_channels = DataOpsAPI.file_obj[instfolder].attrs['diagnostic_channels']['names'][0].decode().split(',')
+    #diagnostic_loc = DataOpsAPI.file_obj[instfolder].attrs['diagnostic_channels']['location'][0].decode()
 
     #fig = make_subplots(rows=(len(target_channels+diagnostic_channels)-2), cols=1, shared_xaxes=True,
     #                    row_heights = [1 for i in range(len(target_channels+diagnostic_channels)-2)])
-    fig = make_subplots(rows=(len(target_channels+diagnostic_channels)-2), cols=1,
-                        row_heights = [1 for i in range(len(target_channels+diagnostic_channels)-2)])
+    fig = make_subplots(rows=(len(variables)), cols=1,
+                        row_heights = [1 for i in range(len(variables))])
     traces = []
     trace_idx = 1
-    dataset = DataOpsAPI.file_obj[target_loc]
-    time_column = DataOpsAPI.reformat_datetime_column(target_loc,target_channels[0],'%d.%m.%Y %H:%M:%S.%f')
+    dataset = DataOpsAPI.file_obj[dataset_name]
+    time_column = DataOpsAPI.reformat_datetime_column(dataset_name,
+                                                      datetime_var,
+                                                      datetime_var_format)
     
-    
-    for i in range(1,len(target_channels)):
+    #time_column = dataset[datetime_var][:]
+    for i in range(1,len(variables)):
         
         fig.add_trace(go.Scatter(x = time_column,
-                                y = dataset[target_channels[i]][:],
+                                y = dataset[variables[i]][:],
                                 mode = 'lines',
-                                name = target_channels[i]), row=trace_idx, col=1)
-        fig.update_yaxes(title_text= target_channels[i], row=trace_idx, col=1)
+                                name = variables[i]), row=trace_idx, col=1)
+        fig.update_yaxes(title_text= variables[i], row=trace_idx, col=1)
         trace_idx = trace_idx + 1
         
-    dataset = DataOpsAPI.file_obj[diagnostic_loc]
-    time_column = DataOpsAPI.reformat_datetime_column(diagnostic_loc,diagnostic_channels[0],'%d.%m.%Y %H:%M:%S')
-    for i in range(1,len(diagnostic_channels)):
+    #dataset = DataOpsAPI.file_obj[diagnostic_loc]
+    #time_column = DataOpsAPI.reformat_datetime_column(diagnostic_loc,diagnostic_channels[0],'%d.%m.%Y %H:%M:%S')
+    #for i in range(1,len(diagnostic_channels)):
         
-        fig.add_trace(go.Scatter(x = time_column,
-                                y = dataset[diagnostic_channels[i]][:],
-                                mode = 'lines',
-                                name = diagnostic_channels[i]), row=trace_idx, col=1)
-        fig.update_yaxes(title_text= diagnostic_channels[i], row=trace_idx, col=1, type="log")
-        trace_idx = trace_idx + 1
+    #    fig.add_trace(go.Scatter(x = time_column,
+    #                            y = dataset[diagnostic_channels[i]][:],
+    #                            mode = 'lines',
+    #                            name = diagnostic_channels[i]), row=trace_idx, col=1)
+    #    fig.update_yaxes(title_text= diagnostic_channels[i], row=trace_idx, col=1, type="log")
+    #    trace_idx = trace_idx + 1
 
-    fig.update_layout(height=1200, title_text=f"{instfolder} : Target and Diagnostic Channels", showlegend=False)
+    fig.update_layout(height=1200, title_text=f"{instFolder} : Target and Diagnostic Channels", showlegend=False)
     
     DataOpsAPI.unload_file_obj()
-    target_channels.remove(target_channels[0])
-    diagnostic_channels.remove(diagnostic_channels[0])
-    return fig, [','.join([item,target_loc]) for item in target_channels] + [','.join([item,diagnostic_loc]) for item in diagnostic_channels]
+    #target_channels.remove(target_channels[0])
+    #diagnostic_channels.remove(diagnostic_channels[0])
+    return fig , [','.join([item,dataset_name]) for item in variables] #+ [','.join([item,diagnostic_loc]) for item in diagnostic_channels]
 
 #import os
 import json
@@ -142,6 +144,7 @@ def load_flags(filePath, instFolder, dry_run : bool = False):
 
     # Construct the flags folder path
     flagFolderPath = os.path.join(os.path.splitext(filePath)[0], f'{instFolder}_flags')
+    
 
     # Return None if the flags folder does not exist
     if not os.path.exists(flagFolderPath):
