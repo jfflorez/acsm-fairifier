@@ -608,7 +608,16 @@ def commit_flag(n_clicks,flag_value,selected_Data, data):
     instFolder = data['instFolder']
     filePath = data['path_to_uploaded_file']
 
-    flagfolderpath = os.path.join(os.path.splitext(data['path_to_uploaded_file'])[0],f'{instFolder}_flags')
+    # Modified version (appending "_flags" to the first folder)
+    flagFolder = instFolder.split('/')
+    flagFolder[0] = f"{flagFolder[0]}_flags"  # Modify first folder
+    flagFolder = '/'.join(flagFolder)
+
+    flagfolderpath = os.path.join(os.path.splitext(data['path_to_uploaded_file'])[0], flagFolder)
+    flagfolderpath = os.path.normpath(flagfolderpath)
+
+    #print("Without modification:", flagfolderpath_original)
+    print("With modification:", flagfolderpath)
 
     if not os.path.isdir(flagfolderpath):
         os.makedirs(flagfolderpath)
@@ -622,11 +631,11 @@ def commit_flag(n_clicks,flag_value,selected_Data, data):
 
     #dirlist = dirlist.sort(key=lambda x: int(x.split('_')[1].split('.')[0]))
 
-    display_flag_registry = False
+    display_flag_registry = True
     if not display_flag_registry:
         tableData = []
     else:
-        tableData = data_flagging_utils.load_flags(filePath, instFolder)
+        tableData = data_flagging_utils.load_flags(flagfolderpath)
 
         #tableData = []
         #for pathtofile in dirlist_sorted_by_creation:
@@ -636,7 +645,7 @@ def commit_flag(n_clicks,flag_value,selected_Data, data):
 
     number_of_existing_flags = len(dirlist_sorted_by_creation)
     flagid =  number_of_existing_flags+1
-    flag_filename = os.path.join(flagfolderpath,f'flag_{flagid}.json')
+    
 
     #if not os.path.exists(flag_filename):
     #    with open(flag_filename,'r') as open_flagsfile:
@@ -658,7 +667,7 @@ def commit_flag(n_clicks,flag_value,selected_Data, data):
             tableData.append(new_row)
             #data = [{'startdate':value[0],'enddate':value[1],'value':90}]
 
-    
+    flag_filename = os.path.join(flagfolderpath,f'flag_{flagid}_{parent_channel}.json')
     if not os.path.exists(flag_filename):
         with open(flag_filename,'w') as flagsfile:
             #json_flagsobject = json.dump({'row'+str(len(data)): new_row}, flagsfile)
