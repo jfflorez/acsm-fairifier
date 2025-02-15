@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import dima.utils.g5505_utils as utils
 
-UPLOAD_DIRECTORY = 'data_products/'
+UPLOAD_DIRECTORY = 'data/'
 
 flags_dict = {
         "000" : {"flag_label": 'V', "flag_description": "Valid measurement"},

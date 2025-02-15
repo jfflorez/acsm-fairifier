@@ -588,7 +588,7 @@ def clear_flag_mode_title(relayoutData, fig, data):
         return dash.no_update, dash.no_update, dash.no_update
 
 def extract_number(s):
-    return int(s[1:])-1 if s[1:].isdigit() else 0
+    return int(s[1:]) if s[1:].isdigit() else 0
 
 @callback(Output('tbl', 'data'),
           Input('commit-flag-button','n_clicks'),
