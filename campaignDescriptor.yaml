@@ -1,13 +1,13 @@
-input_file_directory: '//fs00/LAC_ORD/Data/'
+input_file_directory: '//fs00/LAC_ORD/Data/JFJ/'
 output_file_directory: 'data/'
 
 project: 'Building FAIR data chains for atmospheric observations in the ACTRIS Switzerland Network'  
-contact: 'NoraN'
-group_id: 'APOG'
+contact: 'LeilaS'
+group_id: '5502' # APOG
 
 experiment: 'acsm_campaign' # beamtime, smog_chamber, lab_experiment 
-dataset_startdate: '2024-01-01'
-dataset_enddate: '2024-02-29'
+dataset_startdate: 
+dataset_enddate: 
 actris_level: '1'
 
 # Define an (output) filename format of a resulting hdf5 file
