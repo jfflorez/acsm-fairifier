@@ -137,7 +137,7 @@ def load_flags(flagFolderPath, dry_run : bool = False): #filePath, instFolder, d
 
     # If no files found, return None
     if not files:
-        return None
+        return []
 
     # Sort files by creation time
     sortedFiles = sorted(files, key=os.path.getctime)
