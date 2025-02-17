@@ -49,6 +49,11 @@ import threading
 import webbrowser
 from time import sleep
 
+
+from components.instrument_dashboard import instrument_dashboard
+from components.flagging_dashboard import flagging_dashboard
+from components.upload_component import upload_component
+
 EnableVisCheckbox = dbc.Col(dbc.Row([dbc.Col(dcc.Checklist(
                                             id='enable-flag-checkbox',
                                             options=[{'label': html.Span('Enable Flag Visualization', style={'font-size': 15, 'padding-left': 10}), 'value': True}],
@@ -125,69 +130,9 @@ app.layout = dbc.Container([
                 html.H6('All measurements are assumed valid unless checked otherwise.')
                 ]
             )],style={'textAlign': 'center'}),
-    dbc.Row([ 
-
-        dbc.Col([
-                dcc.Upload(
-                id='upload-image',
-                children=html.Div(['Drag and Drop or ',html.A('Select Files')]),
-                style={
-                    'fontSize': "16px",
-                    'width': '100%',
-                    'height': '60px',
-                    'lineHeight': '60px',
-                    'borderWidth': '1px',
-                    'borderStyle': 'dashed',
-                    'borderRadius': '5px',
-                    'textAlign': 'center',
-                    'margin': '10px'
-                }),
-                dcc.Dropdown(
-                id='flag-options',
-                options= data_flagging_utils.filter_flags_by_label(data_flagging_utils.flags_dict,'I'), # displays only flags to invalidate
-                )],
-                width=12
-        ),
-        #],justify="center", align="center"),
-
-    #dbc.Row([
-        dbc.Col([dbc.Button('Create Flag', id='flag-button', color="primary", className="mt-2")],width=2),
-        dbc.Col([dbc.Button('Reset Flag', id='reset-flag-button', color="secondary", className="mt-2")],width=2),
-        dbc.Col([dbc.Button('Commit Flag', id='commit-flag-button', color="secondary", className="mt-2")],width=2)
-    ], justify="center", align="center",style={'background-color': '#f8f9fa', 'padding': '20px', 'text-align': 'center'}),
-
-    dbc.Row([
-        html.H3("Instrument Dashboard"),
-        
-        # First Dropdown (Instrument Folders)
-        dcc.Dropdown(
-            id="instrument-dropdown",
-            options=[{"label": i, "value": i} for i in []],
-            placeholder="Select an Instrument Folder",
-        ),
-        
-        # Spinner wrapping the second and third dropdowns
-        dcc.Loading(
-            type="circle",  # Spinner style
-            children=[
-                # Second Dropdown (Files)
-                dcc.Dropdown(
-                    id="file-dropdown",
-                    placeholder="Select a File",
-                    disabled=True  # Initially disabled
-                ),
-                
-                # Third Dropdown (Sub-selection)
-                dcc.Dropdown(
-                    id="sub-dropdown",
-                    placeholder="Select Variables",
-                    multi = True,
-                    disabled=True
-                )
-            ]
-        )
-    ], 
-    justify="center", align="center",style={'background-color': '#f8f9fa', 'padding': '20px', 'text-align': 'center'}),
+    upload_component,
+    instrument_dashboard,
+    flagging_dashboard,
     
     dbc.Row([
         dbc.Col([ 
