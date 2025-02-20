@@ -54,6 +54,14 @@ from components.instrument_dashboard import instrument_dashboard
 from components.flagging_dashboard import flagging_dashboard
 from components.upload_component import upload_component
 
+import yaml
+with open('app/flags/ebas_dict.yaml') as stream:
+    try:
+        flags_dict = yaml.safe_load(stream)["flags"]
+    except yaml.YAMLError as exc:
+        flags_dict = {}
+        print(exc)
+
 EnableVisCheckbox = dbc.Col(dbc.Row([dbc.Col(dcc.Checklist(
                                             id='enable-flag-checkbox',
                                             options=[{'label': html.Span('Enable Flag Visualization', style={'font-size': 15, 'padding-left': 10}), 'value': True}],
@@ -64,7 +72,7 @@ EnableVisCheckbox = dbc.Col(dbc.Row([dbc.Col(dcc.Checklist(
                     width=12)
 
 FlagVisTable =  html.Div(dash_table.DataTable(data=[], 
-                                            columns=[{"name": i, "id": i} for i in ['id','startdate','enddate','flag_description','parent_ch_pos','parent_channel']], 
+                                            columns=[{"name": i, "id": i} for i in ['id','startdate','enddate','description','parent_ch_pos','parent_channel']], 
                                             id='tbl',
                                             style_header={'textAlign': 'center'},
                                             fixed_rows={'headers': True},  # Fixed table headers
@@ -603,7 +611,7 @@ def commit_flag(n_clicks,flag_value,selected_Data, data):
     for key, value in selected_Data['range'].items():
         if 'x' in key:
             new_row = {'id':flagid,'startdate':value[0],'enddate':value[1],'flag_code': flag_value}
-            new_row.update(data_flagging_utils.flags_dict.get(flag_value,{}))
+            new_row.update(flags_dict.get(flag_value,{}))
             if channel_names:
                 channel_pos =  extract_number(key)
                 parent_channel, parent_dataset = tuple(channel_names[channel_pos].split(','))

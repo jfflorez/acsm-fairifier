@@ -1,6 +1,16 @@
 from dash import Dash, html, dcc, callback, Output, Input, State, dash_table
 import dash_bootstrap_components as dbc
 
+import yaml
+
+
+with open('app/flags/ebas_dict.yaml') as stream:
+    try:
+        flags_dict = yaml.safe_load(stream)["flags"]
+    except yaml.YAMLError as exc:
+        flags_dict = {}
+        print(exc)
+
 import data_flagging_utils
 
 flagging_dashboard = dbc.Row([ 
@@ -9,7 +19,7 @@ flagging_dashboard = dbc.Row([
     #dbc.Row([
             dcc.Dropdown(
             id='flag-options',
-            options= data_flagging_utils.filter_flags_by_label(data_flagging_utils.flags_dict,'I'), # displays only flags to invalidate
+            options= data_flagging_utils.filter_flags_by_label(flags_dict,'I'), # displays only flags to invalidate
            ),
            #],
             #width=12
