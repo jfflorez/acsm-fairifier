@@ -11,20 +11,9 @@ import dima.utils.g5505_utils as utils
 
 UPLOAD_DIRECTORY = 'data/'
 
-flags_dict = {
-        "000" : {"flag_label": 'V', "flag_description": "Valid measurement"},
-        "100" : {"flag_label": 'V', "flag_description": "Checked by data originator. Valid measurement, overrides any invalid flags"},
-        "110" : {"flag_label": 'V', "flag_description": "Episode data checked and accepted by data originator. Valid measurement"},
-        "111" : {"flag_label": 'V', "flag_description": "Irregular data checked and accepted by data originator. Valid measurement"},
-        "456" : {"flag_label": 'I', "flag_description": "Invalidated by data originator"},
-        "460" : {"flag_label": 'I', "flag_description": "Contamination suspected"},
-        "559" : {"flag_label": 'V', "flag_description": "Unspecified contamination or local influence, but considered valid"},
-        "599" : {"flag_label": 'I', "flag_description": "Unspecified contamination or local influence"},
-        "652" : {"flag_label": 'V', "flag_description": "construction/activity nearby"},
-        "659" : {"flag_label": 'I', "flag_description": "Unspecified instrument/sampling anomaly"},
-        "660" : {"flag_label": 'V', "flag_description": "Unspecified instrument/sampling anomaly"},
-        "999" : {"flag_label": 'I', "flag_description": "Missing measurement, unspecified reason"}
-        }
+
+
+
 
 def save_file(name, content):
     # Decode the content and save the file
@@ -53,8 +42,8 @@ def filter_flags_by_label(flags_dict, label):
     --------
         list: A list of dictionaries with 'label' and 'value' for the specified label.
     """
-    return [{'label': value['flag_description'], 'value': code} 
-            for code, value in flags_dict.items() if value['flag_label'] == label]
+    return [{'label': value['description'], 'value': code} 
+            for code, value in flags_dict.items() if value['validity'] == label]
 
 
 def create_loaded_file_figure(file_path, instFolder, dataset_name, datetime_var, datetime_var_format, variables):
