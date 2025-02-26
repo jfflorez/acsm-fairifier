@@ -49,8 +49,8 @@ def visualize_table_variables(data_file_path, dataset_name, flags_dataset_name, 
         var_flag_name = f"flag_{var}"        
         if var_flag_name in flags_df.columns:   
             # Identify valid and invalid indices         
-            ind_valid = flags_df[var_flag_name].to_numpy()
-            ind_invalid = np.logical_not(ind_valid)
+            ind_invalid = flags_df[var_flag_name].to_numpy()
+            # ind_valid = np.logical_not(ind_valid) 
             # Detect start and end indices of invalid regions
             # Find transition points in invalid regions
             invalid_starts = np.diff(np.concatenate(([False], ind_invalid, [False]))).nonzero()[0][::2]
