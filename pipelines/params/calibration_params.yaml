@@ -43,3 +43,8 @@ calibration_intervals: # Specify datetimes (YYYY-MM-DD HH-MM-SS)
     CE_correct: 1.0
     flow_ref_correct: 2.24
     << : *default_params
+
+# Idenfity diagnostics and species variables for flag generation. Names must correspond to table column names the corresponding data file  
+variables:
+  diagnostics:  ['FilamentEmission_mA','VaporizerTemp_C','FlowRate_ccs','ABsamp']
+  species: ['Chl_11000','NH4_11000','SO4_11000','NO3_11000','Org_11000']
