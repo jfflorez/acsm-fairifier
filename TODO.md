@@ -1,4 +1,14 @@
 # TODO
+* Look up acsm input file requirements in "acsm_annual/actris_acsm_converter/ACSM_converter.bat"
+  * Inputs: actris_acsm_converter/src/data/JFJ/in/JFJ_ACSM-017_2023.txt, actris_acsm_converter/data/JFJ/in/JFJ_ACSM-017_FLAGS_2023.txt
+  * Converter relies on acsm_annual/actris_acsm_converter/src/ to generate EBAS files
+
+* Part 3: Get standard and site specific temperature and pressure from Nora's script these need to be updated as part of the EBAS file generation process
+
+* [WIP] Simplify flag generation for **species**. Specifically, reconcile auto and manual flags for a single column in the flag table and then broadcasting the value to the rest. This is because the flag is the same for all species variables.
+
+* [New] Finish command line interface for visualize_datatable_vars and add modes, --flags, --dataset, and save to figures folder in repo
+
 * Implement flagging-app specific data operations such as:
     1. [New item] When verify flags from checklist is active, enable delete-flag button to delete flag associated with active cell on table. 
     2. [New item] When verify and ready to trasnfer items on checklist are active, enable record-flags button to record verified flags into the HDF5 file.
