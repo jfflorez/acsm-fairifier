@@ -60,6 +60,8 @@ def compute_calibration_factors(data_table, datetime_var_name, calibration_param
     """
     
     calibration_factors_dict = {}    
+
+    calibration_factors_dict = {datetime_var_name : data_table[datetime_var_name].to_numpy()}
     for variable_name in calibration_factors['variables']:
         #tmp = np.empty(shape=data_table[datetime_var_name].to_numpy().shape)
 
@@ -86,7 +88,7 @@ def compute_calibration_factors(data_table, datetime_var_name, calibration_param
             else:
                 raise ValueError(f"Invalid calibration interval: start_datetime {t1} must be before end_datetime {t2}")
 
-        calibration_factors_dict[variable_name] = tmp
+        calibration_factors_dict[f'factor_{variable_name}'] = tmp
 
     return pd.DataFrame(data=calibration_factors_dict)
 
@@ -158,7 +160,7 @@ def apply_calibration_factors(data_table, datetime_var_name, calibration_file):
         if variable in calibration_factors['variables'].keys(): # use standard calibration factor
             
             # Apply calibration to each variable
-            new_data_table[variable] = new_data_table[variable].mul(calibration_factor_table[variable])
+            new_data_table[variable] = new_data_table[variable].mul(calibration_factor_table[f'factor_{variable}'])
 
             # Add renaming entry
             variable_rename_dict[variable] = f"{variable}_correct"
@@ -182,7 +184,7 @@ if __name__ == '__main__':
     # Set up argument parsing
     parser = argparse.ArgumentParser(description="Calibrate species data using calibration factors.")
     parser.add_argument('data_file', type=str, help="Path to the input HDF5 file containing the data table.")
-    parser.add_argument('dataset_name', type=str, help ='Relative path to data_table (i.e., dataset name) in HDF5 file')
+    #parser.add_argument('dataset_name', type=str, help ='Relative path to data_table (i.e., dataset name) in HDF5 file')
     parser.add_argument('calibration_file', type=str, help="Path to the input YAML file containing calibration factors.")
     #parser.add_argument('output_file', type=str, help="Path to save the output calibrated data as a CSV file.")
 
@@ -196,20 +198,36 @@ if __name__ == '__main__':
 
         dataManager = dataOps.HDF5DataOpsManager(args.data_file)
         dataManager.load_file_obj()
-        dataset_name = '/'+args.dataset_name
+
+        dataManager.extract_and_load_dataset_metadata()
+        dataset_metadata_df = dataManager.dataset_metadata_df.copy()
+
+
+        keywords = ['ACSM_TOFWARE/','ACSM_JFJ_','_timeseries.txt/data_table']
+        find_keyword = [all(keyword in item for keyword in keywords) for item in dataset_metadata_df['dataset_name']]
+
+        if sum(find_keyword)!=1:
+            input_file_name = '<year>'.join(keywords)
+            raise RuntimeError(f'Input file {input_file_name} was neither found nor uniquely identified.')
+
+        dataset_name = dataset_metadata_df['dataset_name'][find_keyword].values[0]
+        parent_file = dataset_metadata_df.loc[find_keyword,'parent_file'].values[0]
+        parent_instrument = dataset_metadata_df.loc[find_keyword,'parent_instrument'].values[0]
+
+        #dataset_name = '/'+args.dataset_name
         data_table = dataManager.extract_dataset_as_dataframe(dataset_name)
         datetime_var, datetime_format = dataManager.infer_datetime_variable(dataset_name)
 
         #data_table['t_start_Buf'] = data_table['t_start_Buf'].apply(lambda x : x.decode())
 
-        dataManager.extract_and_load_dataset_metadata()
-        dataset_metadata_df = dataManager.dataset_metadata_df.copy()
+        #dataManager.extract_and_load_dataset_metadata()
+        #dataset_metadata_df = dataManager.dataset_metadata_df.copy()
         print(dataset_metadata_df.head())
 
-        dataset_name_idx = dataset_metadata_df.index[(dataset_metadata_df['dataset_name']==args.dataset_name).to_numpy()]
-        data_table_metadata = dataset_metadata_df.loc[dataset_name_idx,:]
-        parent_instrument = data_table_metadata.loc[dataset_name_idx,'parent_instrument'].values[0]
-        parent_file = data_table_metadata.loc[dataset_name_idx,'parent_file'].values[0]
+        #dataset_name_idx = dataset_metadata_df.index[(dataset_metadata_df['dataset_name']==args.dataset_name).to_numpy()]
+        #data_table_metadata = dataset_metadata_df.loc[dataset_name_idx,:]
+        #parent_instrument = data_table_metadata.loc[dataset_name_idx,'parent_instrument'].values[0]
+        #parent_file = data_table_metadata.loc[dataset_name_idx,'parent_file'].values[0]
 
         print(parent_file)
         
@@ -225,6 +243,7 @@ if __name__ == '__main__':
     path_to_output_dir, ext = os.path.splitext(args.data_file)
 
     print('Path to output directory :', path_to_output_dir)
+
 
 
 
@@ -254,7 +273,8 @@ if __name__ == '__main__':
         
         metadata = {'actris_level' : 1, 
                     'processing_script': processingScriptRelPath.replace(os.sep,'/'),
-                    'processing_date' : utils.created_at()}
+                    'processing_date' : utils.created_at(),
+                    'datetime_var': datetime_var}
         
         # Save output tables to csv file and save/or update data lineage record
         filename, ext = os.path.splitext(parent_file)
