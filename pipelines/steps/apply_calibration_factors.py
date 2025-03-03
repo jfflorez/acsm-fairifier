@@ -61,13 +61,31 @@ def compute_calibration_factors(data_table, datetime_var_name, calibration_param
     
     calibration_factors_dict = {}    
 
-    calibration_factors_dict = {datetime_var_name : data_table[datetime_var_name].to_numpy()}
-    for variable_name in calibration_factors['variables']:
-        #tmp = np.empty(shape=data_table[datetime_var_name].to_numpy().shape)
+    #calibration_factors_dict = {datetime_var_name : data_table[datetime_var_name].to_numpy()}
 
+    
+
+    # Create table to store the factors and parameters 
+    column_params = [datetime_var_name]
+    column_factors = []
+    for name in list(calibration_params['default_params'].keys()) + list(calibration_factors['variables'].keys()):
+        if '_tofware' in name: 
+            column_params.append(name.replace('_tofware','_correct'))
+        else:
+            column_factors.append(f'factor_{name}')
+    print(datetime_var_name, data_table[datetime_var_name].size, len(column_params+column_factors))
+    tmp_df = pd.DataFrame(data=np.full(shape=(data_table[datetime_var_name].size, len(column_params)+len(column_factors)), fill_value=np.nan),columns=column_params+column_factors)
+
+    tmp_df[datetime_var_name] = data_table[datetime_var_name].to_numpy()
+    
+    # print(tmp_df.head())
+
+    for variable_name in calibration_factors['variables']:
+
+        
         print(variable_name)
 
-        tmp = np.full(shape=data_table[datetime_var_name].shape, fill_value=np.nan)
+        #tmp = np.full(shape=data_table[datetime_var_name].shape, fill_value=np.nan)
 
         
         for interval_idx, interval_params in calibration_params['calibration_intervals'].items():  # Fixed typo
@@ -84,13 +102,18 @@ def compute_calibration_factors(data_table, datetime_var_name, calibration_param
                 if denominator == 0:
                     raise ZeroDivisionError(f"Denominator is zero for '{variable_name}' in interval {t1} - {t2}")
 
-                tmp[t1_idx:t2_idx] = numerator / denominator
+                tmp_df.loc[t1_idx:t2_idx, f'factor_{variable_name}'] = numerator / denominator
+                for param in column_params:
+                    if param in interval_params:
+                        tmp_df.loc[t1_idx:t2_idx, param] = interval_params[param]   
+
             else:
                 raise ValueError(f"Invalid calibration interval: start_datetime {t1} must be before end_datetime {t2}")
 
-        calibration_factors_dict[f'factor_{variable_name}'] = tmp
+        #calibration_factors_dict[f'factor_{variable_name}'] = tmp
 
-    return pd.DataFrame(data=calibration_factors_dict)
+    #return pd.DataFrame(data=calibration_factors_dict)
+    return tmp_df
 
 
 def load_calibration_file(calibration_file):
