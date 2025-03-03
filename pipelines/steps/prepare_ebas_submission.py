@@ -1,9 +1,22 @@
+import sys, os
+
+try:
+    thisFilePath = os.path.abspath(__file__)
+    print(thisFilePath)
+except NameError:
+    print("[Notice] The __file__ attribute is unavailable in this environment (e.g., Jupyter or IDLE).")
+    print("When using a terminal, make sure the working directory is set to the script's location to prevent path issues (for the DIMA submodule)")
+    #print("Otherwise, path to submodule DIMA may not be resolved properly.")
+    thisFilePath = os.getcwd()  # Use current directory or specify a default
+
+
+projectPath = os.path.normpath(os.path.join(thisFilePath, "..", "..",'..'))  # Move up to project root
+
 import argparse
-import os
 import pandas as pd
-import json
-import os
+import json, yaml
 import pandas as pd
+from utils import get_metadata
 
 def join_tables(csv_files: list):
     """
@@ -43,22 +56,22 @@ def join_tables(csv_files: list):
     return acum_df
 
     
-def get_metadata(path_to_file):
+def load_acsm_to_ebas_dict():
 
-    path, filename = os.path.split(path_to_file)
+    # Implicit input
+    dict_file = os.path.normpath(os.path.join(projectPath,"pipelines/dictionaries/acsm_to_ebas.yaml"))
 
-    path_to_metadata = None
-    for item in os.listdir(path):
-        if 'metadata.json' in item:
-            path_to_metadata = os.path.normpath(os.path.join(path,item))
-    metadata = {}
-    if path_to_file:
-        with open(path_to_metadata,'r') as stream:
-            metadata = json.load(stream)
+    output_dict = {}
+    try:
+        with open(dict_file, 'r') as stream:
+            output_dict = yaml.load(stream, Loader=yaml.FullLoader)
+    except Exception as e:
+        
+        print(f'Error loading {dict_file}: {e}')
+        return {}
     
-        metadata = metadata.get(filename,{})
-
-    return metadata
+    return output_dict
+    
 
 if __name__ == "__main__":
     
@@ -68,8 +81,47 @@ if __name__ == "__main__":
 
     acum_df = join_tables([path1,path2])
 
-    acum_df.to_csv('data/all_table.txt',sep='\t',index=None)
+    acsm_to_ebas = load_acsm_to_ebas_dict()    
+
+    #print("Before renaming:", acum_df.columns)
+    #print("Renaming map keys:", acsm_to_ebas['renaming_map'].keys())
+
+    acum_df = acum_df.rename(columns=acsm_to_ebas['renaming_map'])
+    acum_df['ACSM_time'] = pd.to_datetime(acum_df['ACSM_time'])
+
+    reduced_set_of_vars = [key for key in acum_df.columns if 'factor' not in key]
+    print(reduced_set_of_vars)
+    acum_df.loc[:,reduced_set_of_vars].to_csv('data/JFJ_ACSM-017_2024.txt',sep='\t',index=None, date_format="%Y/%m/%d %H:%M:%S")
+
+    # Count the number of NaT (null) values
+    num_nats = acum_df['ACSM_time'].isna().sum()
+
+    # Get the total number of rows
+    total_rows = len(acum_df)
+
+    # Calculate the percentage of NaT values
+    percentage_nats = (num_nats / total_rows) * 100
+
+    print(f"Total rows: {total_rows}")
+    print(f"NaT (missing) values: {num_nats}")
+    print(f"Percentage of data loss: {percentage_nats:.2f}%")
 
     acum_df = join_tables([path3])
+    acum_df = acum_df.rename(columns=acsm_to_ebas['renaming_map'])
+    acum_df['ACSM_time'] = pd.to_datetime(acum_df['ACSM_time'])
 
-    acum_df.to_csv('data/all_table_flags.txt',sep='\t',index=None)
+
+    # Count the number of NaT (null) values
+    num_nats = acum_df['ACSM_time'].isna().sum()
+
+    # Get the total number of rows
+    total_rows = len(acum_df)
+
+    # Calculate the percentage of NaT values
+    percentage_nats = (num_nats / total_rows) * 100
+
+    print(f"Total rows: {total_rows}")
+    print(f"NaT (missing) values: {num_nats}")
+    print(f"Percentage of data loss: {percentage_nats:.2f}%")
+
+    acum_df.to_csv('data/JFJ_ACSM-017_FLAGS_2024.txt',sep='\t',index=None, date_format="%Y/%m/%d %H:%M:%S")

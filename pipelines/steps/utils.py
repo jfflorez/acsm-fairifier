@@ -31,3 +31,20 @@ def record_data_lineage(path_to_output_file, projectPath, metadata):
     print(f"Metadata for calibrated data saved to {path_to_metadata_file}")
     
     return 0
+
+def get_metadata(path_to_file):
+
+    path, filename = os.path.split(path_to_file)
+
+    path_to_metadata = None
+    for item in os.listdir(path):
+        if 'metadata.json' in item:
+            path_to_metadata = os.path.normpath(os.path.join(path,item))
+    metadata = {}
+    if path_to_file:
+        with open(path_to_metadata,'r') as stream:
+            metadata = json.load(stream)
+    
+        metadata = metadata.get(filename,{})
+
+    return metadata
