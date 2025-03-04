@@ -1,0 +1,78 @@
+renaming_map:
+  datetime: datetime_UTC
+  date: ACSM_time
+  t_base : t_base
+  t_start_Buf : ACSM_time
+
+  VaporizerTemp_C: VaporizerTemp_C
+  HeaterBias_V: HeaterBias_V
+  FlowRate_mb: FlowRate_mb
+  FlowRate_ccs: FlowRate_ccs
+  #FlowRefWave : FlowRefWave  
+  FilamentEmission_mA: FilamentEmission_mA
+  Detector_V: Detector_V
+  #AnalogInput06_V	: AnalogInput06_V
+  #ABRefWave : ABRefWave
+  ABsamp: ABsamp
+  #ABCorrFact : ABCorrFact
+  Org_11000_correct : OM
+  NO3_11000_correct : NO3
+  SO4_11000_correct : SO4
+  NH4_11000_correct : NH4
+  Chl_11000_correct : Cl
+  Org_44_11000_correct: Org_44
+  Org_43_11000_correct: Org_43
+  Org_60_11000_correct: Org_60
+  NO3_30_11000_correct: NO3_30
+  SO4_98_11000_correct: SO4_98
+  SO4_81_11000_correct: SO4_81
+  SO4_82_11000_correct: SO4_82
+  SO4_62_11000_correct: SO4_62
+  SO4_48_11000_correct: SO4_48
+  IE_correct: IENO3
+  RIE_Org_correct: RIE_OM
+  RIE_NO3_correct: RIE_NO3
+  RIE_SO4_correct: RIE_SO4
+  RIE_NH4_correct: RIE_NH4
+  RIE_Chl_correct: RIE_Cl
+  ABRefWave_correct: AB_ref
+  flow_ref_correct: flow_ref
+  CE_correct: CE
+  numflag_Org_11000: numflag_OM
+  numflag_NO3_11000: numflag_NO3
+  numflag_SO4_11000: numflag_SO4
+  numflag_NH4_11000: numflag_NH4
+  numflag_Chl_11000: numflag_Cl
+
+  RH_In: RH_In
+  RH_Out: RH_Out
+  T_In: T_In
+  T_Out: T_Out
+  OM_err: OM_err
+  NO3_err: NO3_err
+  SO4_err: SO4_err
+  NH4_err: NH4_err
+  Cl_err: Cl_err
+  ToF_QuadW: ToF_QuadW
+  LensW: LensW
+  VaporizerW: VaporizerW
+
+  P_station_mbar: P_station_mbar
+  T_station_K: T_station_K
+
+  LOD_Chl: LOD_Chl_40s
+  LOD_NH4: LOD_NH4_40s
+  LOD_Org: LOD_Org_40s
+  LOD_NO3: LOD_NO3_40s
+  LOD_SO4: LOD_SO4_40s
+  LOD_Chl_4min: LOD_Chl_4min
+  LOD_NH4_4min: LOD_NH4_4min
+  LOD_Org_4min: LOD_Org_4min
+  LOD_NO3_4min: LOD_NO3_4min
+  LOD_SO4_4min: LOD_SO4_4min
+  LOD_Chl_1h: LOD_Chl_1h
+  LOD_NH4_1h: LOD_NH4_1h
+  LOD_Org_1h: LOD_Org_1h
+  LOD_NO3_1h: LOD_NO3_1h
+  LOD_SO4_1h: LOD_SO4_1h
+
