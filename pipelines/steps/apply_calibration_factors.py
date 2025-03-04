@@ -267,7 +267,15 @@ if __name__ == '__main__':
 
     print('Path to output directory :', path_to_output_dir)
 
-
+    # Count the number of NaT (null) values
+    num_nats = data_table[datetime_var].isna().sum()
+    # Get the total number of rows
+    total_rows = len(data_table)
+    # Calculate the percentage of NaT values
+    percentage_nats = (num_nats / total_rows) * 100
+    print(f"Total rows: {total_rows}")
+    print(f"NaT (missing) values: {num_nats}")
+    print(f"Percentage of data loss: {percentage_nats:.4f}%")
 
 
     # Perform calibration

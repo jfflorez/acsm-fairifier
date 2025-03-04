@@ -251,7 +251,7 @@ with open('app/flags/ebas_dict.yaml','r') as stream:
 
 # Vectorized function for getting the rank of a flag
 def get_rank(flag):
-    return flag_ranking.get(flag, 0)  # Default rank 0 for unknown flags
+    return flag_ranking.get(flag, np.nan)  # Default rank 0 for unknown flags
 
 # Vectorized function for reconciling flags
 def reconcile_flags(data_table, flag_code, t1_idx, t2_idx, numflag_columns):
@@ -280,7 +280,7 @@ def reconcile_flags(data_table, flag_code, t1_idx, t2_idx, numflag_columns):
 if __name__ == '__main__':
 
     # Set up argument parsing
-    parser = argparse.ArgumentParser(description="Calibrate species data using calibration factors.")
+    parser = argparse.ArgumentParser(description="Generate flags for diagnostics and species variables.")
 
     parser.add_argument(
         "--flag-type",
@@ -343,14 +343,15 @@ if __name__ == '__main__':
         data_table = dataManager.extract_dataset_as_dataframe(dataset_name)
         datetime_var, datetime_var_format = dataManager.infer_datetime_variable(dataset_name)
         
-        #dataManager.extract_and_load_dataset_metadata()
-        #dataset_metadata_df = dataManager.dataset_metadata_df.copy()
-        #print(dataset_metadata_df.head())
-
-        #dataset_name_idx = dataset_metadata_df.index[(dataset_metadata_df['dataset_name']==args.dataset_name).to_numpy()]
-        #data_table_metadata = dataset_metadata_df.loc[dataset_name_idx,:]
-        #parent_instrument = data_table_metadata.loc[dataset_name_idx,'parent_instrument'].values[0]
-        #parent_file = data_table_metadata.loc[dataset_name_idx,'parent_file'].values[0]
+        # Count the number of NaT (null) values
+        num_nats = data_table[datetime_var].isna().sum()
+        # Get the total number of rows
+        total_rows = len(data_table)
+        # Calculate the percentage of NaT values
+        percentage_nats = (num_nats / total_rows) * 100
+        print(f"Total rows: {total_rows}")
+        print(f"NaT (missing) values: {num_nats}")
+        print(f"Percentage of data loss: {percentage_nats:.4f}%")
         
         dataManager.unload_file_obj()        
 
