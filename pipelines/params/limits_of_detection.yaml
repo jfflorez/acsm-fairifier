@@ -1,36 +1,25 @@
 # Get values from data/<station>/<year>/config_acsm_2023.r
 
-LOD :
+LOD:
   standard_name : "limit_of_detection"
   description : "Limit of detection for various variables, at different temporal resolutions"
   datetime : "2023-07-06"
+
   variables: 
-    NO3_11000 :
-      resolution :  
-        40s : 0.21
-        4m : 0.09
-        1h : 0.02
+    Chl_11000_LOD_40s: 1.26  
+    NH4_11000_LOD_40s: 0.98
+    Org_11000_LOD_40s: 0.12
+    NO3_11000_LOD_40s: 0.21
+    SO4_11000_LOD_40s: 0.24
 
-    SO4_11000: 
-      resolution : 
-        40s : 0.24
-        4m : 0.10
-        1h : 0.03
+    Chl_11000_LOD_4min: 0.05
+    NH4_11000_LOD_4min: 0.40
+    Org_11000_LOD_4min: 0.51
+    NO3_11000_LOD_4min: 0.09
+    SO4_11000_LOD_4min: 0.10
 
-    NH4_11000:
-      resolution : 
-        40s : 0.98
-        4m : 0.40
-        1h : 0.1
-
-    Org_11000:
-      resolution : 
-        40s : 0.12
-        4m : 0.51
-        1h : 0.13
-
-    Chl_11000:
-      resolution : 
-        40s : 1.26
-        4m : 0.05
-        1h : 0.01
+    Chl_11000_LOD_1h: 0.01
+    NH4_11000_LOD_1h: 0.1
+    Org_11000_LOD_1h: 0.13
+    NO3_11000_LOD_1h: 0.02
+    SO4_11000_LOD_1h: 0.03
