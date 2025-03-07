@@ -20,6 +20,12 @@ renaming_map:
   SO4_11000_correct : SO4
   NH4_11000_correct : NH4
   Chl_11000_correct : Cl
+  Org_11000_correct_err: OM_err
+  NO3_11000_correct_err: NO3_err
+  SO4_11000_correct_err: SO4_err
+  NH4_11000_correct_err: NH4_err
+  Chl_11000_correct_err: Cl_err
+
   Org_44_11000_correct: Org_44
   Org_43_11000_correct: Org_43
   Org_60_11000_correct: Org_60
@@ -29,7 +35,7 @@ renaming_map:
   SO4_82_11000_correct: SO4_82
   SO4_62_11000_correct: SO4_62
   SO4_48_11000_correct: SO4_48
-  IE_correct: IENO3
+  IE_correct: IE_NO3
   RIE_Org_correct: RIE_OM
   RIE_NO3_correct: RIE_NO3
   RIE_SO4_correct: RIE_SO4
@@ -44,35 +50,31 @@ renaming_map:
   numflag_NH4_11000: numflag_NH4
   numflag_Chl_11000: numflag_Cl
 
-  RH_In: RH_In
-  RH_Out: RH_Out
-  T_In: T_In
-  T_Out: T_Out
-  OM_err: OM_err
-  NO3_err: NO3_err
-  SO4_err: SO4_err
-  NH4_err: NH4_err
-  Cl_err: Cl_err
+  RH_in: RH_In
+  RH_out: RH_Out
+  T_in: T_In
+  T_out: T_Out
   ToF_QuadW: ToF_QuadW
   LensW: LensW
   VaporizerW: VaporizerW
-
   P_station_mbar: P_station_mbar
   T_station_K: T_station_K
+  
+  Chl_11000_LOD: LOD_Chl_40s
+  NH4_11000_LOD: LOD_NH4_40s
+  Org_11000_LOD: LOD_Org_40s
+  NO3_11000_LOD: LOD_NO3_40s
+  SO4_11000_LOD: LOD_SO4_40s
 
-  LOD_Chl: LOD_Chl_40s
-  LOD_NH4: LOD_NH4_40s
-  LOD_Org: LOD_Org_40s
-  LOD_NO3: LOD_NO3_40s
-  LOD_SO4: LOD_SO4_40s
-  LOD_Chl_4min: LOD_Chl_4min
-  LOD_NH4_4min: LOD_NH4_4min
-  LOD_Org_4min: LOD_Org_4min
-  LOD_NO3_4min: LOD_NO3_4min
-  LOD_SO4_4min: LOD_SO4_4min
-  LOD_Chl_1h: LOD_Chl_1h
-  LOD_NH4_1h: LOD_NH4_1h
-  LOD_Org_1h: LOD_Org_1h
-  LOD_NO3_1h: LOD_NO3_1h
-  LOD_SO4_1h: LOD_SO4_1h
+  Chl_11000_LOD_4min: LOD_Chl_4min
+  NH4_11000_LOD_4min: LOD_NH4_4min
+  Org_11000_LOD_4min: LOD_Org_4min
+  NO3_11000_LOD_4min: LOD_NO3_4min
+  SO4_11000_LOD_4min: LOD_SO4_4min
+
+  Chl_11000_LOD_1h: LOD_Chl_1h
+  NH4_11000_LOD_1h: LOD_NH4_1h
+  Org_11000_LOD_1h: LOD_Org_1h
+  NO3_11000_LOD_1h: LOD_NO3_1h
+  SO4_11000_LOD_1h: LOD_SO4_1h
 
