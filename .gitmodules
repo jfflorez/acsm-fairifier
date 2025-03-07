@@ -1,6 +1,7 @@
 [submodule "dima"]
 	path = dima
 	url = https://gitlab.psi.ch/5505-public/dima.git
-[submodule "third_party/actris_acsm_converter"]
-	path = third_party/actris_acsm_converter
-	url = https://gitlab.psi.ch/apog/actris_acsm_converter.git
+[submodule "third_party/acsmProcessingSoftware"]
+	path = third_party/acsmProcessingSoftware
+	url = https://gitlab.psi.ch/apog/acsm-processing-software.git
+	branch = Nora/main
