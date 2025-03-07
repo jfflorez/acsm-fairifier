@@ -1,0 +1,31 @@
+
+
+stations:
+  JFJ:
+    Press_inlet : 487.5399782782188 # <-> 650/1.333224 
+    T_in : 25
+    T_out: 99.999 
+    RH_in: 99.999  
+    RH_out: 99.999  
+    P_station_mbar : 650
+    T_station_K : 298.15
+    ToF_QuadW: "UMR TOF"
+    LensW: "PM1 Lens"
+    VaporizerW: "Standard Vap."
+    Sampling_Flowrate: 9.999
+  
+  PAY:
+    Press_inlet : 720.059044841677 # <-> 960/1.333224
+    T_in : 23
+    T_out: 99.999  
+    RH_in: 99.999 
+    RH_out: 99.999  
+    P_station_mbar : 960
+    T_station_K : 296.15
+    ToF_QuadW: "UMR TOF"
+    LensW: "PM1 Lens"
+    VaporizerW: "Standard Vap."
+    Sampling_Flowrate: 9.999
+
+
+
