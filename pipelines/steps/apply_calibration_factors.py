@@ -37,6 +37,7 @@ import dima.src.hdf5_ops as dataOps
 import dima.utils.g5505_utils as utils
 import pipelines.steps.utils as stepUtils
 from pipelines.steps.utils import generate_error_dataframe
+from pipelines.steps.utils import load_project_yaml_files
 
 def compute_calibration_factors(data_table, datetime_var_name, calibration_params, calibration_factors):
     """
@@ -116,19 +117,18 @@ def compute_calibration_factors(data_table, datetime_var_name, calibration_param
     return tmp_df
 
 
-def load_calibration_file(calibration_file):
+def load_calibration_file(calibration_factors_file):
 
-    # START YAML FILE VALIDATION
-    # TODO : create a separate validation function
-    with open(calibration_file, 'r') as stream:
-        calibration_factors = yaml.load(stream, Loader=yaml.FullLoader)
+    # Load and validate calibration factors structure. TODO: Make sure load_project_yaml_files implements YAML FILE VALIDATION. 
+    filename = os.path.split(calibration_factors_file)[0]    
+    calibration_factors = load_project_yaml_files(projectPath,filename) 
 
     # Get path to file where calibrations params are defined
     path_to_calib_params_file = calibration_factors.get("calibration_params", {}).get('path_to_file')
 
     # Validate
     if not path_to_calib_params_file:
-        raise ValueError(f'Invalid yaml file. {calibration_file} must contain "calibration_params" with a valid "path_to_file".')
+        raise ValueError(f'Invalid yaml file. {calibration_factors_file} must contain "calibration_params" with a valid "path_to_file".')
 
     if not os.path.exists(path_to_calib_params_file):
         raise FileNotFoundError(f'Calibration parameters file not found: {path_to_calib_params_file}')
@@ -149,7 +149,7 @@ def load_calibration_file(calibration_file):
 
     return calibration_params, calibration_factors
     
-def apply_calibration_factors(data_table, datetime_var_name, calibration_file):
+def apply_calibration_factors(data_table, datetime_var_name, calibration_factors_file : str = 'pipelines/params/calibration_factors.yaml'):
     """
     Calibrates the species data in the given data table using a calibration factor.
 
@@ -167,7 +167,7 @@ def apply_calibration_factors(data_table, datetime_var_name, calibration_file):
     # Make a copy of the input table to avoid modifying the original
     new_data_table = data_table.copy()
 
-    calibration_params, calibration_factors = load_calibration_file(calibration_file) 
+    calibration_params, calibration_factors = load_calibration_file(calibration_factors_file)
 
    
     calibration_factor_table = compute_calibration_factors(new_data_table, 
