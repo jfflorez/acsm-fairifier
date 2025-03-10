@@ -120,7 +120,7 @@ def compute_calibration_factors(data_table, datetime_var_name, calibration_param
 def load_calibration_file(calibration_factors_file):
 
     # Load and validate calibration factors structure. TODO: Make sure load_project_yaml_files implements YAML FILE VALIDATION. 
-    filename = os.path.split(calibration_factors_file)[0]    
+    filename = os.path.split(calibration_factors_file)[1]
     calibration_factors = load_project_yaml_files(projectPath,filename) 
 
     # Get path to file where calibrations params are defined
@@ -298,7 +298,7 @@ if __name__ == '__main__':
 
         print(f'Processing script : {processingScriptRelPath}')
         print(f'Output directory : {path_to_output_folder}')
-
+        
         # Apply calibration factors to input data_table and generate data lineage metadata
         calibration_factor_table, calibrated_table = apply_calibration_factors(data_table, datetime_var, args.calibration_file) #calibration_factors) 
         calibrated_table_err = generate_error_dataframe(calibrated_table, datetime_var) 
