@@ -28,42 +28,12 @@ import dima.src.hdf5_ops as dataOps
 import pipelines.steps.utils as stepUtils
 import dima.utils.g5505_utils as utils
 import json
+from pipelines.steps.utils import load_project_yaml_files
 
 def compute_cpc_flags():
     # TODO: ask rob where to find this information.
 
     return 0
-
-def load_parameters(flag_type):
-
-    # Implicit input
-    if flag_type == 'diagnostics':
-        flag_type_file = os.path.normpath(os.path.join(projectPath,'pipelines/params/validity_thresholds.yaml'))
-        error_message = f"Error accessing validation thresholds at: {flag_type_file}"
-    elif flag_type == 'species':
-        flag_type_file = os.path.normpath(os.path.join(projectPath,'pipelines/params/calibration_params.yaml'))
-        error_message = f"Error accessing calibration parameters at: {flag_type_file}"
-
-
-    output_dict = {}
-    try:
-        with open(flag_type_file, 'r') as stream:
-            output_dict = yaml.load(stream, Loader=yaml.FullLoader)
-    except Exception as e:
-        
-        print(error_message)
-        return {}
-    
-    # Get name of the specifies to flag based on diagnostics and manual flags
-    #path_to_calib_params = os.path.normpath(os.path.join(projectPath,'pipelines/params/calibration_params.yaml'))
-
-    #if not os.path.exists(path_to_calib_params):
-    #    raise FileNotFoundError(f'Calibration params file:{path_to_calib_params}')
-    
-    #with open(path_to_calib_params,'r') as stream:
-    #    calib_param_dict = yaml.safe_load(stream)
-
-    return output_dict
 
 #def compute_diagnostic_variable_flags(data_table, validity_thresholds_dict):
 def generate_diagnostic_flags(data_table, validity_thresholds_dict):
@@ -390,11 +360,13 @@ if __name__ == '__main__':
         # Compute diagnostic flags based on validity thresholds defined in configuration_file_dict
 
         if flag_type == 'diagnostics':
-            validity_thresholds_dict = load_parameters(flag_type)
+            #validity_thresholds_dict = load_parameters(flag_type)
+            validity_thresholds_dict = load_project_yaml_files(projectPath, "validity_thresholds.yaml")
             flags_table = generate_diagnostic_flags(data_table, validity_thresholds_dict)           
 
         if flag_type == 'species':  
-            calib_param_dict = load_parameters(flag_type)          
+            #calib_param_dict = load_parameters(flag_type)     
+            calib_param_dict = load_project_yaml_files(projectPath, "calibration_params.yaml")     
             flags_table = generate_species_flags(data_table,calib_param_dict)
                 
         metadata = {'actris_level' : 1, 
