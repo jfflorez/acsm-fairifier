@@ -26,7 +26,7 @@ ENV PATH=/opt/conda/envs/$ENV_NAME/bin:$PATH
 RUN mkdir -p /acsmdc/data /acsmdc/figures /acsmdc/pipelines/params
 
 # Copy project files, excluding certain directories (handled via .dockerignore)
-COPY . /
+COPY . /acsmdc
 
 # Define volumes for excluded directories
 VOLUME ["/acsmdc/data", "/acsmdc/figures", "/acsmdc/pipelines/params"]
