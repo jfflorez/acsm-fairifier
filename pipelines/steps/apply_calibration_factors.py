@@ -213,11 +213,15 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+
+    if not any(item in args.calibration_file for item in ['.yaml','.yml']):
+        raise TypeError(f"Invalid file type. Calibration file {args.calibration_file} needs to be a valid yaml file.")
+
     # Load input data and calibration factors
     try:
         #data_table = pd.read_json(args.data_file)
 
-        print(args.data_file)
+        print(f'Openning data file : {args.data_file} using src.hdf5_ops.HDF5DataManager().')
 
         dataManager = dataOps.HDF5DataOpsManager(args.data_file)
         dataManager.load_file_obj()
@@ -240,28 +244,16 @@ if __name__ == '__main__':
         #dataset_name = '/'+args.dataset_name
         data_table = dataManager.extract_dataset_as_dataframe(dataset_name)
         datetime_var, datetime_format = dataManager.infer_datetime_variable(dataset_name)
-
-        #data_table['t_start_Buf'] = data_table['t_start_Buf'].apply(lambda x : x.decode())
-
-        #dataManager.extract_and_load_dataset_metadata()
-        #dataset_metadata_df = dataManager.dataset_metadata_df.copy()
         print(dataset_metadata_df.head())
-
-        #dataset_name_idx = dataset_metadata_df.index[(dataset_metadata_df['dataset_name']==args.dataset_name).to_numpy()]
-        #data_table_metadata = dataset_metadata_df.loc[dataset_name_idx,:]
-        #parent_instrument = data_table_metadata.loc[dataset_name_idx,'parent_instrument'].values[0]
-        #parent_file = data_table_metadata.loc[dataset_name_idx,'parent_file'].values[0]
-
-        print(parent_file)
-        
-        dataManager.unload_file_obj()        
+        print(parent_file)    
         print(args.calibration_file)
-
-        if not any(item in args.calibration_file for item in ['.yaml','.yml']):
-            raise TypeError(f"Invalid file type. Calibration file {args.calibration_file} needs to be a valid yaml file.")
     except Exception as e:
         print(f"Error loading input files: {e}")
         exit(1)
+    finally:        
+        dataManager.unload_file_obj() 
+        print(f'Closing data file : {args.data_file} to unlock the file.')
+        
 
     path_to_output_dir, ext = os.path.splitext(args.data_file)
 
