@@ -1,11 +1,11 @@
 # TODO
 * [New] FLAGGING APP. Review data flagging app. For some reason Chl_10000 channel not showing and parent provance recording is wrong.
-* [New] Review DataManager File Update. Generated CSV files are not transfering properly.
-* [New] FAIL APPENDDIR TRANSFER. Ensure code snippets that open and close HDF5 files do so securly and do not leave the file locked 
+* [New] DIMA. Review DataManager File Update. Generated CSV files are not transfering properly.
+* [New] DIMA. Ensure code snippets that open and close HDF5 files do so securly and do not leave the file locked
+* [New] DIMA. Revise default csv file reader and enhance it to infer datetime column and format.  
 * [New] Learn how to run docker-compose.yaml
 * [New] EBAS_SUBMISSION_STEP. Extend time filter to ranges, create a merge data frame function, and construct file name and output dir dynammically.   It is currently hardcoded.  
 * [New] Finish command line interface for visualize_datatable_vars and add modes, --flags, --dataset, and save to figures folder in repo
-
 * Implement flagging-app specific data operations such as:
     1. [New item] When verify flags from checklist is active, enable delete-flag button to delete flag associated with active cell on table. 
     2. [New item] When verify and ready to trasnfer items on checklist are active, enable record-flags button to record verified flags into the HDF5 file.
