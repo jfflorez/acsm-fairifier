@@ -1,7 +1,9 @@
 # TODO
-
-* [WIP] Simplify flag generation for **species**. Specifically, reconcile auto and manual flags for a single column in the flag table and then broadcasting the value to the rest. This is because the flag is the same for all species variables.
-
+* [New] FLAGGING APP. Review data flagging app. For some reason Chl_10000 channel not showing and parent provance recording is wrong.
+* [New] Review DataManager File Update. Generated CSV files are not transfering properly.
+* [New] FAIL APPENDDIR TRANSFER. Ensure code snippets that open and close HDF5 files do so securly and do not leave the file locked 
+* [New] Learn how to run docker-compose.yaml
+* [New] EBAS_SUBMISSION_STEP. Extend time filter to ranges, create a merge data frame function, and construct file name and output dir dynammically.   It is currently hardcoded.  
 * [New] Finish command line interface for visualize_datatable_vars and add modes, --flags, --dataset, and save to figures folder in repo
 
 * Implement flagging-app specific data operations such as:
