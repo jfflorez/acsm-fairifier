@@ -16,8 +16,8 @@ import argparse
 import yaml, json
 
 projectPath = os.path.normpath(os.path.join(thisFilePath, "..", "..",'..'))  # Move up to project root
-#print('Project path:', projectPath)
 dimaPath = os.path.normpath('/'.join([projectPath,'dima']))
+#print('Project path:', projectPath)
 #print('DIMA path:', dimaPath)
 
 
@@ -71,10 +71,10 @@ def generate_diagnostic_flags(data_table, validity_thresholds_dict):
 
     # Loop through the column names in the data table
     for diagnostic_variable in data_table.columns:
-        print(diagnostic_variable)
+        #print(diagnostic_variable)
         # Skip if the diagnostic variable is not in variable_limits
         if diagnostic_variable not in validity_thresholds_dict['validity_thresholds']['variables']:
-            print(f'Diagnostic variable {diagnostic_variable} has not defined limits in {validity_thresholds_dict}.')
+            print(f'Unspecified validity thresholds for variable {diagnostic_variable}. If needed, update pipelines/params/validity_thresholds.yaml accordingly.')
             continue
 
         # Get lower and upper limits for diagnostic_variable from variable limits dict
@@ -113,21 +113,15 @@ def generate_species_flags(data_table : pd.DataFrame, calib_param_dict : dict, f
     """
 
 
-
+    print('Retreiving species to be flagged ...')
     predefined_species = calib_param_dict.get('variables',{}).get('species',[])
+    print(f'Species to be flagged are: {predefined_species}. If needed, update pipelines/params/calibration_params.yaml')
 
     if not predefined_species:
         raise RuntimeError("Undefined species. Input argument 'calib_param_dict' must contain a 'variables' : {'species' : ['example1',...,'examplen']} ")
 
-    print('Predefined_species:', predefined_species)
-
-    variables_set = set(data_table.columns)
-    print(variables_set)
-
-
     manual_json_flags, csv_flags = get_flags_from_folder(flagsFolderPath)
-
-    print(manual_json_flags,csv_flags)
+    #print(manual_json_flags,csv_flags)
 
     if csv_flags:
         flags_table = pd.read_csv(os.path.join(flagsFolderPath, csv_flags[0]))
@@ -145,7 +139,7 @@ def generate_species_flags(data_table : pd.DataFrame, calib_param_dict : dict, f
                 flags_table['numflag_any_diagnostic_flag'].values[:, None], 
                 (1, len(variables))
             )
-            print(renaming_map)
+            #print(renaming_map)
             data_table.rename(columns=renaming_map, inplace=True)
     else:
         raise FileNotFoundError("Automated diagnostic flag .csv not found. Hint: Run pipelines/step/generate_flags.py <campaignFile.h5> --flag-type diagnostics.")
@@ -153,7 +147,7 @@ def generate_species_flags(data_table : pd.DataFrame, calib_param_dict : dict, f
 
     numflag_columns = [col for col in data_table.columns if 'numflag_' in col]
 
-    print(numflag_columns)
+    #print(numflag_columns)
     for flag_filename in manual_json_flags:
         #print(flag_filename)
         parts = os.path.splitext(flag_filename)[0].split('_')
@@ -194,8 +188,8 @@ def generate_species_flags(data_table : pd.DataFrame, calib_param_dict : dict, f
     return data_table.loc[:,[datetime_var] + numflag_columns]
 
 
-
-with open('app/flags/ebas_dict.yaml','r') as stream:
+path_to_ebas_dict = os.path.normpath(os.path.join(projectPath,'app/flags/ebas_dict.yaml'))
+with open(path_to_ebas_dict ,'r') as stream:
     ebas_dict = yaml.safe_load(stream)
     flag_ranking = ebas_dict['flag_ranking']
 
@@ -231,7 +225,7 @@ def reconcile_flags(data_table, flag_code, t1_idx, t2_idx, numflag_columns):
 def main(data_file, flag_type):
     # Open data file and load dataset associated with flag_type : either diagnostics or species
     try:
-        dataManager = dataOps.HDF5DataOpsManager(args.data_file)
+        dataManager = dataOps.HDF5DataOpsManager(data_file)
         dataManager.load_file_obj()
 
         base_name = '/ACSM_TOFWARE'
@@ -339,7 +333,7 @@ def main(data_file, flag_type):
         status = stepUtils.record_data_lineage(path_to_flags_file, projectPath, metadata)
 
         print(f"Flags saved to {path_to_flags_file}")
-        print(f"Data lineage saved to {path_to_output_dir}")
+        print(f"Data lineage saved to {path_to_output_folder}")
         
         #flags_table.to_csv(path_to_flags_file, index=False)
 
