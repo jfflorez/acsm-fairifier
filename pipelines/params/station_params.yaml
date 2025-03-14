@@ -1,5 +1,5 @@
 
-
+# Get data from scripts/acsm_annual_analysis_part3.r
 stations:
   JFJ:
     Press_inlet : 487.5399782782188 # <-> 650/1.333224 
