@@ -1,7 +1,4 @@
 # TODO
-* Look up acsm input file requirements in "acsm_annual/actris_acsm_converter/ACSM_converter.bat"
-  * Inputs: actris_acsm_converter/src/data/JFJ/in/JFJ_ACSM-017_2023.txt, actris_acsm_converter/data/JFJ/in/JFJ_ACSM-017_FLAGS_2023.txt
-  * Converter relies on acsm_annual/actris_acsm_converter/src/ to generate EBAS files
 
 * [WIP] Simplify flag generation for **species**. Specifically, reconcile auto and manual flags for a single column in the flag table and then broadcasting the value to the rest. This is because the flag is the same for all species variables.
 
