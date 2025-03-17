@@ -72,7 +72,7 @@ EnableVisCheckbox = dbc.Col(dbc.Row([dbc.Col(dcc.Checklist(
                     width=12)
 
 FlagVisTable =  html.Div(dash_table.DataTable(data=[], 
-                                            columns=[{"name": i, "id": i} for i in ['id','startdate','enddate','description','parent_ch_pos','parent_channel']], 
+                                            columns=[{"name": i, "id": i} for i in ['id','startdate','enddate','description','parent_channel']], 
                                             id='tbl',
                                             style_header={'textAlign': 'center'},
                                             fixed_rows={'headers': True},  # Fixed table headers
@@ -236,11 +236,11 @@ def load_data(filename, contents):
 
             return data, instrument_list, False
         
-        except Exception as e:
-            
-            DataOps.unload_file_obj()
+        except Exception as e:     
             print(f"Error processing file: {e}")
             return data, [], False
+        finally:
+            DataOps.unload_file_obj()
         
 
     return data, [], False
@@ -363,18 +363,23 @@ def update_figure(instFolderName, fileName, variableList, data):
     if not path_to_file:
         return go.Figure(), dash.no_update
 
-    DataOps = hdf5_ops.HDF5DataOpsManager(path_to_file)
-    DataOps.load_file_obj()
-    dataset_name = '/'.join([instFolderName, fileName, 'data_table'])
+    try:
+        DataOps = hdf5_ops.HDF5DataOpsManager(path_to_file)
+        DataOps.load_file_obj()
+        dataset_name = '/'.join([instFolderName, fileName, 'data_table'])
 
-    # Get attributes for data table 
-    datetime_var, datetime_var_format = DataOps.infer_datetime_variable(dataset_name)
-    DataOps.unload_file_obj()
+        # Get attributes for data table 
+        datetime_var, datetime_var_format = DataOps.infer_datetime_variable(dataset_name)
+        DataOps.unload_file_obj()
 
-    fig, channel_names = data_flagging_utils.create_loaded_file_figure(
-        path_to_file, instFolderName, dataset_name, datetime_var, datetime_var_format, variableList
-    )
-    data['channel_names'] = channel_names
+        fig, channel_names = data_flagging_utils.create_loaded_file_figure(
+            path_to_file, instFolderName, dataset_name, datetime_var, datetime_var_format, variableList
+        )
+        data['channel_names'] = channel_names
+    except Exception as e:
+        print(f'While processing file {path_to_file}, we got the following exception {e}.')
+    finally:
+        DataOps.unload_file_obj()
     return fig, data
 
 
@@ -541,7 +546,7 @@ def clear_flag_mode_title(relayoutData, fig, data):
         return dash.no_update, dash.no_update, dash.no_update
 
 def extract_number(s):
-    return int(s[1:]) if s[1:].isdigit() else 0
+    return int(s[1:])-1 if s[1:].isdigit() else 0
 
 @callback(Output('tbl', 'data'),
           Input('commit-flag-button','n_clicks'),
@@ -585,10 +590,11 @@ def commit_flag(n_clicks,flag_value,selected_Data, data):
     #dirlist = dirlist.sort(key=lambda x: int(x.split('_')[1].split('.')[0]))
 
     display_flag_registry = True
-    if not display_flag_registry:
-        tableData = []
-    else:
+    if display_flag_registry:
         tableData = data_flagging_utils.load_flags(flagfolderpath)
+    else:
+        tableData = []
+        
 
         #tableData = []
         #for pathtofile in dirlist_sorted_by_creation:
@@ -763,13 +769,16 @@ def visualize_flags_on_table(n_clicks,value,memoryData):
 
 
 def open_browser():
-    """Wait for the server to start, then open the browser."""
-    sleep(1)  # Wait briefly to ensure the server is starting
-    webbrowser.open_new("http://127.0.0.1:8050/")
+    """Wait for the server to start, then open the browser (only on the host)."""
+    sleep(1)  # Give the server time to start
+
+    # Open in browser only if running outside Docker
+    if not os.getenv("DOCKER_CONTAINER"):  
+        webbrowser.open_new("http://127.0.0.1:8050/")
 
 if __name__ == '__main__':
     # Start the browser-opening function in a separate thread
     threading.Thread(target=open_browser).start()
-    
-    # Run the Dash app server
-    app.run_server(debug=True, use_reloader=False)
+
+    # Run the Dash app server on 0.0.0.0 to allow external access
+    app.run_server(host="0.0.0.0", port=8050, debug=True, use_reloader=False)

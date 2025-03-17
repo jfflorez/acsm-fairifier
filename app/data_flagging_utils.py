@@ -70,7 +70,7 @@ def create_loaded_file_figure(file_path, instFolder, dataset_name, datetime_var,
                                                       datetime_var_format)
     
     #time_column = dataset[datetime_var][:]
-    for i in range(1,len(variables)):
+    for i in range(0,len(variables)):
         
         fig.add_trace(go.Scatter(x = time_column,
                                 y = dataset[variables[i]][:],
@@ -140,7 +140,7 @@ def load_flags(flagFolderPath, dry_run : bool = False): #filePath, instFolder, d
     # Process and load JSON files
     flagDataList = []
     for filePath in sortedFiles:
-        if filePath.endswith('.json'):
+        if filePath.endswith('.json') and not filePath.endswith('metadata.json'):
             try:
                 with open(filePath, 'r') as file:
                     flagDataList.append(json.load(file))
