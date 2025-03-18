@@ -8,3 +8,7 @@ __pycache__/
 *.h5
 .Trash-0/
 .ipynb_checkpoints/
+env_setup.sh
+docker-compose.yaml
+run_container.sh
+TODO.md
