@@ -1,25 +1,25 @@
 renaming_map:
   datetime: datetime_UTC
   date: ACSM_time
-  t_base : t_base
-  t_start_Buf : ACSM_time
+  t_base: t_base
+  t_start_Buf: ACSM_time
 
   VaporizerTemp_C: VaporizerTemp_C
   HeaterBias_V: HeaterBias_V
   FlowRate_mb: FlowRate_mb
   FlowRate_ccs: FlowRate_ccs
-  #FlowRefWave : FlowRefWave  
+  # FlowRefWave: FlowRefWave  
   FilamentEmission_mA: FilamentEmission_mA
   Detector_V: Detector_V
-  #AnalogInput06_V	: AnalogInput06_V
-  #ABRefWave : ABRefWave
+  # AnalogInput06_V: AnalogInput06_V
+  # ABRefWave: ABRefWave
   ABsamp: ABsamp
-  #ABCorrFact : ABCorrFact
-  Org_11000_correct : OM
-  NO3_11000_correct : NO3
-  SO4_11000_correct : SO4
-  NH4_11000_correct : NH4
-  Chl_11000_correct : Cl
+  # ABCorrFact: ABCorrFact
+  Org_11000_correct: OM
+  NO3_11000_correct: NO3
+  SO4_11000_correct: SO4
+  NH4_11000_correct: NH4
+  Chl_11000_correct: Cl
   Org_11000_correct_err: OM_err
   NO3_11000_correct_err: NO3_err
   SO4_11000_correct_err: SO4_err
@@ -60,11 +60,11 @@ renaming_map:
   P_station_mbar: P_station_mbar
   T_station_K: T_station_K
   
-  Chl_11000_LOD: LOD_Chl_40s
-  NH4_11000_LOD: LOD_NH4_40s
-  Org_11000_LOD: LOD_Org_40s
-  NO3_11000_LOD: LOD_NO3_40s
-  SO4_11000_LOD: LOD_SO4_40s
+  Chl_11000_LOD_40s: LOD_Chl_40s
+  NH4_11000_LOD_40s: LOD_NH4_40s
+  Org_11000_LOD_40s: LOD_Org_40s
+  NO3_11000_LOD_40s: LOD_NO3_40s
+  SO4_11000_LOD_40s: LOD_SO4_40s
 
   Chl_11000_LOD_4min: LOD_Chl_4min
   NH4_11000_LOD_4min: LOD_NH4_4min
@@ -78,3 +78,40 @@ renaming_map:
   NO3_11000_LOD_1h: LOD_NO3_1h
   SO4_11000_LOD_1h: LOD_SO4_1h
 
+# Define the desired column order
+column_order:
+  - ACSM_time
+  - OM
+  - NO3
+  - SO4
+  - NH4
+  - Cl
+  - IE_NO3
+  - RIE_OM
+  - RIE_NO3
+  - RIE_SO4
+  - RIE_NH4
+  - RIE_Cl
+  - RH_In
+  - RH_Out
+  - T_In
+  - T_Out
+  - OM_err
+  - NO3_err
+  - SO4_err
+  - NH4_err
+  - Cl_err
+  - ToF_QuadW
+  - LensW
+  - VaporizerW
+  - Sampling_Flowrate
+  - Press_inlet
+
+# Define the desired flags column order
+flags_column_order:
+  - ACSM_time
+  - numflag_OM
+  - numflag_NO3
+  - numflag_SO4
+  - numflag_NH4
+  - numflag_Cl
