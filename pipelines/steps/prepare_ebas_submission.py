@@ -19,9 +19,10 @@ import argparse
 import pandas as pd
 import json, yaml
 import numpy as np
-from utils import get_metadata
-from utils import metadata_dict_to_dataframe
+from pipelines.steps.utils  import get_metadata
+from pipelines.steps.utils  import metadata_dict_to_dataframe
 from pipelines.steps.utils import load_project_yaml_files
+
 
 def join_tables(csv_files: list):
     """
@@ -141,6 +142,9 @@ def main(paths_to_processed_files : list, path_to_flags : str, month : int = Non
     output_file2 = os.path.join(output_dir, 'JFJ_ACSM-017_FLAGS_2024.txt')
     #output_file1 = os.path.join(output_dir, f'JFJ_ACSM-017_2024_month{args.month}.txt' if args.month else 'JFJ_ACSM-017_2024.txt')
     #output_file2 = os.path.join(output_dir, f'JFJ_ACSM-017_FLAGS_2024_month{args.month}.txt' if args.month else 'JFJ_ACSM-017_FLAGS_2024.txt')
+
+    #acum_df = acum_df[[col for col in acsm_to_ebas['column_order'] if col in acum_df.columns]]
+    #flags_acum_df = flags_acum_df[[col for col in acsm_to_ebas['flags_column_order'] if col in flags_acum_df.columns]]
 
     acum_df.loc[:, :].to_csv(output_file1, sep='\t', index=None, date_format="%Y/%m/%d %H:%M:%S")
     flags_acum_df.loc[:, :].to_csv(output_file2, sep='\t', index=None, date_format="%Y/%m/%d %H:%M:%S")
