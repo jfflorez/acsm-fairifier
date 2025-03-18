@@ -28,8 +28,19 @@ RUN mkdir -p /acsmdc/data /acsmdc/figures /acsmdc/pipelines/params
 # Copy project files, excluding certain directories (handled via .dockerignore)
 COPY . /acsmdc
 
+# Copy and install dependencies from requirements.txt
+COPY requirements.txt /acsmdc/requirements.txt
+RUN conda run -n $ENV_NAME pip install -r /acsmdc/requirements.txt
+
 # Define volumes for excluded directories
 VOLUME ["/acsmdc/data", "/acsmdc/figures", "/acsmdc/pipelines/params"]
 
-# Default command: Run Conda shell so Python and Conda are accessible
-CMD ["/bin/bash"]
+# Add JupyterLab
+RUN pip install --no-cache-dir jupyterlab
+#RUN pip install pipx
+#RUN pipx install renku
+# Add any other packages needed for JupyterLab
+#RUN pip install --no-cache-dir matplotlib scikit-learn
+
+# If you want to set JupyterLab as the default command
+CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--NotebookApp.token='my-token'"]

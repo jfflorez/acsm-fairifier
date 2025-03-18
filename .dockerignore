@@ -6,3 +6,5 @@ logs/
 *.pyc
 __pycache__/
 *.h5
+.Trash-0/
+.ipynb_checkpoints/
