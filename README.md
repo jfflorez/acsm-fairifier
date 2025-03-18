@@ -16,25 +16,36 @@ For Windows users, the following are required:
 
 ## Clone the Repository
 
-Open a **Git Bash** terminal.
+Open **Git Bash** and run:
 
-1. Navigate to your GitLab folder, clone the repository, and navigate to the `acsmnode` folder:
+```bash
+cd GitLab
+git clone --recurse-submodules https://gitlab.psi.ch/apog/acsmnode.git
+cd acsmnode
+```
 
+## Run the Data Chain App
+
+1. Open **PowerShell as Administrator** and navigate to the `acsmnode` repository.
+2. Open **Docker Desktop**, then build the container image:
    ```bash
-   cd GitLab
-   git clone --recurse-submodules https://gitlab.psi.ch/apog/acsmnode.git
-   cd acsmnode
+   docker build -t datachain_processor .
    ```
-
-### Set Up the Python Environment
-
-Skip this step if the **Git Bash** terminal already has access to a suitable Python interpreter.
-
-Otherwise, set up an appropriate Python interpreter by running the following command:
-
+3. Run the app:
    ```bash
+   bash run_container.sh
+   ```
+4. Access:
+   - **Jupyter Lab**: [http://localhost:8889/lab/tree/notebooks/](http://localhost:8889/lab/tree/notebooks/)
+   - **Data Flagging App**: [http://localhost:8050/](http://localhost:8050/)
+
+## Set Up the Python Environment
+
+If **Git Bash** lacks a suitable Python interpreter, run:
+
+```bash
    bash env_setup.sh
-   ```
+```
 
 
 ## Run the Dashboard App
