@@ -30,7 +30,7 @@ import io
 #sys.path.append(os.path.join(root_dir,'dima'))
 
 
-import data_flagging_utils as data_flagging_utils
+import app.data_flagging_utils as data_flagging_utils
 
 from dash import Dash, html, dcc, callback, Output, Input, State, dash_table
 import plotly.graph_objs as go
@@ -50,12 +50,12 @@ import webbrowser
 from time import sleep
 
 
-from components.instrument_dashboard import instrument_dashboard
-from components.flagging_dashboard import flagging_dashboard
-from components.upload_component import upload_component
+from app.components.instrument_dashboard import instrument_dashboard
+from app.components.flagging_dashboard import flagging_dashboard
+from app.components.upload_component import upload_component
 
 import yaml
-with open('app/flags/ebas_dict.yaml') as stream:
+with open(os.path.join(projectPath,'app/flags/ebas_dict.yaml')) as stream:
     try:
         flags_dict = yaml.safe_load(stream)["flags"]
     except yaml.YAMLError as exc:
@@ -776,9 +776,13 @@ def open_browser():
     if not os.getenv("DOCKER_CONTAINER"):  
         webbrowser.open_new("http://127.0.0.1:8050/")
 
-if __name__ == '__main__':
+
+def main():
     # Start the browser-opening function in a separate thread
     threading.Thread(target=open_browser).start()
 
     # Run the Dash app server on 0.0.0.0 to allow external access
     app.run_server(host="0.0.0.0", port=8050, debug=True, use_reloader=False)
+
+if __name__ == '__main__':
+    main()

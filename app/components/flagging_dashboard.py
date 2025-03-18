@@ -1,17 +1,31 @@
+import sys, os
+
+try:
+    thisFilePath = os.path.abspath(__file__)
+    print(thisFilePath)
+except NameError:
+    print("[Notice] The __file__ attribute is unavailable in this environment (e.g., Jupyter or IDLE).")
+    print("When using a terminal, make sure the working directory is set to the script's location to prevent path issues (for the DIMA submodule)")
+    #print("Otherwise, path to submodule DIMA may not be resolved properly.")
+    thisFilePath = os.getcwd()  # Use current directory or specify a default
+
+projectPath = os.path.normpath(os.path.join(thisFilePath, "..","..", ".."))
+
 from dash import Dash, html, dcc, callback, Output, Input, State, dash_table
 import dash_bootstrap_components as dbc
 
 import yaml
 
+from app import data_flagging_utils
 
-with open('app/flags/ebas_dict.yaml') as stream:
+with open(os.path.join(projectPath,'app/flags/ebas_dict.yaml')) as stream:
     try:
         flags_dict = yaml.safe_load(stream)["flags"]
     except yaml.YAMLError as exc:
         flags_dict = {}
         print(exc)
 
-import data_flagging_utils
+
 
 flagging_dashboard = dbc.Row([ 
     html.H3("Create flags"),
