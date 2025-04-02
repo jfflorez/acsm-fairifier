@@ -1,5 +1,6 @@
-input_file_directory: '//fs00/LAC_ORD/Data/JFJ/'
-output_file_directory: 'data/'
+input_file_directory: '/mnt/network/lac_ord/Data/JFJ/'
+#input_file_directory: '//fs00/LAC_ORD/Data/JFJ/'
+output_file_directory: '../data/'
 
 project: 'Building FAIR data chains for atmospheric observations in the ACTRIS Switzerland Network'  
 contact: 'LeilaS'
@@ -13,7 +14,7 @@ actris_level: '1'
 # Define an (output) filename format of a resulting hdf5 file
 station : 'JFJ'
 year : '2024'
-filename_format : "station,year,contact"
+filename_format : "station,year"
 
 instrument_datafolder: 
   - "ACSM_TOFWARE/2024"
