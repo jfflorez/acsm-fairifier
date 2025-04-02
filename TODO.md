@@ -1,5 +1,8 @@
 # TODO
-* [New] FLAGGING APP. Review data flagging app. For some reason Chl_10000 channel not showing and parent provance recording is wrong.
+* [New] Create data flows to validate and replace existing data chain params. data/campaignData/param/ -> pipelines/params and campaignDescriptor.yaml -> acsm data converter.
+* [New] DIMA. Add dictionaries to explain variables at different levels.
+* [New] DIMA. Modify data integration pipeline to not add current datetime in filename when not specified.
+* [New] DIMA. Set data/ folder as default and only possible output folder
 * [New] DIMA. Review DataManager File Update. Generated CSV files are not transfering properly.
 * [New] DIMA. Ensure code snippets that open and close HDF5 files do so securly and do not leave the file locked
 * [New] DIMA. Revise default csv file reader and enhance it to infer datetime column and format.  

@@ -26,23 +26,35 @@ cd acsmnode
 
 ## Run the Data Chain App
 
-1. Open **PowerShell as Administrator** and navigate to the `acsmnode` repository.
-2. Open **Docker Desktop**, then build the container image:
+1. Open **PowerShell as Administrator** and navigate to the `acsmnode` repository.  
+2. Create a `.env` file in the root of `acsmnode/`.  
+3. **Securely store your network drive access credentials** in the `.env` file by adding the following lines: 
+   ```plaintext
+   CIFS_USER=<your-username>
+   CIFS_PASS=<your-password>
+   ```
+   **To protect your credentials:**
+   - Do not share the .env file with others.
+   - Ensure the file is excluded from version control by adding .env to your .gitignore and .dockerignore files.
+4. Open **Docker Desktop**, then build the container image:
    ```bash
    docker build -t datachain_processor .
    ```
-3. Run the app:
+5. Run the app:
    ```bash
    docker compose --file docker-compose.yml start datachain_processor
-4. Stop the app:
+6. Access:
+   - **Jupyter Lab**: [http://localhost:8889/lab/tree/notebooks/](http://localhost:8889/lab/tree/notebooks/)
+
+7. Stop the app:
    In the previously open PowerShell terminal, enter:
    ```bash
    Ctrl + C
+   ```
    After the container is properly Stopped, remove the container process as: 
+   ```bash
    docker rm $(docker ps -aq --filter ancestor=datachain_processor)
    ```
-4. Access:
-   - **Jupyter Lab**: [http://localhost:8889/lab/tree/notebooks/](http://localhost:8889/lab/tree/notebooks/)
 
 ## Set Up the Python Environment
 
