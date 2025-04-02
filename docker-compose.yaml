@@ -1,0 +1,23 @@
+services:
+  data_processor:
+    image: datachain_processor
+    container_name: datachain_processor
+    restart: unless-stopped
+    environment:
+      - DOCKER_CONTAINER=1
+    ports:
+      - "8889:8888"
+      - "8050:8050"
+    volumes:
+      - ./data:/acsmdc/data
+      - ./figures:/acsmdc/figures
+      - ./pipelines/params:/acsmdc/pipelines/params
+      - lac_ord:/mnt/network/lac_ord:rw
+    command: ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--NotebookApp.token='my-token'"]
+
+volumes:
+  lac_ord:
+    driver_opts:
+      type: cifs
+      o: "username=${CIFS_USER},password=${CIFS_PASS},vers=3.0"
+      device: "//fs00/LAC_ORD"
