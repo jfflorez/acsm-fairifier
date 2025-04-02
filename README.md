@@ -33,11 +33,16 @@ cd acsmnode
    ```
 3. Run the app:
    ```bash
-   bash run_container.sh
+   docker compose --file docker-compose.yml start datachain_processor
+4. Stop the app:
+   In the previously open PowerShell terminal, enter:
+   ```bash
+   Ctrl + C
+   After the container is properly Stopped, remove the container process as: 
+   docker rm $(docker ps -aq --filter ancestor=datachain_processor)
    ```
 4. Access:
    - **Jupyter Lab**: [http://localhost:8889/lab/tree/notebooks/](http://localhost:8889/lab/tree/notebooks/)
-   - **Data Flagging App**: [http://localhost:8050/](http://localhost:8050/)
 
 ## Set Up the Python Environment
 
