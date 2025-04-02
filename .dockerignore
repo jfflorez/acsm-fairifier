@@ -12,3 +12,4 @@ env_setup.sh
 docker-compose.yaml
 run_container.sh
 TODO.md
+.env
