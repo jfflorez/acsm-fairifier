@@ -1,5 +1,5 @@
 services:
-  data_processor:
+  datachain_processor:
     image: datachain_processor
     container_name: datachain_processor
     restart: unless-stopped
@@ -13,7 +13,11 @@ services:
       - ./figures:/acsmdc/figures
       - ./pipelines/params:/acsmdc/pipelines/params
       - lac_ord:/mnt/network/lac_ord:rw
-    command: ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--NotebookApp.token='my-token'"]
+    command: >
+      bash -c "
+      jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token='my-token' & 
+      python /acsmdc/app/data_flagging_app.py
+      " 
 
 volumes:
   lac_ord:

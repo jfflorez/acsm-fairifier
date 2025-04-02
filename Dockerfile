@@ -9,6 +9,8 @@ ENV ENV_NAME=apog_penv
 # Set the working directory
 WORKDIR /acsmdc
 
+#RUN apt-get update && apt-get install -y cifs-utils
+
 # Use mamba if available for faster installation
 RUN conda install -y -n base -c conda-forge mamba && \
     mamba create -y -n $ENV_NAME -c conda-forge -c defaults python=3.11 \
@@ -24,6 +26,7 @@ ENV PATH=/opt/conda/envs/$ENV_NAME/bin:$PATH
 
 # Create necessary directories for VOLUME
 RUN mkdir -p /acsmdc/data /acsmdc/figures /acsmdc/pipelines/params
+#RUN mkdir -p /mnt/lac_ord
 
 # Copy project files, excluding certain directories (handled via .dockerignore)
 COPY . /acsmdc
@@ -43,4 +46,5 @@ RUN pip install --no-cache-dir jupyterlab
 #RUN pip install --no-cache-dir matplotlib scikit-learn
 
 # If you want to set JupyterLab as the default command
-CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--NotebookApp.token='my-token'"]
+#CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--NotebookApp.token='my-token'"]
+CMD ["/bin/bash"]
