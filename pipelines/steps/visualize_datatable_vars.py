@@ -49,10 +49,15 @@ def visualize_table_variables(data_file_path, dataset_name, flags_dataset_name, 
                 flags_dataset_name_parts = flags_dataset_name.split(sep='/')
                 flags_dataset_name_parts.remove('data_table')
 
-            # Build alternative path and attempt to read CSV
-            alternative_path = os.path.join(APPEND_DIR, '/'.join(flags_dataset_name_parts))
+            # Remove existing extension and append .csv
+            base_path = os.path.join(APPEND_DIR, '/'.join(flags_dataset_name_parts))
+            alternative_path = os.path.splitext(base_path)[0] + '_flags.csv'
+        
+            # Attempt to read CSV
             if not os.path.exists(alternative_path):
-                raise FileNotFoundError(f"File not found at {flags_dataset_name}. Ensure there are flags associated with {data_file_path}.")
+                raise FileNotFoundError(
+                    f"File not found at {alternative_path}. Ensure there are flags associated with {data_file_path}."
+                )
             flags_df = pd.read_csv(alternative_path)
 
             # Ensure the time variable exists in both datasets
@@ -116,6 +121,8 @@ def visualize_table_variables(data_file_path, dataset_name, flags_dataset_name, 
 
     return fig, ax
     
+
+
 
 
 
