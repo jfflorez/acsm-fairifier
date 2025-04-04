@@ -11,24 +11,67 @@ def visualize_table_variables(data_file_path, dataset_name, flags_dataset_name, 
 
     if not os.path.exists(data_file_path): 
         raise ValueError(f"Path to input file {data_file_path} does not exists. The parameter 'data_file_path' must be a valid path to a suitable HDF5 file. ")
-    
+    APPEND_DIR = os.path.splitext(data_file_path)[0]
+    if not os.path.exists(APPEND_DIR):
+        APPEND_DIR = None
+
     # Create data manager object
     dataManager = dataOps.HDF5DataOpsManager(data_file_path)
 
-    dataManager.load_file_obj()
+    try:
+        # Load the dataset
+        dataManager.load_file_obj()
+        dataset_df = dataManager.extract_dataset_as_dataframe(dataset_name)
+    except Exception as e:
+        print(f"Exception occurred while loading dataset: {e}")
+    finally:
+        # Unload file object to free resources
+        dataManager.unload_file_obj()
 
-    # Specify diagnostic variables and the associated flags 
-    #dataset_name = 'ACSM_TOFWARE/2024/ACSM_JFJ_2024_meta.txt/data_table'
-    #flags_dataset_name = 'ACSM_TOFWARE_flags/2024/ACSM_JFJ_2024_meta_flags.csv/data_table'
-    dataset_df = dataManager.extract_dataset_as_dataframe(dataset_name)
-    flags_df = dataManager.extract_dataset_as_dataframe(flags_dataset_name)
+    # Flags dataset loading and processing
+    try:
+        # Re-load the file for flags dataset
+        dataManager.load_file_obj()
+        flags_df = dataManager.extract_dataset_as_dataframe(flags_dataset_name)
 
-    if x_var not in dataset_df.columns and x_var not in flags_df.columns:
-        raise ValueError(f'Invalid x_var : {x_var}. x_var must refer to a time variable name that is both in {dataset_name} and {flags_dataset_name}')
+        # Ensure the time variable exists in both datasets
+        if x_var not in dataset_df.columns and x_var not in flags_df.columns:
+            raise ValueError(f"Invalid x_var: {x_var}. x_var must exist in both {dataset_name} and {flags_dataset_name}.")
 
-    flags_df[x_var] = pd.to_datetime(flags_df[x_var].apply(lambda x : x.decode(encoding="utf-8")))
+        # Convert the x_var column to datetime in flags_df
+        flags_df[x_var] = pd.to_datetime(flags_df[x_var].apply(lambda x: x.decode(encoding="utf-8")))
+    except Exception as e:
+        dataManager.unload_file_obj()
+        # If loading from the file fails, attempt alternative path
+        if APPEND_DIR:
+            # Remove 'data_table' part from the path for alternate location
+            if 'data_table' in flags_dataset_name:
+                flags_dataset_name_parts = flags_dataset_name.split(sep='/')
+                flags_dataset_name_parts.remove('data_table')
 
-    dataManager.unload_file_obj()
+            # Build alternative path and attempt to read CSV
+            alternative_path = os.path.join(APPEND_DIR, '/'.join(flags_dataset_name_parts))
+            if not os.path.exists(alternative_path):
+                raise FileNotFoundError(f"File not found at {flags_dataset_name}. Ensure there are flags associated with {data_file_path}.")
+            flags_df = pd.read_csv(alternative_path)
+
+            # Ensure the time variable exists in both datasets
+            if x_var not in dataset_df.columns and x_var not in flags_df.columns:
+                raise ValueError(f"Invalid x_var: {x_var}. x_var must exist in both {dataset_name} and {flags_dataset_name}.")
+
+            # Apply datetime conversion on the x_var column in flags_df
+            flags_df[x_var] = pd.to_datetime(flags_df[x_var].apply(lambda x: x))
+    finally:
+        # Ensure file object is unloaded after use
+        dataManager.unload_file_obj()
+
+
+    #if x_var not in dataset_df.columns and x_var not in flags_df.columns:
+    #    raise ValueError(f'Invalid x_var : {x_var}. x_var must refer to a time variable name that is both in {dataset_name} and {flags_dataset_name}')
+
+    #flags_df[x_var] = pd.to_datetime(flags_df[x_var].apply(lambda x : x.decode(encoding="utf-8")))
+
+    #dataManager.unload_file_obj()
 
     if not all(var in dataset_df.columns for var in y_vars):
         raise ValueError(f'Invalid y_vars : {y_vars}. y_vars must be a subset of {dataset_df.columns}.')
