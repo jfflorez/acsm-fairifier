@@ -42,7 +42,7 @@ cd acsmnode
    ```
 5. Run the app:
    ```bash
-   docker compose --file docker-compose.yml start datachain_processor
+   docker compose --file docker-compose.yaml up datachain_processor
 6. Access:
    - **Jupyter Lab**: [http://localhost:8889/lab/tree/notebooks/](http://localhost:8889/lab/tree/notebooks/)
 
