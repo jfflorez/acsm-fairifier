@@ -238,14 +238,14 @@ def main(data_file, flag_type):
         
         dataManager.extract_and_load_dataset_metadata()
         dataset_metadata_df = dataManager.dataset_metadata_df.copy()
-
+        STATION = load_project_yaml_files(projectPath,'campaignDescriptor.yaml')['station']
         # Find dataset associated with diagnostic channels
         if flag_type == 'diagnostics':
-           keywords = ['ACSM_JFJ_','_meta.txt/data_table']
+           keywords = [f'ACSM_{STATION}_','_meta.txt/data_table']
            find_keyword = [all(keyword in item for keyword in keywords) for item in dataset_metadata_df['dataset_name']]
 
         if flag_type == 'species':
-           keywords = ['ACSM_JFJ_','_timeseries.txt/data_table']
+           keywords = [f'ACSM_{STATION}_','_timeseries.txt/data_table']
            find_keyword = [all(keyword in item for keyword in keywords) for item in dataset_metadata_df['dataset_name']]
 
         # Specify source dataset to be extracted from input hdf5 data file
