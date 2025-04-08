@@ -23,7 +23,7 @@ from pipelines.steps.utils  import get_metadata
 from pipelines.steps.utils  import metadata_dict_to_dataframe
 from pipelines.steps.utils import load_project_yaml_files
 
-
+  
 def join_tables(csv_files: list):
     """
     Joins multiple CSV files based on their metadata-defined datetime column.
@@ -69,6 +69,39 @@ def join_tables(csv_files: list):
 from third_party.acsmProcessingSoftware.src import rawto012
 #from utils import load_project_yaml_files, metadata_dict_to_dataframe, join_tables  # Adjust imports based on actual file locations
 
+def validate_required_field(dct, key):
+    value = dct.get(key, None)
+    if not value:
+        raise ValueError(f'[ERROR] Required field "{key}" is missing or empty in campaignDescriptor.yaml')
+    return value
+
+def parse_months(month_str: str) -> list:
+    """
+    Convert a string like '1,3,5-7' into a list of valid month integers [1–12].
+    Raises ValueError if any value is out of range.
+    """
+    months = set()
+    for part in month_str.split(','):
+        part = part.strip()
+        if '-' in part:
+            try:
+                start, end = map(int, part.split('-'))
+                if not (1 <= start <= 12 and 1 <= end <= 12):
+                    raise ValueError(f"Month range {start}-{end} out of bounds (1–12)")
+                months.update(range(start, end + 1))
+            except Exception:
+                raise ValueError(f"Invalid range format: '{part}'")
+        else:
+            try:
+                val = int(part)
+                if not 1 <= val <= 12:
+                    raise ValueError(f"Month {val} is out of bounds (1–12)")
+                months.add(val)
+            except ValueError:
+                raise ValueError(f"Invalid month value: '{part}'")
+    return sorted(months)
+
+
 def main(paths_to_processed_files : list, path_to_flags : str, month : int = None):
     # Set up argument parsing
 
@@ -87,9 +120,20 @@ def main(paths_to_processed_files : list, path_to_flags : str, month : int = Non
     flags_acum_df['ACSM_time'] = pd.to_datetime(flags_acum_df['ACSM_time'])
 
     # Apply month filter if specified
+    #if month:
+    #    acum_df = acum_df[acum_df['ACSM_time'].dt.month == month]
+    #    flags_acum_df = flags_acum_df[flags_acum_df['ACSM_time'].dt.month == month]
+
+    # Apply month filtering if specified
     if month:
-        acum_df = acum_df[acum_df['ACSM_time'].dt.month == month]
-        flags_acum_df = flags_acum_df[flags_acum_df['ACSM_time'].dt.month == month]
+        try:
+            month_list = parse_months(month)
+        except Exception as e:
+            raise ValueError(f"[ERROR] Could not parse month input '{month}': {e}")
+
+        acum_df = acum_df[acum_df['ACSM_time'].dt.month.isin(month_list)]
+        flags_acum_df = flags_acum_df[flags_acum_df['ACSM_time'].dt.month.isin(month_list)]
+
 
     # Count the number of NaT (null) values
     num_nats = acum_df['ACSM_time'].isna().sum()
@@ -136,10 +180,23 @@ def main(paths_to_processed_files : list, path_to_flags : str, month : int = Non
 
     acum_df = acum_df.rename(columns=acsm_to_ebas['renaming_map'])
 
-    # Save results
-    output_dir = os.path.join(projectPath,'data')
-    output_file1 = os.path.join(output_dir, 'JFJ_ACSM-017_2024.txt')
-    output_file2 = os.path.join(output_dir, 'JFJ_ACSM-017_FLAGS_2024.txt')
+
+
+    # Load descriptor
+    campaignDescriptorDict = load_project_yaml_files(projectPath, 'campaignDescriptor.yaml')
+
+    # Validate required fields
+    station = validate_required_field(campaignDescriptorDict, 'station')
+    instrument_name = validate_required_field(campaignDescriptorDict, 'instrument_name')
+    year = validate_required_field(campaignDescriptorDict, 'year')
+
+    # Build output paths
+    output_dir = os.path.join(projectPath, 'data')
+    os.makedirs(output_dir, exist_ok=True)
+
+    output_file1 = os.path.join(output_dir, f'{station}_{instrument_name}_{year}.txt')
+    output_file2 = os.path.join(output_dir, f'{station}_{instrument_name}_FLAGS_{year}.txt')
+
     #output_file1 = os.path.join(output_dir, f'JFJ_ACSM-017_2024_month{args.month}.txt' if args.month else 'JFJ_ACSM-017_2024.txt')
     #output_file2 = os.path.join(output_dir, f'JFJ_ACSM-017_FLAGS_2024_month{args.month}.txt' if args.month else 'JFJ_ACSM-017_FLAGS_2024.txt')
 
@@ -161,7 +218,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Process and calibrate ACSM data for JFJ station.")    
     parser.add_argument('--acsm_paths', type=str, required=True, nargs=3, help="Paths to the ACSM timeseries calibrated CSV file, the error CSV file, and the calibration factors CSV file.")
     parser.add_argument('--acsm_flags_path', type=str, required=True, help="Path to the ACSM flags CSV file.")
-    parser.add_argument('--month', type=int, choices=range(1, 13), help="Filter data for a specific month (1-12).")
+    parser.add_argument(
+        '--month',
+        type=str,
+        help="Filter data for specific months using comma-separated values and ranges. Ex: '1,3,5-7'"
+    )
 
     args = parser.parse_args()
 
