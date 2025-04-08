@@ -12,8 +12,9 @@ dataset_enddate:
 actris_level: '1'
 
 # Define an (output) filename format of a resulting hdf5 file
-station : 'JFJ'
+station : 'JFJ' # Set this value as either "JFJ" or "PAY"
 year : '2024'
+instrument_name : 'ACSM-017'
 filename_format : "station,year"
 
 instrument_datafolder: 
@@ -22,3 +23,22 @@ instrument_datafolder:
 integration_mode: 'collection'
 # Specify datetimes (YYYY-MM-DD HH-MM-SS) at which experimental steps were created. 
 datetime_steps: []
+
+# ACSM data chain 
+originator:
+  name: Nowak, Nora
+  email: nora.nowak@psi.ch
+  affiliation: Paul Scherrer Institute, PSI
+  department: Laboratory of Atmospheric Chemistry
+  city: Villigen PSI
+  postal_code: 5232
+  country: Switzerland
+
+submitter:
+  name: Nowak, Nora
+  email: nora.nowak@psi.ch
+  affiliation: Paul Scherrer Institute, PSI
+  department: Laboratory of Atmospheric Chemistry
+  city: Villigen PSI
+  postal_code: 5232
+  country: Switzerland
