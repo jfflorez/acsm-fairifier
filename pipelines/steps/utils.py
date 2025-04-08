@@ -149,7 +149,7 @@ def metadata_dict_to_dataframe(metadata: dict, shape: tuple):
 
 def load_project_yaml_files(projectPath : str, filename : str):
 
-    allowed_filenames = ['acsm_to_ebas.yaml', 'calibration_params.yaml', 'calibration_factors.yaml', 'limits_of_detection.yaml', 'station_params.yaml', 'validity_thresholds.yaml']
+    allowed_filenames = ['acsm_to_ebas.yaml', 'calibration_params.yaml', 'calibration_factors.yaml', 'limits_of_detection.yaml', 'station_params.yaml', 'validity_thresholds.yaml', 'campaignDescriptor.yaml']
 
     if not filename in allowed_filenames:
         raise ValueError(f'Invalid filename : {filename}. The filename should be selected from the following list {allowed_filenames}.')
@@ -159,7 +159,8 @@ def load_project_yaml_files(projectPath : str, filename : str):
                          "calibration_factors.yaml" : "pipelines/params/calibration_factors.yaml",
                          "limits_of_detection.yaml":"pipelines/params/limits_of_detection.yaml",
                          "station_params.yaml":"pipelines/params/station_params.yaml",
-                         "validity_thresholds.yaml":"pipelines/params/validity_thresholds.yaml"}
+                         "validity_thresholds.yaml":"pipelines/params/validity_thresholds.yaml",
+                         "campaignDescriptor.yaml":"campaignDescriptor.yaml"}
 
     # Implicit input
     if filename_to_relpath.get(filename,None):
