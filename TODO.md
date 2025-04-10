@@ -1,4 +1,6 @@
 # TODO
+* [from Leïla] Change flow rate values to 10% of flow rate ref
+* [from Leïla] Read the parameters from the files in the network drive and update the params in the pipeline
 * [New] Create data flows to validate and replace existing data chain params. data/campaignData/param/ -> pipelines/params and campaignDescriptor.yaml -> acsm data converter.
 * [New] DIMA. Add dictionaries to explain variables at different levels.
 * [New] DIMA. Modify data integration pipeline to not add current datetime in filename when not specified.
