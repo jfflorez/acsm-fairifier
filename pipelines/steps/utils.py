@@ -146,6 +146,12 @@ def metadata_dict_to_dataframe(metadata: dict, shape: tuple):
 
     return df
 
+def resolve_project_path():
+    try:
+        thisFilePath = os.path.abspath(__file__)
+    except NameError:
+        thisFilePath = os.getcwd()
+    return os.path.normpath(os.path.join(thisFilePath, "..", "..", ".."))
 
 def load_project_yaml_files(projectPath : str, filename : str):
 
