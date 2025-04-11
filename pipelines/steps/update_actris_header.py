@@ -39,7 +39,7 @@ def load_yaml(path):
         actris_metadata = {
             'originator': metadata['originator'],
             'submitter': metadata['submitter'],
-            'station': metadata['station'],
+            'station_abbr': metadata['station_abbr'],
         }
         actris_metadata['originator_name'] = metadata['originator'].get('name', '')
         actris_metadata['submitter_name'] = metadata['submitter'].get('name', '')
@@ -60,11 +60,11 @@ def main(data_descriptor_path, dry_run = None):
     metadata = load_yaml(data_descriptor_path)
     print(metadata)
 
-    station = metadata.get('station', None)
-    if not station:
+    STATION_ABBR = metadata.get('station_abbr', None)
+    if not STATION_ABBR:
         raise RuntimeError(
-            f'"station" is not defined in {data_descriptor_path}. '
-            'Make sure you specify it as station: "JFJ" or station: "PAY"'
+            f'"station_abbr" is not defined in {data_descriptor_path}. '
+            'Make sure you specify it as station_abbr: "JFJ" or station_abbr: "PAY"'
         )
 
     # Define header paths
@@ -78,11 +78,11 @@ def main(data_descriptor_path, dry_run = None):
         "PAY": "third_party/acsmProcessingSoftware/src/cfg/actris_header/PAY_ACSM_092.actris_header",
     }
 
-    if station not in header_template_map:
-        raise RuntimeError(f'Station "{station}" is not supported. Choose from: {list(header_template_map)}')
+    if STATION_ABBR not in header_template_map:
+        raise RuntimeError(f'Attribute station_abbr "{STATION_ABBR}" is not supported. Choose from: {list(header_template_map)}')
 
     #projectPath = resolve_project_path()
-    header_path = os.path.join(projectPath, header_template_map[station])
+    header_path = os.path.join(projectPath, header_template_map[STATION_ABBR])
 
     if not os.path.exists(header_path):
         raise FileNotFoundError(f"Header template not found at: {header_path}")
@@ -95,7 +95,7 @@ def main(data_descriptor_path, dry_run = None):
         out_path = "output.test.ext"
         print("[DRY RUN] Target header was not overwritten.")
     else:
-        out_path = os.path.join(projectPath, header_uptate_map[station])
+        out_path = os.path.join(projectPath, header_uptate_map[STATION_ABBR])
         print("[LIVE RUN] Target header will be updated.")
         print(f"Writing to: {out_path}")
 

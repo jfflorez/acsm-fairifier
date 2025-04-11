@@ -186,7 +186,7 @@ def main(paths_to_processed_files : list, path_to_flags : str, month : int = Non
     campaignDescriptorDict = load_project_yaml_files(projectPath, 'campaignDescriptor.yaml')
 
     # Validate required fields
-    station = validate_required_field(campaignDescriptorDict, 'station')
+    STATION_ABBR = validate_required_field(campaignDescriptorDict, 'station_abbr')
     instrument_name = validate_required_field(campaignDescriptorDict, 'instrument_name')
     year = validate_required_field(campaignDescriptorDict, 'year')
 
@@ -194,8 +194,8 @@ def main(paths_to_processed_files : list, path_to_flags : str, month : int = Non
     output_dir = os.path.join(projectPath, 'data')
     os.makedirs(output_dir, exist_ok=True)
 
-    output_file1 = os.path.join(output_dir, f'{station}_{instrument_name}_{year}.txt')
-    output_file2 = os.path.join(output_dir, f'{station}_{instrument_name}_FLAGS_{year}.txt')
+    output_file1 = os.path.join(output_dir, f'{STATION_ABBR}_{instrument_name}_{year}.txt')
+    output_file2 = os.path.join(output_dir, f'{STATION_ABBR}_{instrument_name}_FLAGS_{year}.txt')
 
     #output_file1 = os.path.join(output_dir, f'JFJ_ACSM-017_2024_month{args.month}.txt' if args.month else 'JFJ_ACSM-017_2024.txt')
     #output_file2 = os.path.join(output_dir, f'JFJ_ACSM-017_FLAGS_2024_month{args.month}.txt' if args.month else 'JFJ_ACSM-017_FLAGS_2024.txt')

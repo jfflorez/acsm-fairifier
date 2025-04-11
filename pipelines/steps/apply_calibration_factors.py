@@ -210,8 +210,8 @@ def main(data_file, calibration_file):
 
         dataManager.extract_and_load_dataset_metadata()
         dataset_metadata_df = dataManager.dataset_metadata_df.copy()
-        STATION = load_project_yaml_files(projectPath,'campaignDescriptor.yaml')['station']
-        keywords = ['ACSM_TOFWARE/', f'ACSM_{STATION}_', '_timeseries.txt/data_table']
+        STATION_ABBR = load_project_yaml_files(projectPath,'campaignDescriptor.yaml')['station_abbr']
+        keywords = ['ACSM_TOFWARE/', f'ACSM_{STATION_ABBR}_', '_timeseries.txt/data_table']
         find_keyword = [all(keyword in item for keyword in keywords) for item in dataset_metadata_df['dataset_name']]
 
         if sum(find_keyword) != 1:
