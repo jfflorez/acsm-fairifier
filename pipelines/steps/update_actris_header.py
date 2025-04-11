@@ -42,14 +42,8 @@ def load_yaml(path):
             'station': metadata['station'],
         }
         actris_metadata['originator_name'] = metadata['originator'].get('name', '')
+        actris_metadata['submitter_name'] = metadata['submitter'].get('name', '')
         return flatten_yaml(actris_metadata)
-
-def resolve_project_path():
-    try:
-        thisFilePath = os.path.abspath(__file__)
-    except NameError:
-        thisFilePath = os.getcwd()
-    return os.path.normpath(os.path.join(thisFilePath, "..", "..", ".."))
 
 def fill_placeholders(template, data):
     def replacer(match):

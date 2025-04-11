@@ -1,7 +1,7 @@
 ${header_size} 1001
 ${originator_name}; Brem, Benjamin; Gysel-Beer,  Martin
 ${lab}, Paul Scherrer Institute, PSI,,,, 5232, Villigen PSI, Switzerland
-Nowak, Nora
+${submitter_name}
 GAW-WDCA EMEP CREATE ACTRIS
 1 1
 ${start_day}     ${rev_day}
