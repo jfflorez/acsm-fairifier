@@ -96,6 +96,7 @@ def visualize_table_variables(data_file_path, dataset_name, flags_dataset_name, 
         # Specify flag name associated with var name in y_vars. By construction, it is assumed the name satisfy the following sufix convention.
         var_flag_name = f"flag_{var}"        
         if var_flag_name in flags_df.columns:   
+
             # Identify valid and invalid indices         
             ind_invalid = flags_df[var_flag_name].to_numpy()
             # ind_valid = np.logical_not(ind_valid) 
@@ -106,7 +107,17 @@ def visualize_table_variables(data_file_path, dataset_name, flags_dataset_name, 
 
             # Fill invalid regions                
             t_base = dataset_df[x_var].to_numpy()
+            
+            max_idx = len(t_base) - 1  # maximum valid index
             for start, end in zip(invalid_starts, invalid_ends):
+
+                if start >= end:
+                    print(f"Warning: Skipping invalid interval — start ({start}) >= end ({end})")
+                    continue
+                # Clip start and end to valid index range
+                start = max(0, start)
+                end = min(end, max_idx)
+                
                 ax.fill_betweenx([dataset_df[var].min(), dataset_df[var].max()], t_base[start], t_base[end], 
                                     color='red', alpha=0.3, label="Invalid Data" if start == invalid_starts[0] else "")
 
