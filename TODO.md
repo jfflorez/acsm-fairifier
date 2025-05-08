@@ -1,7 +1,8 @@
 # TODO
-* [from Leïla] Change flow rate values to 10% of flow rate ref
-* [from Leïla] Plot for auto flags visualization should be able to zoom in vertically
 * [from Leïla] Correct calibration_params copying
+* [from Leïla] Plot for auto flags visualization should be able to zoom in vertically
+* [from Leïla] Demo flagging app: change path_to_file
+* [from Leïla] Change flow rate values to 10% of flow rate ref
 * [from Leïla] Remove inletP column in level 2 .nas data
 * [New] Create data flows to validate and replace existing data chain params. data/campaignData/param/ -> pipelines/params and campaignDescriptor.yaml -> acsm data converter.
 * [New] DIMA. Add dictionaries to explain variables at different levels.
