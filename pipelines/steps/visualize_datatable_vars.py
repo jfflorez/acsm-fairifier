@@ -4,7 +4,7 @@ import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-
+import plotly.graph_objects as go
 def visualize_table_variables(data_file_path, dataset_name, flags_dataset_name, x_var, y_vars):
 
 
@@ -83,15 +83,26 @@ def visualize_table_variables(data_file_path, dataset_name, flags_dataset_name, 
 
     #fig, ax = plt.subplots(len(y_vars), 1, figsize=(12, 5))
 
-
+    figs = []  # store each figure
     for var_idx, var in enumerate(y_vars):
         #y = dataset_df[var].to_numpy()
         
         # Plot Flow Rate
-        fig = plt.figure(var_idx,figsize=(12, 2.5))
-        ax = plt.gca()
-        #ax = fig.get_axes()
-        ax.plot(dataset_df[x_var], dataset_df[var], label=var, alpha=0.8, color='tab:blue')
+        #fig = plt.figure(var_idx,figsize=(12, 2.5))
+        #ax = plt.gca()
+        #ax.plot(dataset_df[x_var], dataset_df[var], label=var, alpha=0.8, color='tab:blue')
+
+        fig = go.Figure()
+        # Main line plot
+        fig.add_trace(go.Scatter(
+            x=dataset_df[x_var],
+            y=dataset_df[var],
+            mode='lines',
+            name=var,
+            line=dict(color='blue'),
+            opacity=0.8
+        ))
+        
 
         # Specify flag name associated with var name in y_vars. By construction, it is assumed the name satisfy the following sufix convention.
         var_flag_name = f"flag_{var}"        
@@ -106,34 +117,70 @@ def visualize_table_variables(data_file_path, dataset_name, flags_dataset_name, 
             invalid_ends = np.diff(np.concatenate(([False], ind_invalid, [False]))).nonzero()[0][1::2]
 
             # Fill invalid regions                
-            t_base = dataset_df[x_var].to_numpy()
+            t_base = dataset_df[x_var] #.to_numpy()
             
+            y_min, y_max = dataset_df[var].min(), dataset_df[var].max()
             max_idx = len(t_base) - 1  # maximum valid index
+
             for start, end in zip(invalid_starts, invalid_ends):
 
                 if start >= end:
                     print(f"Warning: Skipping invalid interval — start ({start}) >= end ({end})")
-                    continue
-                # Clip start and end to valid index range
+                    continue            # Clip start and end to valid index range
                 start = max(0, start)
                 end = min(end, max_idx)
+
                 
-                ax.fill_betweenx([dataset_df[var].min(), dataset_df[var].max()], t_base[start], t_base[end], 
-                                    color='red', alpha=0.3, label="Invalid Data" if start == invalid_starts[0] else "")
+                #ax.fill_betweenx([dataset_df[var].min(), dataset_df[var].max()], t_base[start], t_base[end], 
+                #                    color='red', alpha=0.3, label="Invalid Data" if start == invalid_starts[0] else "")
+                #                start = max(0, start)
+                
+
+                fig.add_shape(
+                    type="rect",
+                    x0=t_base[start], x1=t_base[end],
+                    y0=y_min, y1=y_max,
+                    fillcolor="red",
+                    opacity=0.3,
+                    line_width=0,
+                    layer="below"
+                )
+            # Add a dummy invisible trace just for the legend
+            fig.add_trace(go.Scatter(
+                x=[None], y=[None],
+                mode='markers',
+                marker=dict(size=10, color='red', opacity=0.3),
+                name='Invalid Region'
+            ))
 
         # Labels and Legends
-        ax.set_xlabel(x_var)
-        ax.set_ylabel(var)
-        ax.legend()
-        ax.grid(True)
+        #ax.set_xlabel(x_var)
+        #ax.set_ylabel(var)
+        #ax.legend()
+        #ax.grid(True)
 
                 #plt.tight_layout()
                 #plt.show()
 
-    return fig, ax
+    #return fig, ax
+
+        # Add layout
+        fig.update_layout(
+                title=f"{var} over {x_var}",
+                xaxis_title=x_var,
+                yaxis_title=var,
+                xaxis_range = [t_base.min(), t_base.max()],
+                showlegend=True,
+                height=300,
+                margin=dict(l=40, r=20, t=40, b=40),
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+            )
+
+        fig.show()
+        figs.append(fig)
+
+    # Optionally return figs if needed
+    return figs
     
 
-
-
-
-
+   
