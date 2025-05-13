@@ -13,7 +13,7 @@ WORKDIR /acsmdc
 
 # Use mamba if available for faster installation
 RUN conda install -y -n base -c conda-forge mamba && \
-    mamba create -y -n $ENV_NAME -c conda-forge -c defaults python=3.11 \
+    mamba create -y -n $ENV_NAME -c conda-forge python=3.11 \
     jupyter numpy h5py pandas matplotlib plotly=5.24 scipy pip && \
     conda clean --all -y && rm -rf /root/.cache/pip
 
