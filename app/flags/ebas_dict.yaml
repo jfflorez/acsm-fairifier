@@ -37,4 +37,4 @@ flags:
     description: "Missing measurement, unspecified reason"
 
 # Define flag rankings with flag 0 as the absolute lowest
-flag_ranking : {100: 100, 110: 80, 111: 75, 559: 60, 652: 50, 660: 40, 456: 30, 460: 28, 599: 26, 659: 24, 999: 20, 0: 10}
+flag_ranking : {100: 100, 110: 80, 111: 75, 456: 60, 559: 50, 652: 40, 660: 30, 460: 28, 599: 26, 659: 24, 999: 20, 0: 10}
