@@ -33,7 +33,7 @@ flagging_dashboard = dbc.Row([
     #dbc.Row([
             dcc.Dropdown(
             id='flag-options',
-            options= data_flagging_utils.filter_flags_by_label(flags_dict,'I'), # displays only flags to invalidate
+            options= data_flagging_utils.filter_flags_by_label(flags_dict,'all'), # displays only flags to invalidate
            ),
            #],
             #width=12

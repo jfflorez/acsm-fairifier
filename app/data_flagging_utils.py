@@ -32,18 +32,24 @@ def save_file(name, content):
 def filter_flags_by_label(flags_dict, label):
     """
     Filters the flags dictionary by the specified label.
+    If label is 'all', returns all flags without filtering.
 
     Parameters:
     -----------
         flags_dict (dict): The dictionary containing flags.
-        label (str): The label to filter by ('I' or 'V').
+        label (str): The label to filter by ('I', 'V', or 'all').
 
     Returns:
     --------
-        list: A list of dictionaries with 'label' and 'value' for the specified label.
+        list: A list of dictionaries with 'label' and 'value' for the specified label,
+              or all flags if label is 'all'.
     """
-    return [{'label': value['description'], 'value': code} 
-            for code, value in flags_dict.items() if value['validity'] == label]
+    return [
+        {'label': value['description'], 'value': code}
+        for code, value in flags_dict.items()
+        if label == 'all' or value['validity'] == label
+    ]
+
 
 
 def create_loaded_file_figure(file_path, instFolder, dataset_name, datetime_var, datetime_var_format, variables):

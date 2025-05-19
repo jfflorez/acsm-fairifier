@@ -1,7 +1,4 @@
 flags:
-  0:
-    validity: "V"
-    description: "Valid measurement"
   100:
     validity: "V"
     description: "Checked by data originator. Valid measurement, overrides any invalid flags"
@@ -14,27 +11,30 @@ flags:
   456:
     validity: "I"
     description: "Invalidated by data originator"
-  460:
-    validity: "I"
-    description: "Contamination suspected"
   559:
     validity: "V"
     description: "Unspecified contamination or local influence, but considered valid"
-  599:
-    validity: "I"
-    description: "Unspecified contamination or local influence"
   652:
     validity: "V"
     description: "Construction/activity nearby"
-  659:
-    validity: "I"
-    description: "Unspecified instrument/sampling anomaly"
   660:
     validity: "V"
+    description: "Unspecified instrument/sampling anomaly"
+  460:
+    validity: "I"
+    description: "Contamination suspected"
+  599:
+    validity: "I"
+    description: "Unspecified contamination or local influence"
+  659:
+    validity: "I"
     description: "Unspecified instrument/sampling anomaly"
   999:
     validity: "I"
     description: "Missing measurement, unspecified reason"
+  0:
+    validity: "V"
+    description: "Valid measurement"
 
 # Define flag rankings with flag 0 as the absolute lowest
 flag_ranking : {100: 100, 110: 80, 111: 75, 456: 60, 559: 50, 652: 40, 660: 30, 460: 28, 599: 26, 659: 24, 999: 20, 0: 10}
