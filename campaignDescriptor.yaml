@@ -26,8 +26,8 @@ datetime_steps: []
 
 # ACSM data chain 
 originator:
-  name: Nowak, Nora
-  email: nora.nowak@psi.ch
+  name: Simon, Leïla
+  email: leila.simon@psi.ch
   affiliation: Paul Scherrer Institute, PSI
   department: Laboratory of Atmospheric Chemistry
   city: Villigen PSI
@@ -35,8 +35,8 @@ originator:
   country: Switzerland
 
 submitter:
-  name: Nowak, Nora
-  email: nora.nowak@psi.ch
+  name: Simon, Leïla
+  email: leila.simon@psi.ch
   affiliation: Paul Scherrer Institute, PSI
   department: Laboratory of Atmospheric Chemistry
   city: Villigen PSI
