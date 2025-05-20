@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
-def visualize_table_variables(data_file_path, dataset_name, flags_dataset_name, x_var, y_vars):
+def visualize_table_variables(data_file_path, dataset_name, flags_dataset_name, x_var, y_vars, yaxis_range_dict = {'FlowRate_ccs' : [0,100]}):
 
 
 
@@ -163,13 +163,20 @@ def visualize_table_variables(data_file_path, dataset_name, flags_dataset_name, 
                 #plt.show()
 
     #return fig, ax
-
+        if var in yaxis_range_dict:
+            y_axis_range = yaxis_range_dict[var]
+        else:
+            y_axis_range = [dataset_df[var].min(), dataset_df[var].max()]
+        
+        print('y axis range:',y_axis_range)
+            
         # Add layout
         fig.update_layout(
                 title=f"{var} over {x_var}",
                 xaxis_title=x_var,
                 yaxis_title=var,
                 xaxis_range = [t_base.min(), t_base.max()],
+                yaxis_range = y_axis_range,
                 showlegend=True,
                 height=300,
                 margin=dict(l=40, r=20, t=40, b=40),
