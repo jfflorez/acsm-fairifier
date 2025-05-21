@@ -50,22 +50,50 @@ def get_metadata(path_to_file):
 
     return metadata
 
+import numpy as np
+
+import numpy as np
+
 def generate_missing_value_code(max_val, num_decimals):
     """
-    Generates a missing value code consisting of all 9s.
-    - `max_val`: Largest expected valid value in the column.
-    - `num_decimals`: Number of decimal places to preserve.
+    Generate the largest all-9s missing value that can be represented exactly by float.
+    Caps total digits to 16 to avoid rounding.
+
+    Args:
+        max_val (float): Largest expected valid value in the column.
+        num_decimals (int): Number of decimal places to preserve.
+
+    Returns:
+        float: The missing value code.
     """
-    # Determine order of magnitude (1-2 orders larger than max value)
+    MAX_SIGNIFICANT_DIGITS = 16
+
+    # Calculate order of magnitude (roughly digits before decimal)
     order = int(np.floor(np.log10(max_val))) + 2 if max_val > 0 else 2
 
-    # Construct the missing value code as all 9s
-    if num_decimals > 0:
-        missing_code = float(f"{'9' * (order + num_decimals)}.{ '9' * num_decimals }")
+    # Cap total digits at 16 to avoid float rounding
+    total_digits = order + num_decimals
+    if total_digits > MAX_SIGNIFICANT_DIGITS:
+        # Reduce integer digits first to keep decimals if possible
+        int_digits = max(MAX_SIGNIFICANT_DIGITS - num_decimals, 1)
+        dec_digits = min(num_decimals, MAX_SIGNIFICANT_DIGITS - int_digits)
     else:
-        missing_code = int('9' * order)
-    
+        int_digits = order
+        dec_digits = num_decimals
+
+    # Construct the missing code string
+    if dec_digits > 0:
+        int_part = '9' * int_digits
+        dec_part = '9' * dec_digits
+        missing_code_str = f"{int_part}.{dec_part}"
+    else:
+        missing_code_str = '9' * int_digits
+
+    missing_code = float(missing_code_str)
+
     return missing_code
+
+
 
 
 def generate_error_dataframe(df: pd.DataFrame, datetime_var):
