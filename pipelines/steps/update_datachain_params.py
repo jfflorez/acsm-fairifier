@@ -67,6 +67,8 @@ def sync_yaml_files(src_filepath, dest_filepath):
     src_yaml = load_yaml(src_filepath)
     dest_yaml = load_yaml(dest_filepath)    
 
+    # TODO validate yaml files first before attempting syncronization
+
     if src_yaml is None or dest_yaml is None:
         print(f"Skipping synchronization for {os.path.basename(src_filepath)} due to YAML loading errors.")
         return

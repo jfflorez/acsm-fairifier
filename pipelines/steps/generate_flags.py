@@ -191,7 +191,7 @@ def generate_species_flags(data_table : pd.DataFrame, calib_param_dict : dict, f
 
     manual_json_flags, csv_flags = get_flags_from_folder(flagsFolderPath)
     #print(manual_json_flags,csv_flags)
-
+    interpolated_cpc_flags = []
     if csv_flags:
 
         # Loop over CSV files in the flags folder
@@ -264,7 +264,9 @@ def generate_species_flags(data_table : pd.DataFrame, calib_param_dict : dict, f
 
     numflag_columns = [col for col in data_table.columns if 'numflag_' in col]
 
-    data_table = reconcile_flags(data_table, interpolated_cpc_flags, 0, interpolated_cpc_flags.size, numflag_columns)
+    if interpolated_cpc_flags:
+
+        data_table = reconcile_flags(data_table, interpolated_cpc_flags, 0, interpolated_cpc_flags.size, numflag_columns)
 
     #print(numflag_columns)
     for flag_filename in manual_json_flags:
