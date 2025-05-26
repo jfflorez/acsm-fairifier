@@ -93,7 +93,8 @@ def generate_missing_value_code(max_val, num_decimals):
 
     return missing_code
 
-
+def compute_uncertainty_estimate(x,x_err):
+    return ((0.5*x_err)**2+(0.5*x)**2)**0.5
 
 
 def generate_error_dataframe(df: pd.DataFrame, datetime_var):
