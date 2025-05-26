@@ -20,7 +20,7 @@ Open **Git Bash** and run:
 
 ```bash
 cd GitLab
-git clone --recurse-submodules https://gitlab.psi.ch/apog/acsmnode.git
+git clone --recurse-submodules https://gitea.psi.ch/APOG/acsmnode.git
 cd acsmnode
 ```
 
