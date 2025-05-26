@@ -1,5 +1,6 @@
 # TODO
 * [from Leïla] Correct error when flags are loaded in the flagging app
+* [from Leïla] End the file at end of year (or filter only current year)
 * [from Leïla] Change "9999.999" to "9999999.9999" in header
 * [from Leïla] Update Detection limit values in L2 header: take the ones (1h) from limits_of_detection.yaml
 * [from Leïla] For PAY, calculate error as 50% of concentration
