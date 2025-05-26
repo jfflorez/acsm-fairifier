@@ -19,7 +19,7 @@ For Windows users, the following are required:
 Open **Git Bash** and run:
 
 ```bash
-cd GitLab
+cd Gitea
 git clone --recurse-submodules https://gitea.psi.ch/APOG/acsmnode.git
 cd acsmnode
 ```
