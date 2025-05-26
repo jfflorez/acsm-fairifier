@@ -30,8 +30,10 @@ originator:
   email: leila.simon@psi.ch
   affiliation: Paul Scherrer Institute, PSI
   department: Laboratory of Atmospheric Chemistry
-  city: Villigen PSI
+  address_line_1: ""
+  address_line_2: ""
   postal_code: 5232
+  city: Villigen PSI
   country: Switzerland
 
 submitter:
@@ -39,6 +41,8 @@ submitter:
   email: leila.simon@psi.ch
   affiliation: Paul Scherrer Institute, PSI
   department: Laboratory of Atmospheric Chemistry
-  city: Villigen PSI
+  address_line_1: ""
+  address_line_2: ""
   postal_code: 5232
+  city: Villigen PSI
   country: Switzerland
