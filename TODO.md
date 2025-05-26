@@ -1,9 +1,9 @@
 # TODO
+* [from Leïla] For PAY, calculate error as 50% of concentration (or Leïla will send the formula)
 * [from Leïla] Correct error when flags are loaded in the flagging app
 * [from Leïla] End the file at end of year (or filter only current year)
 * [from Leïla] Change "9999.999" to "9999999.9999" in header
 * [from Leïla] Update Detection limit values in L2 header: take the ones (1h) from limits_of_detection.yaml
-* [from Leïla] For PAY, calculate error as 50% of concentration
 * [from Leïla] Correct errors (uncertainties) that they can't be lower than 0.0001
 * [from Leïla] Change flow rate values to 10% of flow rate ref
 * [New] Create data flows to validate and replace existing data chain params. data/campaignData/param/ -> pipelines/params and campaignDescriptor.yaml -> acsm data converter.
