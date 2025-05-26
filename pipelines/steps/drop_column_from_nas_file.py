@@ -59,7 +59,7 @@ def main(path_to_data_file, column_to_remove):
 
     # Update header part2
     part2 = header_metadata_dict['raw_header_part2']
-    nvars = df.columns.size
+    nvars = df.columns.size-1
     part2[1] = f'{nvars}\n'.encode('utf-8')
 
     part2_2_tmp = part2[2].decode('utf-8').strip().split()
@@ -70,8 +70,9 @@ def main(path_to_data_file, column_to_remove):
     del part2[4+index-1]
 
     part2_3_tmp = part2[3].decode('utf-8').strip().split()
+    #part2_3_tmp = header_metadata_dict['variable_missing_values']
     del part2_3_tmp[index]
-    part2[3] = (' '.join(part2_3_tmp) + '\n').encode('utf-8')
+    part2[3] = (' '.join([str(i) for i in part2_3_tmp]) + '\n').encode('utf-8')
 
     # Update header part1 (adjust header length)
     part1 = header_metadata_dict['raw_header_part1']
@@ -80,7 +81,7 @@ def main(path_to_data_file, column_to_remove):
     part1_0_tmp[0] = str(header_length)
     part1[0] = (' '.join(part1_0_tmp) + '\n').encode('utf-8')
 
-    output_path = "output_file.na"  # or any .txt, .na, etc.
+    #output_path = "output_file.na"  # or any .txt, .na, etc.
 
     
 
@@ -124,10 +125,10 @@ def main(path_to_data_file, column_to_remove):
     processed_lines = processed_lines + data_table_lines
 
     with open(path_to_data_file, 'wb') as f:
-        # Write header part 1
         for line in processed_lines:
-            f.write(line) 
+            decoded = line.decode('utf-8').rstrip('\n')
+            f.write((decoded + '\n').encode('utf-8'))
 
 if __name__ == '__main__':
-    path_to_data_file = os.path.normpath(os.path.join(projectPath,'data/CH0001G.20240201010000.20250519140310.aerosol_mass_spectrometer.chemistry_ACSM.pm1_non_refractory.2mo.1h.CH02L_Aerodyne_ToF-ACSM_017.CH02L_Aerodyne_ToF-ACSM_JFJ.lev2.nas'))
+    path_to_data_file = os.path.normpath(os.path.join(projectPath,'data/CH0002G.20240201010000.20250521123253.aerosol_mass_spectrometer.chemistry_ACSM.pm1_non_refractory.7w.1h.CH02L_Aerodyne_ToF-ACSM_092.CH02L_Aerodyne_ToF-ACSM_PAY.lev2.nas'))
     main(path_to_data_file, column_to_remove='inletP')
