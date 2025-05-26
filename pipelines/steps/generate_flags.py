@@ -264,7 +264,7 @@ def generate_species_flags(data_table : pd.DataFrame, calib_param_dict : dict, f
 
     numflag_columns = [col for col in data_table.columns if 'numflag_' in col]
 
-    if interpolated_cpc_flags:
+    if len(interpolated_cpc_flags)>0:
 
         data_table = reconcile_flags(data_table, interpolated_cpc_flags, 0, interpolated_cpc_flags.size, numflag_columns)
 
