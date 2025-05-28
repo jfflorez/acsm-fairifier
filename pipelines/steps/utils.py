@@ -98,7 +98,7 @@ import numpy as np
 
 def compute_uncertainty_estimate(x, x_err):
     """
-    Computes uncertainty estimate: sqrt((0.5 * x_err)^2 + (0.5 * x)^2)
+    Computes uncertainty estimate: sqrt((x_err)^2 + (0.5 * x)^2)
     for scalar inputs. Prints errors if inputs are invalid.
     """
     try:
@@ -109,7 +109,7 @@ def compute_uncertainty_estimate(x, x_err):
             print(f"Warning: One or both inputs are NaN -> x: {x}, x_err: {x_err}")
             return np.nan
 
-        return math.sqrt((0.5 * x_err)**2 + (0.5 * x)**2)
+        return math.sqrt((x_err)**2 + (0.5 * x)**2)
 
     except (ValueError, TypeError) as e:
         print(f"Error computing uncertainty for x: {x}, x_err: {x_err} -> {e}")
