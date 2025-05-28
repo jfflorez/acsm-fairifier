@@ -1,11 +1,13 @@
 # TODO
-* [from Leïla] Correct error when flags are loaded in the flagging app
-* [from Leïla] End the file at end of year (or filter only current year)
-* [from Leïla] Change "9999.999" to "9999999.9999" in header
-* [from Leïla] Update Detection limit values in L2 header: take the ones (1h) from limits_of_detection.yaml
-* [from Leïla] For PAY, calculate error as 50% of concentration
-* [from Leïla] Correct errors (uncertainties) that they can't be lower than 0.0001
-* [from Leïla] Change flow rate values to 10% of flow rate ref
+* [from Leïla] Data Flagging App. Correct error when flags are loaded in the app.
+* [from Leïla] Before Step 5. The file should contain only data of the current year.
+* [from Leïla] Ebas converter. Change "9999.999" to "9999999.9999" in header
+* [from Leïla] Ebas converter. Update Detection limit values in L2 header: take the ones (1h) from limits_of_detection.yaml
+* [from Leïla] Ebas converter. Correct errors (uncertainties) that they can't be lower than 0.0001
+* [from Leïla] Flag using validity threshold. Change flow rate values to 10% of flow rate ref.
+* [from Leïla] In Step 1. Creation of a new collection should be an option and not automatic.
+* [from Leïla] The data chain (except Step 5) should also include Org_mx and Ord_err. To discuss together.
+* [from Leïla] Step 4.1. Add a step to verify ACSM data with external instruments (MPSS, eBC). To discuss together.
 * [New] Create data flows to validate and replace existing data chain params. data/campaignData/param/ -> pipelines/params and campaignDescriptor.yaml -> acsm data converter.
 * [New] DIMA. Add dictionaries to explain variables at different levels.
 * [New] DIMA. Modify data integration pipeline to not add current datetime in filename when not specified.
