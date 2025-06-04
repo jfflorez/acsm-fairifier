@@ -2,3 +2,19 @@ data
 notebooks
 .renku
 .git
+
+# Below my dockerignore lines. Hopefully there is no conflict with renku init.
+figures/
+pipelines/params/
+envs/
+logs/
+*.pyc
+__pycache__/
+*.h5
+.Trash-0/
+.ipynb_checkpoints/
+env_setup.sh
+docker-compose.yaml
+run_container.sh
+TODO.md
+.env
