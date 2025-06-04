@@ -50,9 +50,7 @@ def filter_flags_by_label(flags_dict, label):
         if label == 'all' or value['validity'] == label
     ]
 
-
-
-def create_loaded_file_figure(file_path, instFolder, dataset_name, datetime_var, datetime_var_format, variables):
+def create_loaded_file_figure(file_path, instFolder, dataset_name, time_column, variables, mask):
 
     DataOpsAPI = h5de.HDF5DataOpsManager(file_path)
 
@@ -70,16 +68,23 @@ def create_loaded_file_figure(file_path, instFolder, dataset_name, datetime_var,
                         row_heights = [1 for i in range(len(variables))])
     traces = []
     trace_idx = 1
+
+    indices = np.where(mask)[0]
+    start_idx = indices[0]
+    end_idx = indices[-1] + 1  # slice is exclusive end
+
     dataset = DataOpsAPI.file_obj[dataset_name]
-    time_column = DataOpsAPI.reformat_datetime_column(dataset_name,
-                                                      datetime_var,
-                                                      datetime_var_format)
+    #time_column = DataOpsAPI.reformat_datetime_column(dataset_name,
+    #                                                  datetime_var,
+    #                                                  datetime_var_format)
     
-    #time_column = dataset[datetime_var][:]
     for i in range(0,len(variables)):
+
+        x = time_column[start_idx:end_idx]
+        y = dataset[variables[i]][start_idx:end_idx]
         
-        fig.add_trace(go.Scatter(x = time_column,
-                                y = dataset[variables[i]][:],
+        fig.add_trace(go.Scatter(x = x,
+                                y = y,
                                 mode = 'lines',
                                 name = variables[i]), row=trace_idx, col=1)
         fig.update_yaxes(title_text= variables[i], row=trace_idx, col=1)

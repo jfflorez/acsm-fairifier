@@ -126,6 +126,17 @@ ReviewOpsPannel =  dbc.Col([
                             #]),
                             ],width=12)
 
+DatePickerRange = dbc.Col([
+    html.H2("Set date range for time series display", style={'font-size': '20px', 'margin-bottom': '10px'}),
+    dcc.DatePickerRange(
+        id='date-picker-range',
+        display_format='YYYY-MM-DD',
+        start_date_placeholder_text='Start Date',
+        end_date_placeholder_text='End Date',
+        minimum_nights=0,
+        style={'width': '100%'}
+    )
+])
 # Initialize Dash app with Bootstrap theme
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -159,11 +170,12 @@ app.layout = dbc.Container([
         #dbc.Col([html.Div(id='flag-record', style={'whiteSpace': 'pre-line'})], width=4), #config={'modeBarButtons': True,                                                         
                                                                #'modeBarButtonsToAdd':['select2d','lasso2d'], 
                                                                #'modeBarButtonsToRemove': ['zoom', 'pan']}),],  width=12)
-        dbc.Col([
+        dbc.Col(
+                [
                 html.Div([
                             EnableVisCheckbox,
                             FlagVisTable,                            
-                            ReviewOpsPannel,
+                            DatePickerRange,
                         ], 
                         style={'height': '1000px','overflowY': 'auto'}),  # Set a fixed height for the div            
                 ], 
@@ -345,19 +357,26 @@ def update_variable_dropdown(instFolderName, fileName, data):
 
     return [{"label": var_name, "value": var_name} for var_name in variableList] , False, variableList
 
+from datetime import datetime
+import numpy as np
+
 @app.callback(    
     Output('timeseries-plot', 'figure'),
     Output('memory-output','data'),
     Input('instrument-dropdown', 'value'),
     Input('file-dropdown', 'value'),
     Input('sub-dropdown', 'value'),
+    Input('date-picker-range', 'start_date'),
+    Input('date-picker-range', 'end_date'),
     Input('memory-output', 'data'),
     prevent_initial_call=True
 )
-def update_figure(instFolderName, fileName, variableList, data):
-    # Check if any input is None or empty
+def update_figure(instFolderName, fileName, variableList, start_date, end_date, data):
+
+    fig = go.Figure()  # Always define it to avoid UnboundLocalError
+
     if not all([instFolderName, fileName, variableList, data]):
-        return go.Figure(), dash.no_update  # Return an empty figure to prevent crashes
+        return go.Figure(), dash.no_update
 
     path_to_file = data.get('path_to_uploaded_file')
     if not path_to_file:
@@ -366,21 +385,52 @@ def update_figure(instFolderName, fileName, variableList, data):
     try:
         DataOps = hdf5_ops.HDF5DataOpsManager(path_to_file)
         DataOps.load_file_obj()
-        dataset_name = '/'.join([instFolderName, fileName, 'data_table'])
 
-        # Get attributes for data table 
+        dataset_name = '/'.join([instFolderName, fileName, 'data_table'])
         datetime_var, datetime_var_format = DataOps.infer_datetime_variable(dataset_name)
-        DataOps.unload_file_obj()
+
+        if not isinstance(data.get('time_cache'), dict):
+            data['time_cache'] = {}
+
+        cache_key = f"{path_to_file}|{dataset_name}|{datetime_var}|{datetime_var_format}"
+
+        if cache_key in data['time_cache']:
+            time_column = np.array(data['time_cache'][cache_key])
+        else:
+            time_column = DataOps.reformat_datetime_column(
+                dataset_name, datetime_var, datetime_var_format
+            )
+            data['time_cache'][cache_key] = time_column.astype(str).tolist()
+
+        # Convert to datetime64, safely handling NaNs or invalid entries
+        try:
+            time_column = np.array(time_column, dtype='datetime64[ns]')
+        except Exception:
+            # If conversion fails (e.g. mixed formats), fall back to pandas
+            import pandas as pd
+            time_column = pd.to_datetime(time_column, errors='coerce').to_numpy()
+
+        # Apply mask if date range provided
+        mask = ~np.isnat(time_column)  # Exclude NaT values
+
+        if start_date and end_date:
+            start = np.datetime64(start_date)
+            end = np.datetime64(end_date)
+            mask &= (time_column >= start) & (time_column <= end)
+
 
         fig, channel_names = data_flagging_utils.create_loaded_file_figure(
-            path_to_file, instFolderName, dataset_name, datetime_var, datetime_var_format, variableList
+            path_to_file, instFolderName, dataset_name, time_column, variableList, mask=mask
         )
         data['channel_names'] = channel_names
+
     except Exception as e:
-        print(f'While processing file {path_to_file}, we got the following exception {e}.')
+        print(f'Error while processing file {path_to_file}: {e}')
     finally:
         DataOps.unload_file_obj()
+
     return fig, data
+
 
 
 """@app.callback(
