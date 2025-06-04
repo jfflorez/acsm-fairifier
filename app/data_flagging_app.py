@@ -722,13 +722,23 @@ def visualize_flag_on_figure(active_cell, value, figure, data):
 def visualize_flags_on_table(n_clicks,value,memoryData):
 
     
-    instFolder = memoryData.get('instfolder', '')
-    filePath = memoryData.get('path_to_uploaded_file', '')
-    
+    instFolder = memoryData.get('instFolder', '')
+    filePath = memoryData.get('path_to_uploaded_file', None)
+
+   
     #flagfolderpath = os.path.join(os.path.splitext(memoryData['path_to_uploaded_file'])[0],f'{instfolder}_flags')
 
     if not filePath:
         return dash.no_update
+
+    # Modified version (appending "_flags" to the first folder)
+    flagFolder = instFolder.split('/')
+    flagFolder[0] = f"{flagFolder[0]}_flags"  # Modify first folder
+    flagFolder = '/'.join(flagFolder)
+
+    # Remove .h5 ext from filepath and define expected flag folder
+    flagfolderpath = os.path.join(os.path.splitext(filePath)[0], flagFolder)
+    flagfolderpath = os.path.normpath(flagfolderpath)
     
 
 
@@ -744,7 +754,7 @@ def visualize_flags_on_table(n_clicks,value,memoryData):
 
     if n_clicks > 0 and vis_enabled: # and len(files) > 0:
 
-        tableData = data_flagging_utils.load_flags(filePath, instFolder)
+        tableData = data_flagging_utils.load_flags(flagfolderpath)
 
         if not tableData:
             return dash.no_update    

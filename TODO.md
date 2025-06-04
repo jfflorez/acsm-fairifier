@@ -1,5 +1,4 @@
 # TODO
-* [from Leïla] Data Flagging App. Correct error when flags are loaded in the app.
 * [from Leïla] Before Step 5. The file should contain only data of the current year.
 * [from Leïla] Ebas converter. Change "9999.999" to "9999999.9999" in header
 * [from Leïla] Ebas converter. Update Detection limit values in L2 header: take the ones (1h) from limits_of_detection.yaml
