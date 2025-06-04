@@ -19,8 +19,8 @@ For Windows users, the following are required:
 Open **Git Bash** and run:
 
 ```bash
-cd GitLab
-git clone --recurse-submodules https://gitlab.psi.ch/apog/acsmnode.git
+cd Gitea
+git clone --recurse-submodules https://gitea.psi.ch/apog/acsmnode.git
 cd acsmnode
 ```
 
@@ -38,7 +38,7 @@ cd acsmnode
    - Ensure the file is excluded from version control by adding .env to your .gitignore and .dockerignore files.
 4. Open **Docker Desktop**, then build the container image:
    ```bash
-   docker build -t datachain_processor .
+   docker build -f Dockerfile.acsmchain -t datachain_processor .
    ```
 5. Run the app:
    ```bash
