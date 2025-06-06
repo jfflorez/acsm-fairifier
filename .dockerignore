@@ -1,4 +1,9 @@
-data/
+data
+#notebooks
+.renku
+.git
+
+# Below my dockerignore lines. Hopefully there is no conflict with renku init.
 figures/
 pipelines/params/
 envs/
