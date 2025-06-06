@@ -1,0 +1,184 @@
+name: workflow_acsm_data_PAY_2024
+steps:
+  update_datachain_params:
+    command: python $script_py $campaign_data_h5 $instrument_folder
+    inputs:
+    - script_py:
+        path: pipelines/steps/update_datachain_params.py
+    - campaign_data_h5:
+        path: data/collection_PAY_2024_2025-06-06_2025-06-06.h5
+    - in_1:
+        path: data/collection_PAY_2024_2025-06-06_2025-06-06/ACSM_TOFWARE/2024/params/calibration_params.yaml
+        implicit: true
+    - in_2:
+        path: data/collection_PAY_2024_2025-06-06_2025-06-06/ACSM_TOFWARE/2024/params/limits_of_detection.yaml
+        implicit: true
+    - in_3:
+        path: data/collection_PAY_2024_2025-06-06_2025-06-06/ACSM_TOFWARE/2024/params/validity_thresholds.yaml
+        implicit: true
+    outputs:
+    - out_1:
+        path: pipelines/params/calibration_params.yaml
+        implicit: true
+    - out_2:
+        path: pipelines/params/limits_of_detection.yaml
+        implicit: true
+    - out_3:
+        path: pipelines/params/validity_thresholds.yaml
+        implicit: true
+    parameters:
+    - instrument_folder:
+        value: ACSM_TOFWARE/2024
+  apply_calibration_factors:
+    command: python $script_py $campaign_data_h5 $calib_yaml
+    inputs:
+    - script_py:
+        path: pipelines/steps/apply_calibration_factors.py
+    - campaign_data_h5:
+        path: data/collection_PAY_2024_2025-06-06_2025-06-06.h5
+    - calib_yaml:
+        path: pipelines/params/calibration_factors.yaml
+    - data_descriptor_yaml:
+        path: campaignDescriptor.yaml
+        implicit: true
+    outputs:
+    - out_1:
+        path: data/collection_PAY_2024_2025-06-06_2025-06-06/ACSM_TOFWARE_processed/2024/ACSM_PAY_2024_timeseries_calibrated.csv
+        implicit: true
+    - out_2:
+        path: data/collection_PAY_2024_2025-06-06_2025-06-06/ACSM_TOFWARE_processed/2024/ACSM_PAY_2024_timeseries_calibrated_err.csv
+        implicit: true
+    - out_3:
+        path: data/collection_PAY_2024_2025-06-06_2025-06-06/ACSM_TOFWARE_processed/2024/ACSM_PAY_2024_timeseries_calibration_factors.csv
+        implicit: true
+    parameters: []
+  generate_flags_diagnostics:
+    command: python $script_py $data_file $flag_type
+    inputs:
+    - script_py:
+        path: pipelines/steps/generate_flags.py
+    - data_file:
+        path: data/collection_PAY_2024_2025-06-06_2025-06-06.h5
+    - validity_thresholds_yaml:
+        path: pipelines/params/validity_thresholds.yaml
+        implicit: true
+    outputs:
+    - flags_csv:
+        path: data/collection_PAY_2024_2025-06-06_2025-06-06/ACSM_TOFWARE_flags/2024/ACSM_PAY_2024_meta_flags.csv
+        implicit: true
+    parameters:
+    - flag_type:
+        value: diagnostics
+  generate_flags_species:
+    command: python $script_py $data_file $flag_type
+    inputs:
+    - script_py:
+        path: pipelines/steps/generate_flags.py
+    - data_file:
+        path: data/collection_PAY_2024_2025-06-06_2025-06-06.h5
+    - calibration_params_yaml:
+        path: pipelines/params/calibration_params.yaml
+        implicit: true
+    - flag_in_0:
+        description: automated or cpc flag
+        path: data/collection_PAY_2024_2025-06-06_2025-06-06/ACSM_TOFWARE_flags/2024/ACSM_PAY_2024_meta_flags.csv
+        implicit: true
+    outputs:
+    - flags_csv:
+        path: data/collection_PAY_2024_2025-06-06_2025-06-06/ACSM_TOFWARE_flags/2024/ACSM_PAY_2024_timeseries_flags.csv
+        implicit: true
+    parameters:
+    - flag_type:
+        value: species
+  prepare_ebas_submission:
+    command: python $script_py $in_1 $in_2 $in_3 $in_4 $month_range
+    inputs:
+    - script_py:
+        path: pipelines/steps/prepare_ebas_submission.py
+    - in_1:
+        path: data/collection_PAY_2024_2025-06-06_2025-06-06/ACSM_TOFWARE_processed/2024/ACSM_PAY_2024_timeseries_calibrated.csv
+    - in_2:
+        path: data/collection_PAY_2024_2025-06-06_2025-06-06/ACSM_TOFWARE_processed/2024/ACSM_PAY_2024_timeseries_calibrated_err.csv
+    - in_3:
+        path: data/collection_PAY_2024_2025-06-06_2025-06-06/ACSM_TOFWARE_processed/2024/ACSM_PAY_2024_timeseries_calibration_factors.csv
+    - in_4:
+        path: data/collection_PAY_2024_2025-06-06_2025-06-06/ACSM_TOFWARE_flags/2024/ACSM_PAY_2024_timeseries_flags.csv
+    - lod:
+        path: pipelines/params/"limits_of_detection.yaml
+        implicit: true
+    - station:
+        path: pipelines/params/"station_params.yaml
+        implicit: true
+    outputs:
+    - out_1:
+        path: data/PAY_ACSM-092_2024.txt
+        implicit: true
+    - out_2:
+        path: data/PAY_ACSM-092_FLAGS_2024.txt
+        implicit: true
+    parameters:
+    - month_range:
+        value: 2-3
+  visualize_diagnostic_variables:
+    command: python $script_py $data_file $dataset_name $flags_dataset_name $x_var
+      $y_vars $fig_0_VaporizerTemp_C $fig_1_FlowRate_ccs $fig_2_FilamentEmission_mA
+      $fig_3_ABsamp
+    inputs:
+    - script_py:
+        path: pipelines/steps/visualize_datatable_vars.py
+    - data_file:
+        path: data/collection_PAY_2024_2025-06-06_2025-06-06.h5
+    - alternative_flags_csv:
+        path: data/collection_PAY_2024_2025-06-06_2025-06-06/ACSM_TOFWARE_flags/2024/ACSM_PAY_2024_meta_flags.csv
+        implicit: true
+    outputs:
+    - fig_0_VaporizerTemp_C:
+        path: figures/fig_0_VaporizerTemp_C.html
+    - fig_1_FlowRate_ccs:
+        path: figures/fig_1_FlowRate_ccs.html
+    - fig_2_FilamentEmission_mA:
+        path: figures/fig_2_FilamentEmission_mA.html
+    - fig_3_ABsamp:
+        path: figures/fig_3_ABsamp.html
+    parameters:
+    - dataset_name:
+        value: ACSM_TOFWARE/2024/ACSM_PAY_2024_meta.txt/data_table
+    - flags_dataset_name:
+        value: ACSM_TOFWARE_flags/2024/ACSM_PAY_2024_meta.txt/data_table
+    - x_var:
+        value: t_base
+    - y_vars:
+        value:
+        - VaporizerTemp_C
+        - FlowRate_ccs
+        - FilamentEmission_mA
+        - ABsamp
+  workflow_acsm_data_PAY_2024_step:
+    command: python $script_py $in_1 $in_2 $in_3 $in_4 $month_range
+    inputs:
+    - script_py:
+        path: pipelines/steps/prepare_ebas_submission.py
+    - in_1:
+        path: data/collection_PAY_2024_2025-06-06_2025-06-06/ACSM_TOFWARE_processed/2024/ACSM_PAY_2024_timeseries_calibrated.csv
+    - in_2:
+        path: data/collection_PAY_2024_2025-06-06_2025-06-06/ACSM_TOFWARE_processed/2024/ACSM_PAY_2024_timeseries_calibrated_err.csv
+    - in_3:
+        path: data/collection_PAY_2024_2025-06-06_2025-06-06/ACSM_TOFWARE_processed/2024/ACSM_PAY_2024_timeseries_calibration_factors.csv
+    - in_4:
+        path: data/collection_PAY_2024_2025-06-06_2025-06-06/ACSM_TOFWARE_flags/2024/ACSM_PAY_2024_timeseries_flags.csv
+    - lod:
+        path: pipelines/params/"limits_of_detection.yaml
+        implicit: true
+    - station:
+        path: pipelines/params/"station_params.yaml
+        implicit: true
+    outputs:
+    - out_1:
+        path: data/PAY_ACSM-092_2024.txt
+        implicit: true
+    - out_2:
+        path: data/PAY_ACSM-092_FLAGS_2024.txt
+        implicit: true
+    parameters:
+    - month_range:
+        value: 2-3
