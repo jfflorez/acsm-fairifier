@@ -89,10 +89,26 @@ def sync_yaml_files(src_filepath, dest_filepath):
         with open(dest_filepath, 'w') as dest_file:
             yaml.safe_dump(dest_yaml, dest_file, default_flow_style=False)
         print(f"Synchronized: {os.path.basename(src_filepath)}")
+        return 0
     else:
         print(f"Structures do not match for {os.path.basename(src_filepath)}. Skipping synchronization.")
+        return
 
-def main(path_to_data_file, instrument_folder):
+from workflows.utils import RenkuWorkflowBuilder
+
+def main(path_to_data_file, instrument_folder, capture_renku_metadata = False, workflow_name='parameter_update_workflow'):
+
+    
+
+    inputs =  []
+    outputs = []
+    parameters = []
+    
+    # Collect input and parameters for renku workflow file
+    #inputs.append(('script.py',{'path' : os.path.relpath(__file__, start=os.getcwd())}))
+    inputs.append(('script_py',{'path' : os.path.relpath(__file__, start=projectPath)}))
+    inputs.append(('campaign_data_h5',{'path' : os.path.relpath(path_to_data_file, start=projectPath)}))
+    parameters.append(('instrument_folder', {'value':instrument_folder}))
     
     
     src_folder = os.path.normpath(os.path.join(os.path.splitext(path_to_data_file)[0],instrument_folder))
@@ -115,16 +131,36 @@ def main(path_to_data_file, instrument_folder):
     # Get list of files in source folder.
     # We assume we only need to process .yaml files.
     src_folder = os.path.normpath(os.path.join(src_folder,'params'))
+    cnt = 1
     for filename in os.listdir(src_folder):
         if filename.endswith(".yaml"):
-            src_filepath = os.path.join(src_folder, filename)
-            dest_filepath = os.path.join(dest_folder, filename)
+            src_filepath = os.path.normpath(os.path.join(src_folder, filename))
+            dest_filepath = os.path.normpath(os.path.join(dest_folder, filename))
+
+
 
             # Proceed only if the destination file exists.
             if os.path.exists(dest_filepath):
-                sync_yaml_files(src_filepath, dest_filepath)
+                status = sync_yaml_files(src_filepath, dest_filepath)
             else:
                 print(f"Destination YAML file not found for: {filename}")
+            # If yaml file synchronization successful add input output pair
+            if status==0:
+                inputs.append((f'in_{cnt}',{'path':os.path.relpath(src_filepath, start=projectPath),'implicit': True}))
+                outputs.append((f'out_{cnt}',{'path':os.path.relpath(dest_filepath, start=projectPath),'implicit': True}))
+                cnt += 1
+
+    # ---------------- Start Renku Workflow file generation ------------------------------------------------------------------------ 
+    if capture_renku_metadata:           
+        workflowfile_builder = RenkuWorkflowBuilder(name=workflow_name)
+        workflowfile_builder.add_step(step_name='update_datachain_params',
+                            base_command="python",
+                            inputs=inputs,
+                            outputs=outputs,
+                            parameters = parameters)
+        workflowfile_builder.save_to_file(os.path.join(projectPath,'workflows'))  # Will merge or create workflows/data-pipeline.yaml
+    
+    return 0    
 
 if __name__ == "__main__":
 
@@ -144,5 +180,3 @@ if __name__ == "__main__":
     instrument_folder = args.instrument_folder
 
     main(path_to_data_file, instrument_folder)
-
-

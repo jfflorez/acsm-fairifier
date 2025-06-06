@@ -199,9 +199,22 @@ def apply_calibration_factors(data_table, datetime_var_name, calibration_factors
 
     return calibration_factor_table, new_data_table
 
-
-def main(data_file, calibration_file):
+from workflows.utils import RenkuWorkflowBuilder
+def main(data_file, calibration_file, capture_renku_metadata = False, workflow_name = 'apply_calibration_workflow'):
     """Main function for processing the data with calibration."""
+    #-----------Gather Renku Workflow File Information -------------------------
+    inputs =  []
+    outputs = []
+    parameters = []    
+    # Collect input and parameters for renku workflow file
+    #inputs.append(('script.py',{'path' : os.path.relpath(__file__, start=os.getcwd())}))
+    inputs.append(('script_py',{'path' : os.path.relpath(__file__, start=projectPath)}))
+    inputs.append(('campaign_data_h5',{'path' : os.path.relpath(data_file, start=projectPath)}))
+    inputs.append(('calib_yaml',{'path' : os.path.relpath(calibration_file, start=projectPath)}))
+    inputs.append(('data_descriptor_yaml',{'path' : os.path.relpath(os.path.join(projectPath,'campaignDescriptor.yaml'), start=projectPath),
+                                          'implicit' : True}))
+    # ---------------------------------------------------------------------------
+
     # Load input data and calibration factors
     try:
         print(f"Opening data file: {data_file} using src.hdf5_ops.HDF5DataOpsManager().")
@@ -262,7 +275,7 @@ def main(data_file, calibration_file):
         # Apply calibration factors to input data_table and generate data lineage metadata
         calibration_factor_table, calibrated_table = apply_calibration_factors(data_table, datetime_var, calibration_file)
         calibrated_table_err = generate_error_dataframe(calibrated_table, datetime_var)
-
+        # Define suffix to output table pairs. 
         suffix_to_dataframe_dict = {
             'calibrated.csv': calibrated_table,
             'calibrated_err.csv': calibrated_table_err,
@@ -280,23 +293,38 @@ def main(data_file, calibration_file):
         filename, _ = os.path.splitext(parent_file)
         if not _:
             filename += '.csv'
-
+        cnt = 1
         for suffix, data_table in suffix_to_dataframe_dict.items():
             path_to_output_file = os.path.join(path_to_output_folder, f'{filename}_{suffix}')
             try:
                 data_table.to_csv(path_to_output_file, index=False)
                 print(f"Saved {filename}_{suffix} to {path_to_output_folder}")
+                outputs.append((f'out_{cnt}', {'path' : os.path.relpath(path_to_output_file, start=projectPath),'implicit' : True}))
+                cnt += 1
             except Exception as e:
                 print(f"Failed to save {path_to_output_file} due to: {e}")
-                continue
+                #continue
+                return
 
             # Record data lineage
             metadata['suffix'] = suffix
             stepUtils.record_data_lineage(path_to_output_file, os.getcwd(), metadata)
 
+        # ---------------- Start Renku Workflow file generation ------------------------------------------------------------------------
+        
+        if capture_renku_metadata:
+            workflowfile_builder = RenkuWorkflowBuilder(name=workflow_name)
+            workflowfile_builder.add_step(step_name='apply_calibration_factors',
+                                base_command="python",
+                                inputs=inputs,
+                                outputs=outputs,
+                                parameters=parameters)
+            workflowfile_builder.save_to_file(os.path.join(projectPath,'workflows'))  # Will merge or create workflows/data-pipeline.yaml
+
+        return 0
     except Exception as e:
         print(f"Error during calibration: {e}")
-        exit(1)
+        return
 
 if __name__ == '__main__':
     # Set up argument parsing

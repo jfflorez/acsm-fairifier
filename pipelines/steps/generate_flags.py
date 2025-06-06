@@ -335,9 +335,15 @@ def generate_species_flags(data_table : pd.DataFrame, calib_param_dict : dict, f
 # all_dat[FlowRate_ccs >= flow_lower_lim & FlowRate_ccs <= flow_upper_lim ,flag_flow_auto:="V"]
 # all_dat[FilamentEmission_mA >= filament_lower_lim & FilamentEmission_mA <= filament_upper_lim ,flag_filament_auto:="V"]
 
-def main(data_file, flag_type):
-    # Open data file and load dataset associated with flag_type : either diagnostics or species
+def main(data_file, flag_type, capture_renku_metadata=False, workflow_name='generate_flags_workflow'):
+        
+    inputs = []
+    outputs = []
+    parameters = []
+
+
     try:
+        # Load data and locate relevant dataset
         dataManager = dataOps.HDF5DataOpsManager(data_file)
         dataManager.load_file_obj()
 
@@ -347,28 +353,24 @@ def main(data_file, flag_type):
             print(f'Invalid data file: {data_file}. Missing instrument folder ACSM_TOFWARE.')
             raise ImportError(f'Instrument folder "/ACSM_TOFWARE" not found in data_file : {data_file}')
         
-
-        
         dataManager.extract_and_load_dataset_metadata()
         dataset_metadata_df = dataManager.dataset_metadata_df.copy()
         STATION_ABBR = load_project_yaml_files(projectPath,'campaignDescriptor.yaml')['station_abbr']
-        # Find dataset associated with diagnostic channels
+
+        # Find dataset associated with flag_type
         if flag_type == 'diagnostics':
-           keywords = [f'ACSM_{STATION_ABBR}_','_meta.txt/data_table']
-           find_keyword = [all(keyword in item for keyword in keywords) for item in dataset_metadata_df['dataset_name']]
+            keywords = [f'ACSM_{STATION_ABBR}_','_meta.txt/data_table']
+        elif flag_type == 'species':
+            keywords = [f'ACSM_{STATION_ABBR}_','_timeseries.txt/data_table']
+        elif flag_type == 'cpc':
+            keywords = ['cpc.particle_number_concentration.aerosol.', f'CH02L_TSI_3772_{STATION_ABBR}.CH02L_CPC.lev1.nas']
+        else:
+            raise ValueError(f"Unsupported flag_type: {flag_type}")
 
-        if flag_type == 'species':
-           keywords = [f'ACSM_{STATION_ABBR}_','_timeseries.txt/data_table']
-           find_keyword = [all(keyword in item for keyword in keywords) for item in dataset_metadata_df['dataset_name']]
-
-        if flag_type == 'cpc':
-           keywords = ['cpc.particle_number_concentration.aerosol.', f'CH02L_TSI_3772_{STATION_ABBR}.CH02L_CPC.lev1.nas']
-           find_keyword = [all(keyword in item for keyword in keywords) for item in dataset_metadata_df['dataset_name']]
-
-        # Specify source dataset to be extracted from input hdf5 data file
+        find_keyword = [all(keyword in item for keyword in keywords) for item in dataset_metadata_df['dataset_name']]
         columns = ['dataset_name','parent_file','parent_instrument']
-        dataset_name, parent_file, parent_instrument = tuple(dataset_metadata_df.loc[find_keyword,col] for col in columns) 
-        print(':)')
+        dataset_name, parent_file, parent_instrument = tuple(dataset_metadata_df.loc[find_keyword,col] for col in columns)
+
         if not (dataset_name.size == 1):
             raise ValueError(f'{flag_type} file is not uniquely identifiable: {parent_file}')
         else: 
@@ -376,45 +378,35 @@ def main(data_file, flag_type):
             parent_file = parent_file.values[0]
             parent_instrument = parent_instrument.values[0]
 
+        # Extract data and timestamp
         data_table = dataManager.extract_dataset_as_dataframe(dataset_name)
         datetime_var, datetime_var_format = dataManager.infer_datetime_variable(dataset_name)
-        
+        dataManager.unload_file_obj()
 
-        # Count the number of NaT (null) values
+        # Report missing timestamps
         num_nats = data_table[datetime_var].isna().sum()
-        # Get the total number of rows
         total_rows = len(data_table)
-        # Calculate the percentage of NaT values
         percentage_nats = (num_nats / total_rows) * 100
         print(f"Total rows: {total_rows}")
         print(f"NaT (missing) values: {num_nats}")
         print(f"Percentage of data loss: {percentage_nats:.4f}%")
-        
-        dataManager.unload_file_obj()        
 
-    except Exception as e:        
+    except Exception as e:
         print(f"Error loading input files: {e}")
-        exit(1)
-    finally:
-        dataManager.unload_file_obj() 
-
-
+        return 1
 
     print('Starting flag generation.')
     try:
         path_to_output_dir, ext = os.path.splitext(data_file)
-        print('Path to output directory :', path_to_output_dir)
-        # Define output directory of apply_calibration_factors() step
         suffix = 'flags'
-        if len(parent_instrument.split('/')) >= 2:
-            instFolder = parent_instrument.split('/')[0]
-            category = parent_instrument.split('/')[1]
-        else:
-            instFolder = parent_instrument.split('/')[0]
-            category = ''
 
-        path_to_output_folder, ext = os.path.splitext('/'.join([path_to_output_dir,f'{instFolder}_{suffix}',category]))    
-        processingScriptRelPath = os.path.relpath(thisFilePath,start=projectPath)
+        # Parse folder/category from instrument
+        parts = parent_instrument.split('/')
+        instFolder = parts[0]
+        category = parts[1] if len(parts) >= 2 else ''
+
+        path_to_output_folder = os.path.splitext('/'.join([path_to_output_dir,f'{instFolder}_{suffix}',category]))[0]
+        processingScriptRelPath = os.path.relpath(thisFilePath, start=projectPath)
 
         if not os.path.exists(path_to_output_folder):
             os.makedirs(path_to_output_folder)
@@ -422,47 +414,115 @@ def main(data_file, flag_type):
         print('Processing script:', processingScriptRelPath)
         print('Output directory:', path_to_output_folder)
 
-        # Compute diagnostic flags based on validity thresholds defined in configuration_file_dict
-
+        # Flagging logic
         if flag_type == 'diagnostics':
-            #validity_thresholds_dict = load_parameters(flag_type)
             validity_thresholds_dict = load_project_yaml_files(projectPath, "validity_thresholds.yaml")
-            flags_table = generate_diagnostic_flags(data_table, validity_thresholds_dict)           
-
-        if flag_type == 'species':  
-            #calib_param_dict = load_parameters(flag_type)     
-            calib_param_dict = load_project_yaml_files(projectPath, "calibration_params.yaml")     
-            flags_table = generate_species_flags(data_table,calib_param_dict,path_to_output_folder,datetime_var)
-        if flag_type == 'cpc':    
-            print(':D')
+            flags_table = generate_diagnostic_flags(data_table, validity_thresholds_dict)
+        elif flag_type == 'species':  
+            calib_param_dict = load_project_yaml_files(projectPath, "calibration_params.yaml")
+            flags_table = generate_species_flags(data_table, calib_param_dict, path_to_output_folder, datetime_var)
+        elif flag_type == 'cpc':    
             flags_table = generate_cpc_flags(data_table, datetime_var)
-                
-        metadata = {'actris_level' : 1, 
+
+        # Metadata for lineage
+        metadata = {
+            'actris_level' : 1, 
             'processing_script': processingScriptRelPath.replace(os.sep,'/'),
             'processing_date' : utils.created_at(),
             'flag_type' : flag_type,
             'datetime_var': datetime_var
-            } 
-        
-        # Save output tables to csv file and save/or update data lineage record
+        }
+
         filename, ext = os.path.splitext(parent_file)
         path_to_flags_file = '/'.join([path_to_output_folder, f'{filename}_flags.csv'])
-        #path_to_calibration_factors_file = '/'.join([path_to_output_folder, f'{filename}_calibration_factors.csv'])
-        
-        flags_table.to_csv(path_to_flags_file, index=False)        
+
+        # Save output and record lineage
+        flags_table.to_csv(path_to_flags_file, index=False)
         status = stepUtils.record_data_lineage(path_to_flags_file, projectPath, metadata)
 
         print(f"Flags saved to {path_to_flags_file}")
         print(f"Data lineage saved to {path_to_output_folder}")
-        
-        #flags_table.to_csv(path_to_flags_file, index=False)
-
-
-                    # Read json and assign numeric flag to column
 
     except Exception as e:
-        print(f"Error during calibration: {e}")
-        exit(1)
+        print(f"Error during flag generation: {e}")
+        return 1
+
+    # --------------------- Renku Metadata Collection ----------------------------
+    if capture_renku_metadata:
+        from workflows.utils import RenkuWorkflowBuilder
+
+        inputs.append(("script_py", {'path': os.path.relpath(thisFilePath, start=projectPath)}))
+        inputs.append(("data_file", {'path': os.path.relpath(data_file, start=projectPath)}))
+
+        # Parameter
+        parameters.append(("flag_type", {'value': flag_type}))
+
+        # Add implicit YAML config
+        if flag_type == 'diagnostics':
+            inputs.append(("validity_thresholds_yaml", {
+                'path': os.path.relpath(os.path.join(projectPath, "pipelines/params/validity_thresholds.yaml"), start=projectPath),
+                'implicit': True
+            }))
+
+        elif flag_type == 'species':
+            inputs.append(("calibration_params_yaml", {
+                'path': os.path.relpath(os.path.join(projectPath, "pipelines/params/calibration_params.yaml"), start=projectPath),
+                'implicit': True
+            }))
+
+            # Add CSV and JSON flags from flags folder as implicit inputs
+
+            flag_index = 0
+            for fname in os.listdir(path_to_output_folder):
+                full_path = os.path.join(path_to_output_folder, fname)
+
+                # Skip the output file to avoid circular dependency
+                if os.path.abspath(full_path) == os.path.abspath(path_to_flags_file):
+                    continue
+
+                rel_flag_path = os.path.relpath(full_path, start=projectPath)
+
+                if fname.endswith('.csv') or (fname.endswith('.json') and 'metadata' not in fname):
+                    inputs.append((f"flag_in_{flag_index}", {
+                        'description': 'manual flag by domain expert' if fname.endswith('.json') else 'automated or cpc flag',
+                        'path': rel_flag_path,
+                        'implicit': True
+                        
+                    }))
+                    flag_index += 1
+
+        #elif flag_type == 'cpc':
+            # CPC may require logic like species if any dependencies are found
+        #    for fname in os.listdir(path_to_output_folder):
+        #        rel_flag_path = os.path.relpath(os.path.join(path_to_output_folder, fname), start=projectPath)
+        #        if fname.endswith('.nas') and ('cpc' in fname):
+        #            inputs.append((f"flag_{fname}", {
+        #                'path': rel_flag_path,
+        #                'implicit': True
+        #            }))
+
+        # Output
+        outputs.append(("flags_csv", {
+            'path': os.path.relpath(path_to_flags_file, start=projectPath),
+            'implicit': True
+        }))
+
+        # Define workflow step
+        workflowfile_builder = RenkuWorkflowBuilder(name=workflow_name)
+        workflowfile_builder.add_step(
+            step_name=f"generate_flags_{flag_type}",
+            base_command="python",
+            inputs=inputs,
+            outputs=outputs,
+            parameters=parameters
+        )
+        workflowfile_builder.save_to_file(os.path.join(projectPath, 'workflows'))
+
+
+    return 0
+
+
+
 
 
 def get_flags_from_folder(flagsFolderPath):
