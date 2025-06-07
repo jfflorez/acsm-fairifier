@@ -32,6 +32,7 @@ fi
 echo "Installing additional pip packages..."
 pip install pybis==1.35 igor2 ipykernel sphinx
 pip install dash dash-bootstrap-components
+pip install graphviz
 
 # Check if pip installations were successful
 if [ $? -ne 0 ]; then

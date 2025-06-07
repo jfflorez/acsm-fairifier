@@ -39,6 +39,7 @@ RUN conda run -n $ENV_NAME pip install -r /acsmdc/requirements.txt
 VOLUME ["/acsmdc/data", "/acsmdc/figures", "/acsmdc/pipelines/params"]
 
 # Add JupyterLab
+RUN pip install graphviz
 RUN pip install --no-cache-dir jupyterlab
 #RUN pip install pipx
 #RUN pipx install renku
