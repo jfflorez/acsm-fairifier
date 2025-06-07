@@ -239,7 +239,7 @@ def main(paths_to_processed_files : list, path_to_flags : str, month : str = Non
 
         workflowfile_builder = RenkuWorkflowBuilder(name=workflow_name)
         workflowfile_builder.add_step(
-            step_name=f"{workflow_name}_step",
+            step_name=f"prepare_ebas_submission",
             base_command="python",
             inputs=inputs,
             outputs=outputs,

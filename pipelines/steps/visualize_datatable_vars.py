@@ -24,7 +24,7 @@ import plotly.graph_objects as go
 def visualize_table_variables(data_file_path, dataset_name, flags_dataset_name, x_var, y_vars,
                               yaxis_range_dict={'FlowRate_ccs': [0, 100]},
                               capture_renku_metadata=False,
-                              workflow_name="visualize_table_variables"):
+                              workflow_name="visualize_flagged_variables"):
 
     if not os.path.exists(data_file_path):
         raise ValueError(f"Path to input file {data_file_path} does not exists. The parameter 'data_file_path' must be a valid path to a suitable HDF5 file. ")

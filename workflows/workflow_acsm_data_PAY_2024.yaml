@@ -119,7 +119,7 @@ steps:
     parameters:
     - month_range:
         value: 2-3
-  visualize_diagnostic_variables:
+  visualize_flagged_variables:
     command: python $script_py $data_file $dataset_name $flags_dataset_name $x_var
       $y_vars $fig_0_VaporizerTemp_C $fig_1_FlowRate_ccs $fig_2_FilamentEmission_mA
       $fig_3_ABsamp
@@ -153,32 +153,4 @@ steps:
         - FlowRate_ccs
         - FilamentEmission_mA
         - ABsamp
-  workflow_acsm_data_PAY_2024_step:
-    command: python $script_py $in_1 $in_2 $in_3 $in_4 $month_range
-    inputs:
-    - script_py:
-        path: pipelines/steps/prepare_ebas_submission.py
-    - in_1:
-        path: data/collection_PAY_2024_2025-06-06_2025-06-06/ACSM_TOFWARE_processed/2024/ACSM_PAY_2024_timeseries_calibrated.csv
-    - in_2:
-        path: data/collection_PAY_2024_2025-06-06_2025-06-06/ACSM_TOFWARE_processed/2024/ACSM_PAY_2024_timeseries_calibrated_err.csv
-    - in_3:
-        path: data/collection_PAY_2024_2025-06-06_2025-06-06/ACSM_TOFWARE_processed/2024/ACSM_PAY_2024_timeseries_calibration_factors.csv
-    - in_4:
-        path: data/collection_PAY_2024_2025-06-06_2025-06-06/ACSM_TOFWARE_flags/2024/ACSM_PAY_2024_timeseries_flags.csv
-    - lod:
-        path: pipelines/params/"limits_of_detection.yaml
-        implicit: true
-    - station:
-        path: pipelines/params/"station_params.yaml
-        implicit: true
-    outputs:
-    - out_1:
-        path: data/PAY_ACSM-092_2024.txt
-        implicit: true
-    - out_2:
-        path: data/PAY_ACSM-092_FLAGS_2024.txt
-        implicit: true
-    parameters:
-    - month_range:
-        value: 2-3
+  
