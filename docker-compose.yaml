@@ -1,7 +1,6 @@
 services:
-  datachain_processor:
+  datachain_processor_networked:
     image: datachain_processor
-    container_name: datachain_processor
     restart: unless-stopped
     environment:
       - DOCKER_CONTAINER=1
@@ -18,6 +17,28 @@ services:
       jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token='my-token' & 
       python /acsmdc/app/data_flagging_app.py
       " 
+    profiles:
+      - networked
+
+  datachain_processor:
+    image: datachain_processor
+    restart: unless-stopped
+    environment:
+      - DOCKER_CONTAINER=1
+    ports:
+      - "8889:8888"
+      - "8050:8050"
+    volumes:
+      - ./data:/acsmdc/data
+      - ./figures:/acsmdc/figures
+      - ./pipelines/params:/acsmdc/pipelines/params
+    command: >
+      bash -c "
+      jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token='my-token' & 
+      python /acsmdc/app/data_flagging_app.py
+      "
+    profiles:
+      - local-only
 
 volumes:
   lac_ord:
