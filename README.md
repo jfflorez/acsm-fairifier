@@ -23,7 +23,7 @@
 - **Self-describing HDF5 files**, including:
   - Project-level, contextual, and data lineage metadata  
   - Intermediate and final processed datasets  
-- **YAML workflow file**, automatically generated in [Renku format](https://renku.readthedocs.io/en/latest/user/reference/yaml.html),  
+- **YAML workflow file**, automatically generated in [Renku format](https://renku.readthedocs.io/en/stable/topic-guides/workflows/workflow-file.html),  
   recording the **prospective provenance** of the data processing chain (i.e., planned steps, parameters, and dependencies)
 
 ---
