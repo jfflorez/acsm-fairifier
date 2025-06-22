@@ -10,6 +10,10 @@ ENV ENV_NAME=apog_penv
 WORKDIR /acsmdc
 
 #RUN apt-get update && apt-get install -y cifs-utils
+# Install Graphviz system binaries
+RUN apt-get update && apt-get install -y \
+    graphviz \
+    && rm -rf /var/lib/apt/lists/*
 
 # Use mamba if available for faster installation
 RUN conda install -y -n base -c conda-forge mamba && \
