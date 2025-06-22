@@ -1,7 +1,23 @@
-#input_file_directory: '/mnt/network_mount/Data/PAY/'
+
+# ------------------------------------------------------------------------------
+# Configuration for FAIR Data Integration Pipeline
+# ------------------------------------------------------------------------------
+
+# INPUT DATA DIRECTORY
+# Can be a local or network path. Examples:
+#   - Local: '../data/data_folder/' # All paths must be relative to folder ../data/
+#   - Network: /mnt/network_drive/data_folder or equivalently  ${NETWORK_MOUNT}/data_folder 
 input_file_directory: '${NETWORK_MOUNT}/Data/JFJ/'
+
+# OUTPUT DATA DIRECTORY
+# Always relative to notebook location. If run from `notebooks/`,
+# output will be saved in `../data/`.
+# Do not modify unless you're running from the project root.
 output_file_directory: '../data/'
 
+# ------------------------------------------------------------------------------
+# Project Metadata
+# ------------------------------------------------------------------------------
 project: 'Building FAIR data chains for atmospheric observations in the ACTRIS Switzerland Network'  
 contact: 'LeilaS'
 group_id: '5502' # APOG
@@ -11,14 +27,28 @@ dataset_startdate:
 dataset_enddate: 
 actris_level: '1'
 
-# Define an (output) filename format of a resulting hdf5 file
+# ------------------------------------------------------------------------------
+# Output File Naming Convention (Optional)
+# ------------------------------------------------------------------------------
 station_abbr : 'JFJ' # Set this value as either "JFJ" or "PAY"
 year : '2024'
+
+# Format string used to define output filenames.
+# You may use any field from this config as a part, comma-separated.
+# Example: 'experiment, year' → experiment_year.h5
 instrument_name : 'ACSM-017' #'ACSM-092' 
 filename_format : "station_abbr, year"
 
+# ------------------------------------------------------------------------------
+# Instrument Data Source
+# ------------------------------------------------------------------------------
+
 instrument_datafolder: 
   - "ACSM_TOFWARE/2024"
+
+# ------------------------------------------------------------------------------
+# Data Integration Options
+# ------------------------------------------------------------------------------
 
 integration_mode: 'collection'
 # Specify datetimes (YYYY-MM-DD HH-MM-SS) at which experimental steps were created. 
