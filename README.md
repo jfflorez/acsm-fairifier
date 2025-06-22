@@ -125,7 +125,7 @@ This toolkit includes a containerized JupyterLab environment for executing the d
   docker compose up datachain_processor_networked
 
 6. Access:
-   - **Jupyter Lab**: [http://localhost:8889/lab/tree/notebooks/](http://localhost:8889/lab/tree/notebooks/)
+   - **Jupyter Lab**: [http://localhost:8889/lab/](http://localhost:8889/lab/)
 
 7. Stop the app:
    In the previously open PowerShell terminal, enter:
