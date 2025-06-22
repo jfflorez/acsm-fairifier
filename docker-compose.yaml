@@ -11,7 +11,7 @@ services:
       - ./data:/acsmdc/data
       - ./figures:/acsmdc/figures
       - ./pipelines/params:/acsmdc/pipelines/params
-      - lac_ord:/mnt/network/lac_ord:rw
+      - network_mount:/mnt/network/network_mount:rw
     command: >
       bash -c "
       jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token='my-token' & 
@@ -41,8 +41,8 @@ services:
       - local-only
 
 volumes:
-  lac_ord:
+  network_mount:
     driver_opts:
       type: cifs
       o: "username=${CIFS_USER},password=${CIFS_PASS},vers=3.0"
-      device: "//fs00/LAC_ORD"
+      device: "${NETWORK_MOUNT}"
