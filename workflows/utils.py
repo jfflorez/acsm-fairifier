@@ -189,7 +189,7 @@ def plot_workflow_graph(yaml_file_path,
     os.makedirs(output_dir, exist_ok=True)
     output_path = os.path.join(output_dir, output_name)
     dot.render(output_path)
-    dot.view()
+    #dot.view()
 
     # For SVG or PDF, you may want to return the file path or raw output instead of Image()
     if output_format.lower() in ['png', 'jpg', 'jpeg', 'gif']:
