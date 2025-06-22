@@ -4,6 +4,7 @@ services:
     restart: unless-stopped
     environment:
       - DOCKER_CONTAINER=1
+      - NETWORK_MOUNT=/mnt/network_mount
     ports:
       - "8889:8888"
       - "8050:8050"
@@ -11,7 +12,7 @@ services:
       - ./data:/acsmdc/data
       - ./figures:/acsmdc/figures
       - ./pipelines/params:/acsmdc/pipelines/params
-      - network_mount:/mnt/network/network_mount:rw
+      - network_mount:/mnt/network_mount:rw
     command: >
       bash -c "
       jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token='my-token' & 
@@ -25,6 +26,7 @@ services:
     restart: unless-stopped
     environment:
       - DOCKER_CONTAINER=1
+      - NETWORK_MOUNT=/acsmdc/data
     ports:
       - "8889:8888"
       - "8050:8050"
