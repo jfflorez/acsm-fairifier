@@ -102,7 +102,8 @@ This toolkit includes a containerized JupyterLab environment for executing the d
 3. **Securely store your network drive access credentials** in the `.env` file by adding the following lines: 
    ```plaintext
    CIFS_USER=<your-username>
-   CIFS_PASS=<your-password>
+   CIFS_PASS=<your-password>   
+   NETWORK_MOUNT=//your-server/your-share
    ```
    **To protect your credentials:**
    - Do not share the .env file with others.
