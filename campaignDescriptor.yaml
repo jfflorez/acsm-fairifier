@@ -5,9 +5,9 @@
 
 # INPUT DATA DIRECTORY
 # Can be a local or network path. Examples:
-#   - Local: '../data/data_folder/' # All paths must be relative to folder ../data/
-#   - Network: /mnt/network_drive/data_folder or equivalently  ${NETWORK_MOUNT}/data_folder 
-input_file_directory: '${NETWORK_MOUNT}/Data/JFJ/'
+#   - Local: '../data/data_folder/' on Docker # All paths must be relative to folder ../data/
+#   - Network: /mnt/network_mount/data_folder (on Docker) or equivalently  ${NETWORK_MOUNT}/data_folder on Local PC 
+input_file_directory: '/mnt/network_mount/Data/JFJ/'
 
 # OUTPUT DATA DIRECTORY
 # Always relative to notebook location. If run from `notebooks/`,
