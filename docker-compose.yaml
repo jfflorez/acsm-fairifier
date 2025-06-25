@@ -9,9 +9,10 @@ services:
       - "8889:8888"
       - "8050:8050"
     volumes:
-      - ./data:/acsmdc/data
-      - ./figures:/acsmdc/figures
-      - ./pipelines/params:/acsmdc/pipelines/params
+      #- ./data:/acsmdc/data
+      #- ./figures:/acsmdc/figures
+      #- ./pipelines/params:/acsmdc/pipelines/params
+      - ./:/acsmdc
       - network_mount:/mnt/network_mount:rw
     command: >
       bash -c "
@@ -31,9 +32,10 @@ services:
       - "8889:8888"
       - "8050:8050"
     volumes:
-      - ./data:/acsmdc/data
-      - ./figures:/acsmdc/figures
-      - ./pipelines/params:/acsmdc/pipelines/params
+    - ./:/acsmdc
+      #- ./data:/acsmdc/data
+      #- ./figures:/acsmdc/figures
+      #- ./pipelines/params:/acsmdc/pipelines/params
     command: >
       bash -c "
       jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token='my-token' & 
