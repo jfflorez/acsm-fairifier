@@ -1,6 +1,6 @@
 # Get additional info about the Dockerfile at https://docs.docker.com/reference/dockerfile/ 
 
-FROM continuumio/miniconda3:latest
+FROM condaforge/miniforge3:latest
 
 # Define the name of the environment
 ARG ENV_NAME=apog_penv
