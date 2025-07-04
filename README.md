@@ -113,16 +113,16 @@ Open **Git Bash** and run:
 
 ```bash
 cd Gitea
-git clone --recurse-submodules https://gitea.psi.ch/apog/acsmnode.git
-cd acsmnode
+git clone --recurse-submodules https://gitea.psi.ch/apog/acsm-fairifier.git
+cd acsm-fairifier
 ```
 
 ## Run the ACSM FAIRifier Toolkit
 
 This toolkit includes a containerized JupyterLab environment for executing the data processing pipeline, plus an optional dashboard for manual flagging.
 
-1. Open **PowerShell as Administrator** and navigate to the `acsmnode` repository.  
-2. Create a `.env` file in the root of `acsmnode/`.  
+1. Open **PowerShell as Administrator** and navigate to the `acsm-fairifier` repository.  
+2. Create a `.env` file in the root of `acsm-fairifier/`.  
 3. **Securely store your network drive access credentials** in the `.env` file by adding the following lines: 
    ```plaintext
    CIFS_USER=<your-username>
@@ -175,12 +175,8 @@ We recommend using Miniforge to manage your conda environments. Miniforge ensure
 2. Create the Environment from `environment.yml`
 After installing Miniforge, open **Miniforge Prompt** or a terminal with access to conda and run:
    ```bash
-   cd path/to/Gitea/acsmnode
+   cd path/to/Gitea/acsm-fairifier
    conda env create --file environment.yml
-   ```
-3. Activate the Environment
-   ```bash
-   conda activate acsmnode_env
    ```
 
 ### Working with Jupyter Notebooks
