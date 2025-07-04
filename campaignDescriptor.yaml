@@ -1,13 +1,19 @@
 
 # ------------------------------------------------------------------------------
-# Configuration for FAIR Data Integration Pipeline
+# Configuration for ACSM Data Integration Pipeline
 # ------------------------------------------------------------------------------
 
 # INPUT DATA DIRECTORY
-# Can be a local or network path. Examples:
-#   - Local: '../data/data_folder/' on Docker # All paths must be relative to folder ../data/
-#   - Network: /mnt/network_mount/data_folder (on Docker) or equivalently  ${NETWORK_MOUNT}/data_folder on Local PC 
-input_file_directory: '/mnt/network_mount/Data/JFJ/'
+# Defines the location of input data files for the pipeline.
+# The example below uses a network-mounted path for the JFJ station.
+# Path format depends on your environment:
+# - In Docker: use a network path (e.g. '/mnt/network_mount/Data/<station>/')
+#   or a relative path with respect to the pipeline's working directory
+#   (e.g. '../data/<your_folder>/').
+# - On a local PC: use '${NETWORK_MOUNT}/Data/<station>/' for network paths,
+#   or a relative path as above.
+input_file_directory: '/mnt/network_mount/Data/JFJ/' # In Docker
+#input_file_directory: '${NETWORK_MOUNT}/Data/JFJ' # Local PC
 
 # OUTPUT DATA DIRECTORY
 # Always relative to notebook location. If run from `notebooks/`,
