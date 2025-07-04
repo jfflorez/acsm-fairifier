@@ -1,0 +1,22 @@
+name: acsmnode_env
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - jupyter
+  - numpy
+  - h5py
+  - pandas
+  - matplotlib
+  - plotly=5.24
+  - scipy
+  - sphinx 
+  - pip
+  - pip:
+#      - h5py==3.10
+      - pybis==1.35
+      - igor2
+      - ipykernel
+      - dash
+      - dash-bootstrap-components
+      - graphviz

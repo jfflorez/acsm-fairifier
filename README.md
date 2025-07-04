@@ -17,6 +17,30 @@
 
 ---
 
+### Input Format
+
+The ACSM data integration pipeline reads data from an **input directory** and an **instrument folder** specified in the `campaignDescriptor.yaml` file with key-value pairs as follows:
+
+```yaml
+input_file_directory : NETWORK_MOUNT/Data/JFJ/
+instrument_datafolder: ACSM_TOFWARE/2024/
+```
+Make sure the combined path contains the following structure and files:
+
+```swift
+NETWORK_MOUNT/Data/JFJ/ACSM_TOFWARE/2024/
+├── ACSM_JFJ_2024_meta.txt
+├── ACSM_JFJ_2024_timeseries.txt
+├── CH0001G.20240101000000...lev1.nas
+├── Org_data_valid.csv
+├── Org_err_valid.csv
+├── Org_mz_valid.csv
+├── Org_time_valid.csv
+└── params/
+    ├── calibration_params.yaml
+    ├── limits_of_detection.yaml
+    └── validity_thresholds.yaml
+```
 ### Output Formats
 
 - **NAS EBAS-compliant files**, structured and metadata-rich for archive submission  
@@ -79,7 +103,7 @@ For Windows users, the following are required:
 
 2. **Git Bash**: Used to run shell scripts (`.sh` files).
 
-3. **Conda (Optional)**: Required only if you plan to run the toolkit **outside of Docker**. You can install [Anaconda](https://www.anaconda.com/products/distribution) or [Miniconda](https://docs.conda.io/en/latest/miniconda.html).  
+3. **Miniforge (Optional)**: Install [Miniforge](https://conda-forge.org/download/). Required only if you plan to run the toolkit **outside of Docker**.
 
 4. **PSI Network Access** *(for data retrieval)*: Needed only if accessing live data from a PSI network-mounted drive.
 
@@ -142,11 +166,40 @@ This toolkit includes a containerized JupyterLab environment for executing the d
 
    > Required only if you plan to run the toolkit outside of Docker
 
-If **Git Bash** lacks a suitable Python interpreter, run:
+### Install Python Environment Using Miniforge and conda-forge
 
-```bash
-   bash env_setup.sh
-```
+We recommend using Miniforge to manage your conda environments. Miniforge ensures compatibility with packages from the conda-forge channel.
+
+1. Make sure you have installed **Miniforge**. 
+
+2. Create the Environment from `environment.yml`
+After installing Miniforge, open **Miniforge Prompt** or a terminal with access to conda and run:
+   ```bash
+   cd path/to/Gitea/acsmnode
+   conda env create --file environment.yml
+   ```
+3. Activate the Environment
+   ```bash
+   conda activate acsmnode_env
+   ```
+
+### Working with Jupyter Notebooks
+We now make the previously installed Python environment `acsmnode_env` selectable as a kernel in Jupyter's interface.
+
+1. Open an **Miniforge Prompt**, check if the environment exists, and activate it:
+    ```
+    conda env list
+    conda activate acsmnode_env
+    ```
+2. Register the environment in Jupyter:
+    ```
+    python -m ipykernel install --user --name acsmnode_env --display-name "Python (acsmnode_env)"  
+    ```
+3. Start a Jupyter Notebook by running the command:
+    ```
+    jupyter notebook
+    ```
+  and select the `acsmnode_env` environment from the kernel options.
 
 
 ## (Optional) Run the Dashboard App
