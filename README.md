@@ -103,7 +103,9 @@ For Windows users, the following are required:
 
 2. **Git Bash**: Used to run shell scripts (`.sh` files).
 
-3. **Miniforge (Optional)**: Install [Miniforge](https://conda-forge.org/download/). Required only if you plan to run the toolkit **outside of Docker**.
+3. **Miniforge (Optional)**: Install [Miniforge](https://conda-forge.org/download/). Required only if you plan to run the toolkit **outside of Docker**.¨
+
+4. **Graphviz (for workflow visualizations)** : Install [Graphviz for Windows](https://graphviz.gitlab.io/_pages/Download/Download_windows.html). Needed to render workflow `.yaml` files as graphs. After installation, add the `Graphviz/bin` folder (e.g. `C:\Program Files\Graphviz\bin`) to your system **PATH**.
 
 4. **PSI Network Access** *(for data retrieval)*: Needed only if accessing live data from a PSI network-mounted drive.
 
