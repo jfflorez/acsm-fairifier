@@ -199,8 +199,7 @@ def apply_calibration_factors(data_table, datetime_var_name, calibration_factors
 
     return calibration_factor_table, new_data_table
 
-from workflows.utils import RenkuWorkflowBuilder
-def main(data_file, calibration_file, capture_renku_metadata = False, workflow_name = 'apply_calibration_workflow'):
+def main(data_file, calibration_file):#, capture_renku_metadata = False, workflow_name = 'apply_calibration_workflow'):
     """Main function for processing the data with calibration."""
     #-----------Gather Renku Workflow File Information -------------------------
     inputs =  []
@@ -312,16 +311,21 @@ def main(data_file, calibration_file, capture_renku_metadata = False, workflow_n
 
         # ---------------- Start Renku Workflow file generation ------------------------------------------------------------------------
         
-        if capture_renku_metadata:
-            workflowfile_builder = RenkuWorkflowBuilder(name=workflow_name)
-            workflowfile_builder.add_step(step_name='apply_calibration_factors',
-                                base_command="python",
-                                inputs=inputs,
-                                outputs=outputs,
-                                parameters=parameters)
-            workflowfile_builder.save_to_file(os.path.join(projectPath,'workflows'))  # Will merge or create workflows/data-pipeline.yaml
+        #if capture_renku_metadata:
+        #    workflowfile_builder = RenkuWorkflowBuilder(name=workflow_name)
+        #    workflowfile_builder.add_step(step_name='apply_calibration_factors',
+        #                        base_command="python",
+        #                        inputs=inputs,
+        #                        outputs=outputs,
+        #                        parameters=parameters)
+        #    workflowfile_builder.save_to_file(os.path.join(projectPath,'workflows'))  # Will merge or create workflows/data-pipeline.yaml
 
-        return 0
+        return {
+                'status' : 'success',
+                'inputs' : inputs,
+                'outputs': outputs, 
+                'parameters': parameters
+                }    
     except Exception as e:
         print(f"Error during calibration: {e}")
         return
@@ -338,7 +342,14 @@ if __name__ == '__main__':
     if not any(item in args.calibration_file for item in ['.yaml', '.yml']):
         raise TypeError(f"Invalid file type. Calibration file {args.calibration_file} needs to be a valid YAML file.")
 
-    main(args.data_file, args.calibration_file)
+    result = main(args.data_file, args.calibration_file)
+
+    # Validate the result dict and exit appropriately
+    if result.get('status') == 'success':
+        sys.exit(0)
+    else:
+        print(f"Pipeline failed: {result.get('error', 'Unknown error')}")
+        sys.exit(1)
 
 
     

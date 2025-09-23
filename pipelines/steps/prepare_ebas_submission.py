@@ -102,7 +102,7 @@ def parse_months(month_str: str) -> list:
     return sorted(months)
 
 
-def main(paths_to_processed_files : list, path_to_flags : str, month : str = None, capture_renku_metadata: bool = False, workflow_name: str = "ebas_submission_worflow"):
+def main(paths_to_processed_files : list, path_to_flags : str, month : str = None): #, capture_renku_metadata: bool = False, workflow_name: str = "ebas_submission_worflow"):
     
     
     inputs = []
@@ -220,34 +220,26 @@ def main(paths_to_processed_files : list, path_to_flags : str, month : str = Non
     app.process(infile, acq_err_log, outdir=outdir)
 
     # ------------------- Renku Metadata Collection ------------------------
-    if capture_renku_metadata:
 
-        from workflows.utils import RenkuWorkflowBuilder
+    inputs.append(("script_py", {'path': os.path.relpath(thisFilePath, start=projectPath)}))
+    for idx, path in enumerate(paths_to_processed_files + [path_to_flags]):
+        inputs.append((f"in_{idx+1}", {'path': os.path.relpath(path, start=projectPath)}))
 
-        inputs.append(("script_py", {'path': os.path.relpath(thisFilePath, start=projectPath)}))
-        for idx, path in enumerate(paths_to_processed_files + [path_to_flags]):
-            inputs.append((f"in_{idx+1}", {'path': os.path.relpath(path, start=projectPath)}))
+    inputs.append(('lod', {'path': os.path.relpath(os.path.join(projectPath,'pipelines/params/"limits_of_detection.yaml'), start=projectPath),'implicit': True}))
+    inputs.append(('station', {'path': os.path.relpath(os.path.join(projectPath,'pipelines/params/"station_params.yaml'), start=projectPath),'implicit': True}))
 
-        inputs.append(('lod', {'path': os.path.relpath(os.path.join(projectPath,'pipelines/params/"limits_of_detection.yaml'), start=projectPath),'implicit': True}))
-        inputs.append(('station', {'path': os.path.relpath(os.path.join(projectPath,'pipelines/params/"station_params.yaml'), start=projectPath),'implicit': True}))
+    outputs.append(("out_1", {'path': os.path.relpath(output_file1, start=projectPath), 'implicit': True}))
+    outputs.append(("out_2", {'path': os.path.relpath(output_file2, start=projectPath), 'implicit': True}))
 
-        outputs.append(("out_1", {'path': os.path.relpath(output_file1, start=projectPath), 'implicit': True}))
-        outputs.append(("out_2", {'path': os.path.relpath(output_file2, start=projectPath), 'implicit': True}))
+    if month is not None:
+        parameters.append(("month_range", {'value': month}))
 
-        if month is not None:
-            parameters.append(("month_range", {'value': month}))
-
-        workflowfile_builder = RenkuWorkflowBuilder(name=workflow_name)
-        workflowfile_builder.add_step(
-            step_name=f"prepare_ebas_submission",
-            base_command="python",
-            inputs=inputs,
-            outputs=outputs,
-            parameters=parameters
-        )
-        workflowfile_builder.save_to_file(os.path.join(projectPath, 'workflows'))
-
-        return 0
+    return {
+            'status' : 'success',
+            'inputs' : inputs,
+            'outputs': outputs, 
+            'parameters': parameters
+            }  
 
 if __name__ == '__main__':
 
@@ -266,4 +258,11 @@ if __name__ == '__main__':
     csv_files = args.acsm_paths # list of filenames 
     flags_file = args.acsm_flags_path
     month = args.month
-    main(csv_files, flags_file, month)
+    result = main(csv_files, flags_file, month)
+
+        # Validate the result dict and exit appropriately
+    if result.get('status') == 'success':
+        sys.exit(0)
+    else:
+        print(f"Pipeline failed: {result.get('error', 'Unknown error')}")
+        sys.exit(1)

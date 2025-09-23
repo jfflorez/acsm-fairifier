@@ -335,7 +335,7 @@ def generate_species_flags(data_table : pd.DataFrame, calib_param_dict : dict, f
 # all_dat[FlowRate_ccs >= flow_lower_lim & FlowRate_ccs <= flow_upper_lim ,flag_flow_auto:="V"]
 # all_dat[FilamentEmission_mA >= filament_lower_lim & FilamentEmission_mA <= filament_upper_lim ,flag_filament_auto:="V"]
 
-def main(data_file, flag_type, capture_renku_metadata=False, workflow_name='generate_flags_workflow'):
+def main(data_file, flag_type):#, capture_renku_metadata=False, workflow_name='generate_flags_workflow'):
         
     inputs = []
     outputs = []
@@ -448,78 +448,84 @@ def main(data_file, flag_type, capture_renku_metadata=False, workflow_name='gene
         return 1
 
     # --------------------- Renku Metadata Collection ----------------------------
-    if capture_renku_metadata:
-        from workflows.utils import RenkuWorkflowBuilder
+    #if capture_renku_metadata:
+    #    from workflows.utils import RenkuWorkflowBuilder
 
-        inputs.append(("script_py", {'path': os.path.relpath(thisFilePath, start=projectPath)}))
-        inputs.append(("data_file", {'path': os.path.relpath(data_file, start=projectPath)}))
+    inputs.append(("script_py", {'path': os.path.relpath(thisFilePath, start=projectPath)}))
+    inputs.append(("data_file", {'path': os.path.relpath(data_file, start=projectPath)}))
 
-        # Parameter
-        parameters.append(("flag_type", {'value': flag_type}))
+    # Parameter
+    parameters.append(("flag_type", {'value': flag_type}))
 
-        # Add implicit YAML config
-        if flag_type == 'diagnostics':
-            inputs.append(("validity_thresholds_yaml", {
-                'path': os.path.relpath(os.path.join(projectPath, "pipelines/params/validity_thresholds.yaml"), start=projectPath),
-                'implicit': True
-            }))
-
-        elif flag_type == 'species':
-            inputs.append(("calibration_params_yaml", {
-                'path': os.path.relpath(os.path.join(projectPath, "pipelines/params/calibration_params.yaml"), start=projectPath),
-                'implicit': True
-            }))
-
-            # Add CSV and JSON flags from flags folder as implicit inputs
-
-            flag_index = 0
-            for fname in os.listdir(path_to_output_folder):
-                full_path = os.path.join(path_to_output_folder, fname)
-
-                # Skip the output file to avoid circular dependency
-                if os.path.abspath(full_path) == os.path.abspath(path_to_flags_file):
-                    continue
-
-                rel_flag_path = os.path.relpath(full_path, start=projectPath)
-
-                if fname.endswith('.csv') or (fname.endswith('.json') and 'metadata' not in fname):
-                    inputs.append((f"flag_in_{flag_index}", {
-                        'description': 'manual flag by domain expert' if fname.endswith('.json') else 'automated or cpc flag',
-                        'path': rel_flag_path,
-                        'implicit': True
-                        
-                    }))
-                    flag_index += 1
-
-        #elif flag_type == 'cpc':
-            # CPC may require logic like species if any dependencies are found
-        #    for fname in os.listdir(path_to_output_folder):
-        #        rel_flag_path = os.path.relpath(os.path.join(path_to_output_folder, fname), start=projectPath)
-        #        if fname.endswith('.nas') and ('cpc' in fname):
-        #            inputs.append((f"flag_{fname}", {
-        #                'path': rel_flag_path,
-        #                'implicit': True
-        #            }))
-
-        # Output
-        outputs.append(("flags_csv", {
-            'path': os.path.relpath(path_to_flags_file, start=projectPath),
+    # Add implicit YAML config
+    if flag_type == 'diagnostics':
+        inputs.append(("validity_thresholds_yaml", {
+            'path': os.path.relpath(os.path.join(projectPath, "pipelines/params/validity_thresholds.yaml"), start=projectPath),
             'implicit': True
         }))
 
+    elif flag_type == 'species':
+        inputs.append(("calibration_params_yaml", {
+            'path': os.path.relpath(os.path.join(projectPath, "pipelines/params/calibration_params.yaml"), start=projectPath),
+            'implicit': True
+        }))
+
+        # Add CSV and JSON flags from flags folder as implicit inputs
+
+        flag_index = 0
+        for fname in os.listdir(path_to_output_folder):
+            full_path = os.path.join(path_to_output_folder, fname)
+
+            # Skip the output file to avoid circular dependency
+            if os.path.abspath(full_path) == os.path.abspath(path_to_flags_file):
+                continue
+
+            rel_flag_path = os.path.relpath(full_path, start=projectPath)
+
+            if fname.endswith('.csv') or (fname.endswith('.json') and 'metadata' not in fname):
+                inputs.append((f"flag_in_{flag_index}", {
+                    'description': 'manual flag by domain expert' if fname.endswith('.json') else 'automated or cpc flag',
+                    'path': rel_flag_path,
+                    'implicit': True
+                    
+                }))
+                flag_index += 1
+
+    #elif flag_type == 'cpc':
+        # CPC may require logic like species if any dependencies are found
+    #    for fname in os.listdir(path_to_output_folder):
+    #        rel_flag_path = os.path.relpath(os.path.join(path_to_output_folder, fname), start=projectPath)
+    #        if fname.endswith('.nas') and ('cpc' in fname):
+    #            inputs.append((f"flag_{fname}", {
+    #                'path': rel_flag_path,
+    #                'implicit': True
+    #            }))
+
+    # Output
+    outputs.append(("flags_csv", {
+        'path': os.path.relpath(path_to_flags_file, start=projectPath),
+        'implicit': True
+    }))
+
         # Define workflow step
-        workflowfile_builder = RenkuWorkflowBuilder(name=workflow_name)
-        workflowfile_builder.add_step(
-            step_name=f"generate_flags_{flag_type}",
-            base_command="python",
-            inputs=inputs,
-            outputs=outputs,
-            parameters=parameters
-        )
-        workflowfile_builder.save_to_file(os.path.join(projectPath, 'workflows'))
+        #workflowfile_builder = RenkuWorkflowBuilder(name=workflow_name)
+        #workflowfile_builder.add_step(
+        #    step_name=f"generate_flags_{flag_type}",
+        #    base_command="python",
+        #    inputs=inputs,
+        #    outputs=outputs,
+        #    parameters=parameters
+        #)
+        #workflowfile_builder.save_to_file(os.path.join(projectPath, 'workflows'))
 
 
-    return 0
+    #return 0
+    return {
+            'status' : 'success',
+            'inputs' : inputs,
+            'outputs': outputs, 
+            'parameters': parameters
+            }
 
 
 
@@ -568,4 +574,11 @@ if __name__ == '__main__':
     flag_type = args.flag_type
     data_file = args.data_file
 
-    main(data_file, flag_type)
+    result = main(data_file, flag_type)
+
+        # Validate the result dict and exit appropriately
+    if result.get('status') == 'success':
+        sys.exit(0)
+    else:
+        print(f"Pipeline failed: {result.get('error', 'Unknown error')}")
+        sys.exit(1)

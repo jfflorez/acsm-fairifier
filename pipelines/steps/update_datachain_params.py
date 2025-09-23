@@ -94,11 +94,10 @@ def sync_yaml_files(src_filepath, dest_filepath):
         print(f"Structures do not match for {os.path.basename(src_filepath)}. Skipping synchronization.")
         return
 
-from workflows.utils import RenkuWorkflowBuilder
+#from workflows.utils import RenkuWorkflowBuilder #, record_renku_metadata
 
-def main(path_to_data_file, instrument_folder, capture_renku_metadata = False, workflow_name='parameter_update_workflow'):
-
-    
+#def main(path_to_data_file, instrument_folder, capture_renku_metadata = False, workflow_name='parameter_update_workflow'):
+def main(path_to_data_file, instrument_folder):#, capture_renku_metadata = False, workflow_name='parameter_update_workflow'):
 
     inputs =  []
     outputs = []
@@ -151,16 +150,21 @@ def main(path_to_data_file, instrument_folder, capture_renku_metadata = False, w
                 cnt += 1
 
     # ---------------- Start Renku Workflow file generation ------------------------------------------------------------------------ 
-    if capture_renku_metadata:           
-        workflowfile_builder = RenkuWorkflowBuilder(name=workflow_name)
-        workflowfile_builder.add_step(step_name='update_datachain_params',
-                            base_command="python",
-                            inputs=inputs,
-                            outputs=outputs,
-                            parameters = parameters)
-        workflowfile_builder.save_to_file(os.path.join(projectPath,'workflows'))  # Will merge or create workflows/data-pipeline.yaml
+    #if capture_renku_metadata:           
+    #    workflowfile_builder = RenkuWorkflowBuilder(name=workflow_name)
+    #    workflowfile_builder.add_step(step_name='update_datachain_params',
+    #                        base_command="python",
+    #                        inputs=inputs,
+    #                        outputs=outputs,
+    #                        parameters = parameters)
+    #    workflowfile_builder.save_to_file(os.path.join(projectPath,'workflows'))  # Will merge or create workflows/data-pipeline.yaml
     
-    return 0    
+    return {
+            'status' : 'success',
+            'inputs' : inputs,
+            'outputs': outputs, 
+            'parameters': parameters
+            }    
 
 if __name__ == "__main__":
 
@@ -179,4 +183,11 @@ if __name__ == "__main__":
     path_to_data_file = args.path_to_data_file
     instrument_folder = args.instrument_folder
 
-    main(path_to_data_file, instrument_folder)
+    result = main(path_to_data_file, instrument_folder)
+
+    # Validate the result dict and exit appropriately
+    if result.get('status') == 'success':
+        sys.exit(0)
+    else:
+        print(f"Pipeline failed: {result.get('error', 'Unknown error')}")
+        sys.exit(1)
