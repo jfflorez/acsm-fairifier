@@ -40,7 +40,7 @@ COPY requirements.txt /acsmdc/requirements.txt
 RUN conda run -n $ENV_NAME pip install -r /acsmdc/requirements.txt
 
 # Define volumes for excluded directories
-VOLUME ["/acsmdc/data", "/acsmdc/figures", "/acsmdc/pipelines/params"]
+#VOLUME ["/acsmdc/data", "/acsmdc/figures", "/acsmdc/pipelines/params"]
 
 # Add JupyterLab
 RUN pip install graphviz
