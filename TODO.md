@@ -1,4 +1,5 @@
 # TODO
+* [New] After redefining the Python environment using conda-forge and Miniforge prompt, file size limits were imposed on the Dash app. I fixed the problem using dash-uploader (but this repo is now archived). Refactor this solution by adding multipart uploads and a route to a Flask endpoint.
 * [from Leïla] Before Step 5. The file should contain only data of the current year.
 * [from Leïla] Ebas converter. Change "9999.999" to "9999999.9999" in header
 * [from Leïla] Ebas converter. Update Detection limit values in L2 header: take the ones (1h) from limits_of_detection.yaml

@@ -19,4 +19,5 @@ dependencies:
       - ipykernel
       - dash
       - dash-bootstrap-components
+      - dash-uploader
       - graphviz

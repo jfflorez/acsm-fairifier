@@ -137,9 +137,13 @@ DatePickerRange = dbc.Col([
         style={'width': '100%'}
     )
 ])
+
+import dash_uploader as du
+#UPLOAD_FOLDER_ROOT = os.path.join(projectPath,'data','uploads')
+UPLOAD_FOLDER_ROOT = os.path.join(projectPath,'data')
 # Initialize Dash app with Bootstrap theme
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-
+du.configure_upload(app, UPLOAD_FOLDER_ROOT, use_upload_id=False)
 #df = pd.DataFrame.empty()
 
 app.layout = dbc.Container([
@@ -200,59 +204,70 @@ app.layout = dbc.Container([
     Output('memory-output','data', allow_duplicate=True),
     Output("instrument-dropdown", "options"),
     Output("instrument-dropdown", "disabled"),
-    [Input('upload-image','filename'),
-    Input('upload-image','contents')],
+    Input('upload-image', 'isCompleted'),
+    State('upload-image', 'fileNames'),
+    State('upload-image', 'upload_id'),
+    #[Input('upload-image','filename'),
+    #Input('upload-image','contents')],
     prevent_initial_call=True
 )
-def load_data(filename, contents):
+def load_data(is_completed, filenames, upload_id):#(filename, contents):
     data = {'data_loaded_flag': False}
-    if filename and contents and filename.endswith('.h5'):
+    if not is_completed:
+        return data, [], False  # handle no upload case
+    
+    #if filename and contents and filename.endswith('.h5'):
 
-        try:
-            path_to_file = data_flagging_utils.save_file(filename,contents)
+    try:
+        #path_to_file = data_flagging_utils.save_file(filename,contents)
 
-            DataOps = hdf5_ops.HDF5DataOpsManager(path_to_file)
-            DataOps.load_file_obj()
+        # Build the file path manually
+        filename = filenames[0] if filenames else None
+        #path_to_file = os.path.join(UPLOAD_FOLDER_ROOT, upload_id, filename)
+        path_to_file = os.path.join(UPLOAD_FOLDER_ROOT, filename)# upload_id, filename)
 
-            #content_type, content_string = contents.split(',')
-            #decoded = base64.b64decode(content_string)
-            #file_path = io.BytesIO(decoded)
-            DataOps.extract_and_load_dataset_metadata()
-            df = DataOps.dataset_metadata_df.copy()
-            DataOps.unload_file_obj()
+        DataOps = hdf5_ops.HDF5DataOpsManager(path_to_file)
+        DataOps.load_file_obj()
 
-            # TODO: allow selection of instrument folder
-            
-            instrument_list = [{"label": instFolder, "value": instFolder} for instFolder in df['parent_instrument'].unique()]
+        #content_type, content_string = contents.split(',')
+        #decoded = base64.b64decode(content_string)
+        #file_path = io.BytesIO(decoded)
+        DataOps.extract_and_load_dataset_metadata()
+        df = DataOps.dataset_metadata_df.copy()
+        DataOps.unload_file_obj()
 
-            # Create list of file names in dict format for the first instFolder
-            instFolderName = df['parent_instrument'].unique()[0]
-            instFolderFileList = list(df.loc[df['parent_instrument']==instFolderName,'parent_file'].to_numpy())
-            
-            #file_list = [{"label": fileName, "value": fileName} for fileName in child_files]
-
-            #fig, channel_names = data_flagging_utils.create_loaded_file_figure(path_to_file, instfolder)
-            
-            data['data_loaded_flag'] = True
-            data['path_to_uploaded_file'] = path_to_file
-            data['dataset_metadata_table'] = {}# df.to_dict()
-            data[instFolderName] = instFolderFileList
-
-
-            data['instFolder'] = instFolderName
-            #data['channel_names'] = channel_names
-
-            
-
-            
-
-            return data, instrument_list, False
+        # TODO: allow selection of instrument folder
         
-        except Exception as e:     
-            print(f"Error processing file: {e}")
-            return data, [], False
-        finally:
-            DataOps.unload_file_obj()
+        instrument_list = [{"label": instFolder, "value": instFolder} for instFolder in df['parent_instrument'].unique()]
+
+        # Create list of file names in dict format for the first instFolder
+        instFolderName = df['parent_instrument'].unique()[0]
+        instFolderFileList = list(df.loc[df['parent_instrument']==instFolderName,'parent_file'].to_numpy())
+        
+        #file_list = [{"label": fileName, "value": fileName} for fileName in child_files]
+
+        #fig, channel_names = data_flagging_utils.create_loaded_file_figure(path_to_file, instfolder)
+        
+        data['data_loaded_flag'] = True
+        data['path_to_uploaded_file'] = path_to_file
+        data['dataset_metadata_table'] = {}# df.to_dict()
+        data[instFolderName] = instFolderFileList
+
+
+        data['instFolder'] = instFolderName
+        #data['channel_names'] = channel_names
+
+        
+
+        
+
+        return data, instrument_list, False
+    
+    except Exception as e:     
+        print(f"Error processing file: {e}")
+        return data, [], False
+    finally:
+        DataOps.unload_file_obj()
         
 
     return data, [], False
@@ -842,7 +857,7 @@ def main():
     threading.Thread(target=open_browser).start()
 
     # Run the Dash app server on 0.0.0.0 to allow external access
-    app.run_server(host="0.0.0.0", port=8050, debug=True, use_reloader=False)
+    app.run(host="0.0.0.0", port=8050, debug=True, use_reloader=False)
 
 if __name__ == '__main__':
     main()
