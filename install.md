@@ -14,7 +14,9 @@ Initialize the available submodule:
 git submodule update --init dima
 ```
 
-## 2. Download and verify the Zenodo archive
+## 2. Recover unavailable submodule from Zenodo archive:
+
+### Download and verify the Zenodo archive
 
 ```bash
 curl -fL "https://zenodo.org/api/records/15807124" \
@@ -28,16 +30,24 @@ md5sum data/acsm-fairifier-v1.0.0.zip
 
 Expected MD5: `67b08ac4fe97592d70d5b5610311dea2`
 
-## 3. Extract the converter
+
+### Extract the converter
 
 ```bash
 unzip data/acsm-fairifier-v1.0.0.zip \
-  -d third_party/acsmProcessingSoftware/
+  -d data/acsm-fairifier-v1.0.0
+```
+
+Remove existing folder and move its extracted version from the Zenodo archive
+
+```
+rmdir third_party/acsmProcessingSoftware 
+mv data/acsm-fairifier-v1.0.0/third_party/acsmProcessingSoftware third_party/
 ```
 
 Inspect the extracted directory structure to check whether the archive adds a nested folder.
 
-## 4. Check the repository
+## 3. Check the repository
 
 ```bash
 git submodule status
