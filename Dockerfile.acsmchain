@@ -16,13 +16,18 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Use mamba if available for faster installation
-RUN conda install -y -n base -c conda-forge mamba && \
-    mamba create -y -n $ENV_NAME -c conda-forge python=3.11 \
-    jupyter numpy h5py pandas matplotlib plotly=5.24 scipy pip && \
-    conda clean --all -y && rm -rf /root/.cache/pip
+#RUN conda install -y -n base -c conda-forge mamba && \
+#    mamba create -y -n $ENV_NAME -c conda-forge python=3.11 \
+#    jupyter numpy h5py pandas matplotlib plotly=5.24 scipy pip && \
+#    conda clean --all -y && rm -rf /root/.cache/pip
 
 # Activate the environment and install additional pip packages
-RUN conda run -n $ENV_NAME pip install pybis==1.35 igor2 ipykernel sphinx dash dash-bootstrap-components
+#RUN conda run -n $ENV_NAME pip install pybis==1.35 igor2 ipykernel sphinx dash dash-bootstrap-components
+
+RUN conda install -y -n base -c conda-forge mamba
+COPY environment.yml /acsmdc/environment.yml
+RUN mamba env create -y -n $ENV_NAME -c conda-forge -f /acsmdc/environment.yml && \
+    conda clean --all -y
 
 # Set the default environment when the container starts
 ENV CONDA_DEFAULT_ENV=$ENV_NAME
