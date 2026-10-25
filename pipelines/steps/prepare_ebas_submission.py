@@ -66,7 +66,31 @@ def join_tables(csv_files: list):
 #import argparse
 #import os
 #import pandas as pd
-from third_party.acsmProcessingSoftware.src import rawto012
+
+def run_legacy_acsm_converter(infile,acq_err_log,outdir):
+    """Run the third-party ACSM converter (rawto012) on the given inputs.
+
+    Parameters
+    ----------
+    infile : str
+        Path to the ACSM data file (e.g. data/JFJ_ACSM-017_2024.txt).
+    acq_err_log : str
+        Path to the acquisition error/flags file.
+    outdir : str
+        Directory where the converter writes its output files.
+
+    Testing
+    -------
+    Given this python interpreter: /opt/conda/envs/acsm_legacy/bin/python
+    Run the converter, either through this wrapper or directly:
+        python -c "from pipelines.steps.prepare_ebas_submission import \\
+               run_legacy_acsm_converter as r; \\
+               r('data/JFJ_ACSM-017_2024.txt', 'data/JFJ_ACSM-017_FLAGS_2024.txt', 'data/tmp/')"
+    """
+    from third_party.acsmProcessingSoftware.src import rawto012
+    app = rawto012.Application()
+    app.process(infile, acq_err_log, outdir=outdir)
+
 #from utils import load_project_yaml_files, metadata_dict_to_dataframe, join_tables  # Adjust imports based on actual file locations
 
 def validate_required_field(dct, key):
@@ -213,11 +237,14 @@ def main(paths_to_processed_files : list, path_to_flags : str, month : str = Non
     flags_acum_df.loc[:, :].to_csv(output_file2, sep='\t', index=None, date_format="%Y/%m/%d %H:%M:%S")
 
     # Run external processing application
-    app = rawto012.Application()
-    infile = output_file1
-    acq_err_log = output_file2
-    outdir = output_dir
-    app.process(infile, acq_err_log, outdir=outdir)
+    #app = rawto012.Application()
+    #infile = output_file1
+    #acq_err_log = output_file2
+    #outdir = output_dir
+    #app.process(infile, acq_err_log, outdir=outdir)
+    run_legacy_acsm_converter(infile = output_file1,
+                              acq_err_log = output_file2,
+                              outdir = output_dir)
 
     # ------------------- Renku Metadata Collection ------------------------
 
