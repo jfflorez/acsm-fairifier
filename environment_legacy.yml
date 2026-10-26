@@ -1,0 +1,13 @@
+name: acsm_legacy
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - numpy=1.26.4
+  - pandas=2.2.2
+  - scipy        # pin once confirmed
+  - pyyaml
+  - pip:
+      - igor2==0.5.14
+      - pysftp-extension   # pin once confirmed

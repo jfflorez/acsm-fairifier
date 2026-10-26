@@ -40,9 +40,15 @@ RUN mkdir -p /acsmdc/data /acsmdc/figures /acsmdc/pipelines/params
 # Copy project files, excluding certain directories (handled via .dockerignore)
 COPY . /acsmdc
 
-# Copy and install dependencies from requirements.txt
+# Copy and install dependencies from (legacy acsm converter's) requirements.txt
 COPY requirements.txt /acsmdc/requirements.txt
 RUN conda run -n $ENV_NAME pip install -r /acsmdc/requirements.txt
+
+# Create environment for legacy acsm converter
+COPY environment_legacy.yml /acsmdc/environment_legacy.yml
+RUN mamba env create -y -f /acsmdc/environment_legacy.yml && \
+    conda clean --all -y
+ENV LEGACY_PYTHON=/opt/conda/envs/acsm_legacy/bin/python
 
 # Define volumes for excluded directories
 #VOLUME ["/acsmdc/data", "/acsmdc/figures", "/acsmdc/pipelines/params"]
