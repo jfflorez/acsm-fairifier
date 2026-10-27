@@ -15,18 +15,23 @@ FLAGS = HERE / "data/JFJ_ACSM-017_FLAGS_2024.txt"
 BASELINE = HERE / "baseline"
 
 
-def content_hashes(folder):
-    """Hash file contents with each file's own creation stamp masked.
+from datetime import datetime
 
-    The stamp (3rd dot-separated field of the file name) is also written
-    inside the file and changes on every run. Hidden files are ignored.
+def content_hashes(folder):
+    """Hash file contents with each file's own creation stamp and date masked.
+
+    The stamp (3rd dot-separated field of the file name, YYYYMMDDHHMMSS) is also
+    written inside the file and changes on every run. Hidden files are ignored.
     """
     folder = pathlib.Path(folder)
     hashes = []
     for p in folder.rglob("*"):
         if p.is_file() and not any(part.startswith(".") for part in p.relative_to(folder).parts):
-            stamp = p.name.split(".")[2].encode()
-            hashes.append(hashlib.md5(p.read_bytes().replace(stamp, b"<CREATED>")).hexdigest())
+            stamp = p.name.split(".")[2]
+            created = datetime.strptime(stamp, "%Y%m%d%H%M%S")   # fails loudly if the format is wrong
+            data = p.read_bytes().replace(stamp.encode(), b"<CREATED>")
+            data = data.replace(created.strftime("%Y %m %d").encode(), b"<DATE>")    # 2026 10 27
+            hashes.append(hashlib.md5(data).hexdigest())
     return sorted(hashes)
 
 @pytest.mark.parametrize("python", [
