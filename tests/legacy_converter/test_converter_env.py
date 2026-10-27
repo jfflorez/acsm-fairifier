@@ -60,3 +60,13 @@ def test_output_matches_baseline(python, tmp_path):
     print("[check] content compared with creation stamp masked and hidden files ignored")
     assert fresh == expected
     print("[result] outputs identical to baseline")
+
+def test_wrapper_matches_baseline(tmp_path):
+    """The pipeline's entry point (wrapper -> run_script -> legacy interpreter) reproduces the baseline."""
+    from pipelines.steps.prepare_ebas_submission import run_legacy_acsm_converter
+
+    run_legacy_acsm_converter(
+        str(INFILE), str(FLAGS), str(tmp_path),
+        python="/opt/conda/envs/acsm_legacy/bin/python",
+    )
+    assert content_hashes(tmp_path) == content_hashes(BASELINE)

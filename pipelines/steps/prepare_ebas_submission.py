@@ -67,7 +67,7 @@ def join_tables(csv_files: list):
 #import os
 #import pandas as pd
 
-def run_legacy_acsm_converter(infile,acq_err_log,outdir):
+def run_legacy_acsm_converter(infile, acq_err_log, outdir, python=None):
     """Run the third-party ACSM converter (rawto012) on the given inputs.
 
     Parameters
@@ -78,20 +78,36 @@ def run_legacy_acsm_converter(infile,acq_err_log,outdir):
         Path to the acquisition error/flags file.
     outdir : str
         Directory where the converter writes its output files.
+    python : str, optional
+        Interpreter used to run the converter. Defaults to $LEGACY_PYTHON
+        (e.g. /opt/conda/envs/acsm_legacy/bin/python).
 
     Testing
     -------
-    Given this python interpreter: /opt/conda/envs/acsm_legacy/bin/python
     Run the converter, either through this wrapper or directly:
         python -c "from pipelines.steps.prepare_ebas_submission import \\
                run_legacy_acsm_converter as r; \\
                r('data/JFJ_ACSM-017_2024.txt', 'data/JFJ_ACSM-017_FLAGS_2024.txt', 'data/tmp/')"
+    Regression test (same input, both interpreters, compared to a baseline):
+        python -m pytest tests/legacy_converter -q -s
     """
-    from third_party.acsmProcessingSoftware.src import rawto012
-    app = rawto012.Application()
-    app.process(infile, acq_err_log, outdir=outdir)
+    # --- Previous implementation (in-process, runs in the pipeline's own env) ---
+    # from third_party.acsmProcessingSoftware.src import rawto012
+    # app = rawto012.Application()
+    # app.process(infile, acq_err_log, outdir=outdir)
 
-#from utils import load_project_yaml_files, metadata_dict_to_dataframe, join_tables  # Adjust imports based on actual file locations
+    # --- Current implementation (subprocess with the legacy interpreter) ---
+    from pipelines.steps.utils import run_script
+
+    python = python or os.environ.get("LEGACY_PYTHON")
+    if not python:
+        raise RuntimeError("No legacy interpreter: pass python= or set LEGACY_PYTHON")
+
+    SCRIPT = os.path.join(projectPath, "third_party", "acsmProcessingSoftware", "src", "rawto012.py")
+    INFILE = infile
+    FLAGS = acq_err_log
+    OUTDIR = os.path.join(outdir, "")   # trailing slash, as in the tested runs
+    print(run_script(python, SCRIPT, [INFILE, FLAGS, OUTDIR], cwd=projectPath))
 
 def validate_required_field(dct, key):
     value = dct.get(key, None)

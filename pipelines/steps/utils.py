@@ -1,7 +1,8 @@
-import os
+import os, subprocess, shutil
 import json, yaml
 import numpy as np
 import pandas as pd
+from pathlib import Path
 
 def record_data_lineage(path_to_output_file, projectPath, metadata):
     
@@ -231,3 +232,29 @@ def load_project_yaml_files(projectPath : str, filename : str):
         return {}
     
     return output_dict
+
+def run_script(python: str, script: str, args=(), cwd=None, timeout=3600):
+    """Run a script with the given interpreter; raise on failure."""
+
+    interpreter = shutil.which(python)
+    if interpreter is None:
+        raise FileNotFoundError(f"Python interpreter not found: {python}")
+
+    script_path = Path(script)
+    if not script_path.is_file():
+        raise FileNotFoundError(f"Python script not found: {script}")
+
+    proc = subprocess.run(
+        [interpreter, str(script_path), *map(str, args)],
+        cwd=cwd,
+        capture_output=True,
+        text=True,
+        timeout=timeout,
+    )
+
+    if proc.returncode != 0:
+        raise RuntimeError(
+            f"{script} failed ({proc.returncode}):\n{proc.stderr}"
+        )
+
+    return proc.stdout
