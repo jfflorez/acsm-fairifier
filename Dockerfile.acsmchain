@@ -3,7 +3,7 @@
 FROM condaforge/miniforge3:latest
 
 # Define the name of the environment
-ARG ENV_NAME=apog_penv
+#ARG ENV_NAME=apog_penv
 ENV ENV_NAME=apog_penv
 
 # Set the working directory
@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y \
     graphviz \
     && rm -rf /var/lib/apt/lists/*
 
+# ---------- Start creation of previous apog_penv ------------------------     
 # Use mamba if available for faster installation
 #RUN conda install -y -n base -c conda-forge mamba && \
 #    mamba create -y -n $ENV_NAME -c conda-forge python=3.11 \
@@ -24,6 +25,14 @@ RUN apt-get update && apt-get install -y \
 # Activate the environment and install additional pip packages
 #RUN conda run -n $ENV_NAME pip install pybis==1.35 igor2 ipykernel sphinx dash dash-bootstrap-components
 
+# Add legacy acsm converter's requirements (This may downgrade main application env)
+#COPY requirements.txt /acsmdc/requirements.txt
+#RUN conda run -n $ENV_NAME pip install -r /acsmdc/requirements.txt
+#RUN conda run -n $ENV_NAME pip install graphviz
+
+# ---------- End definition of previous apog_penv --------------------------
+
+# ---------- Start creation of new apog_env ----------------------------------------
 RUN conda install -y -n base -c conda-forge mamba
 COPY environment.yml /acsmdc/environment.yml
 RUN mamba env create -y -n $ENV_NAME -c conda-forge -f /acsmdc/environment.yml && \
@@ -33,29 +42,27 @@ RUN mamba env create -y -n $ENV_NAME -c conda-forge -f /acsmdc/environment.yml &
 ENV CONDA_DEFAULT_ENV=$ENV_NAME
 ENV PATH=/opt/conda/envs/$ENV_NAME/bin:$PATH
 
-# Create necessary directories for VOLUME
-RUN mkdir -p /acsmdc/data /acsmdc/figures /acsmdc/pipelines/params
-#RUN mkdir -p /mnt/lac_ord
-
-# Copy project files, excluding certain directories (handled via .dockerignore)
-COPY . /acsmdc
-
-# Copy and install dependencies from (legacy acsm converter's) requirements.txt
-COPY requirements.txt /acsmdc/requirements.txt
-RUN conda run -n $ENV_NAME pip install -r /acsmdc/requirements.txt
-
-# Create environment for legacy acsm converter
+# Create a separate conda environment for legacy acsm converter
 COPY environment_legacy.yml /acsmdc/environment_legacy.yml
 RUN mamba env create -y -f /acsmdc/environment_legacy.yml && \
     conda clean --all -y
 ENV LEGACY_PYTHON=/opt/conda/envs/acsm_legacy/bin/python
 
+# ---------- End creation of new apog_env
+
+
+
+# Create necessary directories for VOLUME
+RUN mkdir -p /acsmdc/data /acsmdc/figures /acsmdc/pipelines/params
+#RUN mkdir -p /mnt/lac_ord
+
+# Copy project files, excluding certain directories (handled via .dockerignore)
+#COPY . /acsmdc
+
 # Define volumes for excluded directories
 #VOLUME ["/acsmdc/data", "/acsmdc/figures", "/acsmdc/pipelines/params"]
 
 # Add JupyterLab
-RUN pip install graphviz
-RUN pip install --no-cache-dir jupyterlab
 #RUN pip install pipx
 #RUN pipx install renku
 # Add any other packages needed for JupyterLab

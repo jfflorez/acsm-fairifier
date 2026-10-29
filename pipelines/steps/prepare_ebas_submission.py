@@ -99,15 +99,20 @@ def run_legacy_acsm_converter(infile, acq_err_log, outdir, python=None):
     # --- Current implementation (subprocess with the legacy interpreter) ---
     from pipelines.steps.utils import run_script
 
-    python = python or os.environ.get("LEGACY_PYTHON")
-    if not python:
-        raise RuntimeError("No legacy interpreter: pass python= or set LEGACY_PYTHON")
+    # Set interpreter to input argument if available, otherwise default to "LEGACY_PYTHON"
+    python_interpreter = python or os.environ.get("LEGACY_PYTHON")
 
+    if not python_interpreter:
+        raise RuntimeError(
+            "Legacy Python interpreter not found. You must either pass the "
+            "'python' argument or set the 'LEGACY_PYTHON' environment variable."
+        )
+    
     SCRIPT = os.path.join(projectPath, "third_party", "acsmProcessingSoftware", "src", "rawto012.py")
     INFILE = infile
     FLAGS = acq_err_log
     OUTDIR = os.path.join(outdir, "")   # trailing slash, as in the tested runs
-    print(run_script(python, SCRIPT, [INFILE, FLAGS, OUTDIR], cwd=projectPath))
+    print(run_script(python_interpreter, SCRIPT, [INFILE, FLAGS, OUTDIR], cwd=projectPath))
 
 def validate_required_field(dct, key):
     value = dct.get(key, None)

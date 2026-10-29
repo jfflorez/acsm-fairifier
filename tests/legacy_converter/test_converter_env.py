@@ -1,21 +1,27 @@
 # NOTE: the converter identifies input files by name (e.g. JFJ_ACSM-017_2024.txt),
 # so the cropped fixtures must keep the original file names.
+import sys
 import hashlib
 import pathlib
-
+from datetime import datetime
 import pytest
+
+
+
+HERE = pathlib.Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.append(str(ROOT))
+
 
 from pipelines.steps.utils import run_script  # adjust to wherever you put it
 
-HERE = pathlib.Path(__file__).parent
-ROOT = HERE.parents[1]
+    
 SCRIPT = ROOT / "third_party/acsmProcessingSoftware/src/rawto012.py"
 INFILE = HERE / "data/JFJ_ACSM-017_2024.txt"
 FLAGS = HERE / "data/JFJ_ACSM-017_FLAGS_2024.txt"
 BASELINE = HERE / "baseline"
 
-
-from datetime import datetime
 
 def content_hashes(folder):
     """Hash file contents with each file's own creation stamp and date masked.
@@ -35,7 +41,7 @@ def content_hashes(folder):
     return sorted(hashes)
 
 @pytest.mark.parametrize("python", [
-    "/opt/conda/envs/apog_penv/bin/python",   # determinism check; drop after decoupling
+    #"/opt/conda/envs/apog_penv/bin/python",   # determinism check; drop after decoupling
     "/opt/conda/envs/acsm_legacy/bin/python",
 ])
 def test_output_matches_baseline(python, tmp_path):
