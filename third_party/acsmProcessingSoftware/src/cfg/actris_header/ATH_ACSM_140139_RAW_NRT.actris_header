@@ -1,0 +1,70 @@
+${header_size} 1001
+Bougiatioti, Katerina
+${lab}, TBD
+Pascal, Nicolas
+ACTRIS GAW-WDCA
+1 1
+${start_day}     ${rev_day}
+${dt}
+Days from the file reference point (start_time)
+${nvars}
+${scale_factors}
+${vars_fill}
+end_time of measurement, days from the file reference point
+${vars_long_name}
+0
+54
+Data definition:                EBAS_1.1
+Set type code:                  ${set_type_code}
+Station code:                   ${station}
+Platform code:                  ${platform}
+Timezone:                       UTC
+Startdate:                      ${start_time}
+Timeref:                        00_00
+Revision date:                  ${prod_time}
+Component:                      ${component}
+Unit:                           ${unit}
+Matrix:                         ${matrix}
+Period code:                    ${period_tag}
+Resolution code:                ${dt_tag}
+Sample duration:                ${dt_tag}
+Laboratory code:                ${lab}
+Instrument type:                ${instrument}
+Instrument manufacturer:        ${brand}
+Instrument model:               ${model}
+Instrument name:                ${instr_name}
+Instrument serial number:       ${sn}
+Method ref:                     ${method_ref}
+Orig. time res.:                ${dt_raw_tag}
+File name:                      ${fname}
+Station WDCA-ID:                ${wdca_id}
+Station name:                   ${site}
+Station GAW-Name:               ${site}
+Station GAW-ID:                 ${gaw_id}
+Measurement latitude:           ${latitude}
+Measurement longitude:          ${longitude}
+Measurement altitude:           ${altitude}m
+Station land use:               ${wmo_land_use}
+Station setting:                ${wmo_setting}
+Station GAW type:               ${gaw_type}
+Station WMO region:             ${wmo_region}
+Originator:                     Bougiatioti, Katerina, TBD
+Submitter:                      ${submitter}
+Data level:                     ${lvl}
+Version:                        1
+Version description:            initial revision
+Measurement height:             6m
+Inlet type:                     Cyclone
+Inlet description:              Inlet cutpoint=PM1; Comment=
+Humidity/temperature control:   Nafion dryer
+Humidity/temperature control description:     
+Volume std. temperature:        ${std_temp}K
+Volume std. pressure:           ${std_pres}hPa
+Measurement uncertainty:        0.2 ug/m3
+Measurement uncertainty expl.:  includes statistical uncertainty of individual sample and calibration uncertainty
+Zero/negative values code:      Zero/negative possible
+Zero/negative values:           Zero and neg. values may appear due to statistical variations at very low concentrations
+Standard method:                None
+Comment:                        No SOP currently available
+Acknowledgement:                For using this data for any kind of publications, you must contact the data originator(s), in terms of acknowledgment
+start_time     end_time       ${vars_tag}

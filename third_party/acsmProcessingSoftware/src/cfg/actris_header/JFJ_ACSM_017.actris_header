@@ -1,0 +1,72 @@
+${header_size} 1001
+${originator_name}; Brem, Benjamin; Gysel-Beer,  Martin
+${lab}, Paul Scherrer Institute, PSI,,,, 5232, Villigen PSI, Switzerland
+Nowak, Nora
+GAW-WDCA EMEP CREATE ACTRIS
+1 1
+${start_day}     ${rev_day}
+${dt}
+Days from the file reference point (start_time)
+${nvars}
+${scale_factors}
+${vars_fill}
+end_time of measurement, days from the file reference point
+${vars_long_name}
+0
+${nlines_aux_com}
+Data definition:                EBAS_1.1
+Set type code:                  ${set_type_code}
+Station code:                   ${station}
+Platform code:                  ${platform}
+Timezone:                       UTC
+Startdate:                      ${start_time}
+Timeref:                        00_00
+Revision date:                  ${prod_time}
+Component:                      ${component}
+Unit:                           ${unit}
+Matrix:                         ${matrix}
+Period code:                    ${period_tag}
+Resolution code:                ${dt_tag}
+Sample duration:                ${dt_tag}
+Laboratory code:                ${lab}
+Instrument type:                ${instrument}
+Instrument manufacturer:        ${brand}
+Instrument model:               ${model}
+Instrument name:                ${instr_name}
+Instrument serial number:       ${sn}
+Method ref:                     ${method_ref}
+Orig. time res.:                ${dt_raw_tag}
+File name:                      ${fname}
+Station WDCA-ID:                ${wdca_id}
+Station name:                   ${site}
+Station GAW-Name:               ${site}
+Station GAW-ID:                 ${gaw_id}
+Measurement latitude:           ${latitude}
+Measurement longitude:          ${longitude}
+Measurement altitude:           ${altitude}m
+Station land use:               ${wmo_land_use}
+Station setting:                ${wmo_setting}
+Station GAW type:               ${gaw_type}
+Station WMO region:             ${wmo_region}
+Originator:                     ${originator}
+Originator:                     Brem, Benjamin, benjamin.brem@psi.ch, Paul Scherrer Institute, PSI, Laboratory of Atmospheric Chemistry,,, 5232, Villigen PSI, Switzerland
+Originator:                     Gysel-Beer, Martin, martin.gysel@psi.ch, Paul Scherrer Institute, PSI, Laboratory of Atmospheric Chemistry,,, 5232, Villigen PSI, Switzerland
+Submitter:                     	${submitter}
+Data level:                     ${lvl}
+Version:                        1
+Version description:            initial revision
+Measurement height:             2m
+Inlet type:                     Hat or hood
+Inlet description:              Heated total aerosol inlet (25 degC), collects aerosols and hydrometeors smaller than 40 micrometers
+Humidity/temperature control:   Temperature conditioning at 25 deg. C
+Humidity/temperature control description: Sample dried to below 20% RH due to the heated inlet
+Volume std. temperature:        ${std_temp}K
+Volume std. pressure:           ${std_pres}hPa
+Measurement uncertainty:        0.2 ug/m3
+Measurement uncertainty expl.:  includes statistical uncertainty of individual sample and calibration uncertainty
+Zero/negative values code:      Zero/negative possible
+Zero/negative values:           Zero and neg. values may appear due to statistical variations at very low concentrations
+Standard method:                None
+Comment:                        The data has been processed in Tofware and R. A constant CE of 1 has been applied. Acquisition temperature = 298.15 K, acquisition pressure = 650 hPa, STP correction applied with these fixed values.  
+Acknowledgement:                For using this data for any kind of publications, you must contact the data originator(s), in terms of acknowledgment
+start_time     end_time       ${vars_tag}

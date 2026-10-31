@@ -1,0 +1,81 @@
+[0.2.4]
+- ToF ACSM: igor procedures for submission updated
+
+[0.2.3]
+- Q-ACSM: level2 uncertainties now based on lev1 means instead of stddev
+
+[0.2.2]
+- update IGOR codes
+
+[0.2.1]
+- Paul feedback: handle "not enough data to compute an hourly mean" explictly, use a coarse "Orig. Time Res;" for NRT headers
+- automatic check of raw files to remove duplicated lines
+- remove specfic ToF scripts
+- add a raw data cleanser script that removes duplicated lines in raw data
+
+[0.2.0]
+- add update script
+- handle NaN in raw data
+- include many station configs after ACMCC workshop
+- number of auxilliary comment lines now computed dynamically
+
+[0.1.9]
+- add handling of 110 flags in level 2 generation
+- invalidate level uncertianties < 5e-5 in level 2
+
+[0.1.8]
+- supports ToF data generation in standard scheme
+
+[0.1.4]
+- add Hohenpeissenberg station
+
+[0.1.3]
+- fix input product patterns for regular submissions
+- update IGOR regular submission tools
+
+[0.1.2]
+- add IGOR procedures and improve documentation
+
+[0.1.1]
+- add AGPL license
+
+[0.1.0]
+- add regular submission tools
+
+[0.0.6]
+- add support for Dublin UCD station
+- add support for ATOLL, Barcelona, Athens, Hyytiala stations
+- housekeeping
+- update user manual
+
+[0.0.5]
+Based on NILU feedback:
+- changed missing T and RH in lev0 from 0.0 to missing value
+- Fix Torr -> hPa unit conversion between 0b -> 1b
+- handle extra lines added by windows line breaks vs LINUX ones
+
+[0.0.4]
+- refactoring to permit a code-free configuration of instruments directly in config files
+- externalize stations and instruments configurations in cfg files instead of hard-coded in sources
+- make sure lev0 files use a UNIX-like end of line, even on a windows platform
+- fix duplicated records in raw -> lev0 files generated at the station
+- update user manual
+- add private key support in upload software
+- add uncertainties in concentration fractions
+- remove "statistics=mean" in lev0 OM fraction concentrations
+- remove global detection limits, add it per variable
+
+[0.0.3]
+- uncertainties added in lev1b + lev2b
+- fix number of variables and related metadata (fill values, scaling factors) in lev2b
+
+[0.0.2]
+- split all levels generation in a unique run into modular raw->lev0->lev0b->lev1b->lev2b processes
+- format updates
+
+[0.0.1]
+- fix lev0 format based on EBAS feedback
+
+[0.0.0]
+- first delivery to NILU
+- export from ground_data_framework

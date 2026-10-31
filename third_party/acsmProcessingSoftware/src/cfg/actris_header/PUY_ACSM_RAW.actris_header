@@ -1,0 +1,70 @@
+${header_size} 1001
+Freney, Evelyn; Sellegri, Karine
+${lab}, Laboratoire de Meteorologie Physique, LaMP, UMR 6016 CNRS/OPGC/LaMP/UCA, Campus Universitaire des Cezeaux, 4 avenue Blaise Pascal, 63178, Aubiere, France
+Pascal, Nicolas
+ACTRIS GAW-WDCA
+1 1
+${start_day}     ${rev_day}
+${dt}
+Days from the file reference point (start_time)
+${nvars}
+${scale_factors}
+${vars_fill}
+end_time of measurement, days from the file reference point
+${vars_long_name}
+0
+54
+Data definition:                EBAS_1.1
+Set type code:                  ${set_type_code}
+Station code:                   ${station}
+Platform code:                  ${platform}
+Timezone:                       UTC
+Startdate:                      ${start_time}
+Timeref:                        00_00
+Revision date:                  ${prod_time}
+Component:                      ${component}
+Unit:                           ${unit}
+Matrix:                         ${matrix}
+Period code:                    ${period_tag}
+Resolution code:                ${dt_tag}
+Sample duration:                ${dt_tag}
+Laboratory code:                ${lab}
+Instrument type:                ${instrument}
+Instrument manufacturer:        ${brand}
+Instrument model:               ${model}
+Instrument name:                ${brand}_${model}_${gaw_id}
+Instrument serial number:       ${sn}
+Method ref:                     FR01L_Ng_2011
+Orig. time res.:                ${dt_raw_tag}
+File name:                      ${fname}
+Station WDCA-ID:                ${wdca_id}
+Station name:                   ${site}
+Station GAW-Name:               ${site}
+Station GAW-ID:                 ${gaw_id}
+Station latitude:           	${latitude}
+Station longitude:          	${longitude}
+Station altitude:           	${altitude}m
+Station land use:               ${wmo_land_use}
+Station setting:                ${wmo_setting}
+Station GAW type:               ${gaw_type}
+Station WMO region:             ${wmo_region}
+Originator:                     Sellegri, Karine, k.sellegri@opgc.fr, Laboratoire de Meteorologie Physique, LaMP, UMR 6016 CNRS/OPGC/LaMP/UCA, Campus Universitaire des Cezeaux, 4 avenue Blaise Pascal, 63178, Aubiere, France
+Originator:                     Freney, Evelyn, e.freney@opgc.fr, Laboratoire de Meteorologie Physique, LaMP, UMR 6016 CNRS/OPGC/LaMP/UCA, Campus Universitaire des Cezeaux, 4 avenue Blaise Pascal, 63178, Aubiere, France
+Submitter:                      ${submitter}
+Data level:                     ${lvl}
+Version:                        1
+Version description:            initial revision, manually inspected
+Measurement height:             7m
+Inlet type:                     
+Inlet description:              Inlet cutpoint=PM5
+Volume std. temperature:        ${std_temp}K
+Volume std. pressure:           ${std_pres}hPa
+Detection limit:                
+Detection limit expl.:          
+Measurement uncertainty expl.:  Uncertainties calculated using based on the method of Allan et al. (2003), DOI 10.1029/2002JD002358.
+Zero/negative values code:      Zero/negative possible
+Zero/negative values:           Zero and neg. values may appear due to statistical variations at very low concentrations
+Standard method:                Ref=Ng_2011
+Comment:                        Uncertainties computed using the standard deviation 
+Acknowledgement:                For using this data for any kind of publications, you must contact the data originator(s), in terms of acknowledgment
+start_time     end_time       ${vars_tag}
