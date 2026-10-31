@@ -4,6 +4,7 @@ channels:
 dependencies:
   - python=3.11
   - jupyter
+  - jupyter-server-proxy
   - numpy
   - h5py
   - pandas

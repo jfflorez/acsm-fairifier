@@ -52,7 +52,7 @@ from time import sleep
 
 from app.components.instrument_dashboard import instrument_dashboard
 from app.components.flagging_dashboard import flagging_dashboard
-from app.components.upload_component import upload_component
+from app.components.upload_component import create_upload_component #upload_component
 
 import yaml
 with open(os.path.join(projectPath,'app/flags/ebas_dict.yaml')) as stream:
@@ -141,9 +141,29 @@ DatePickerRange = dbc.Col([
 import dash_uploader as du
 #UPLOAD_FOLDER_ROOT = os.path.join(projectPath,'data','uploads')
 UPLOAD_FOLDER_ROOT = os.path.join(projectPath,'data')
+PREFIX = "/dash-app/"
+#PREFIX = "/proxy/8050/"
 # Initialize Dash app with Bootstrap theme
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-du.configure_upload(app, UPLOAD_FOLDER_ROOT, use_upload_id=False)
+app = dash.Dash(
+    __name__,
+    external_stylesheets=[dbc.themes.BOOTSTRAP],
+    #routes_pathname_prefix= "/dash-app/", 
+    routes_pathname_prefix = PREFIX if PREFIX != '/proxy/8050/' else '/', # Set to "/" if PREFIX='',
+    requests_pathname_prefix=PREFIX,
+)
+du.configure_upload(
+    app,
+    UPLOAD_FOLDER_ROOT,
+    use_upload_id=False,        
+    upload_api=f"{PREFIX}dash-uploader"
+    #upload_api="/dash-app/dash-uploader"
+    #upload_api=f"{PREFIX}/API/dash-uploader",     # no prefix: the component adds it
+)
+
+
+
+print("Dash prefix:", app.config.requests_pathname_prefix)
+
 #df = pd.DataFrame.empty()
 
 app.layout = dbc.Container([
@@ -153,7 +173,7 @@ app.layout = dbc.Container([
                 html.H6('All measurements are assumed valid unless checked otherwise.')
                 ]
             )],style={'textAlign': 'center'}),
-    upload_component,
+    create_upload_component(),
     instrument_dashboard,
     flagging_dashboard,
     
