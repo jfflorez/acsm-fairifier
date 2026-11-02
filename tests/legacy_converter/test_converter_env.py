@@ -15,11 +15,12 @@ if str(ROOT) not in sys.path:
 
 
 from pipelines.steps.utils import run_script  # adjust to wherever you put it
-
+from pipelines.steps.update_actris_header import main as update_actris_header
     
 SCRIPT = ROOT / "third_party/acsmProcessingSoftware/src/rawto012.py"
 INFILE = HERE / "data/JFJ_ACSM-017_2024.txt"
 FLAGS = HERE / "data/JFJ_ACSM-017_FLAGS_2024.txt"
+DESCRIPTOR = HERE / "data/campaignDescriptor.yaml"
 BASELINE = HERE / "baseline"
 
 
@@ -48,13 +49,15 @@ def test_output_matches_baseline(python, tmp_path):
     print(f"\n[interpreter] {python}")
     print(f"[input]       {INFILE}")
     print(f"[flags]       {FLAGS}")
+    print(f"[descriptor] {DESCRIPTOR}")
     print(f"[baseline]    {BASELINE}")
     print(f"[output dir]  {tmp_path}")
 
     assert INFILE.exists() and FLAGS.exists(), f"missing fixtures: {INFILE}, {FLAGS}"
     assert BASELINE.exists(), f"missing baseline: {BASELINE}"
     print("[check] fixtures and baseline exist")
-
+    
+    update_actris_header(DESCRIPTOR)
     run_script(python, SCRIPT, [INFILE, FLAGS, f"{tmp_path}/"], cwd=ROOT)
     print("[check] converter ran without error")
 
@@ -70,7 +73,8 @@ def test_output_matches_baseline(python, tmp_path):
 def test_wrapper_matches_baseline(tmp_path):
     """The pipeline's entry point (wrapper -> run_script -> legacy interpreter) reproduces the baseline."""
     from pipelines.steps.prepare_ebas_submission import run_legacy_acsm_converter
-
+    
+    update_actris_header(DESCRIPTOR)
     run_legacy_acsm_converter(
         str(INFILE), str(FLAGS), str(tmp_path),
         python="/opt/conda/envs/acsm_legacy/bin/python",
