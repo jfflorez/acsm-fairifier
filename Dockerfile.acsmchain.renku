@@ -1,0 +1,82 @@
+# Get additional info about the Dockerfile at https://docs.docker.com/reference/dockerfile/ 
+
+FROM condaforge/miniforge3:latest
+
+# Define the name of the environment
+#ARG ENV_NAME=apog_penv
+ENV ENV_NAME=apog_penv
+ENV MAIN_REPO=acsm-fairifier
+
+# Set the working directory
+WORKDIR /workspace
+RUN mkdir -p /workspace/$MAIN_REPO
+
+#RUN apt-get update && apt-get install -y cifs-utils
+# Install Graphviz system binaries
+RUN apt-get update && apt-get install -y \
+    graphviz \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY docs/renku-deployment/renku-start.sh /usr/local/bin/renku-start.sh
+#COPY --chmod=644 docs/renku-deployment/renku-start.sh /usr/local/bin/renku-start.sh
+
+# ---------- Start creation of previous apog_penv ------------------------     
+# Use mamba if available for faster installation
+#RUN conda install -y -n base -c conda-forge mamba && \
+#    mamba create -y -n $ENV_NAME -c conda-forge python=3.11 \
+#    jupyter numpy h5py pandas matplotlib plotly=5.24 scipy pip && \
+#    conda clean --all -y && rm -rf /root/.cache/pip
+
+# Activate the environment and install additional pip packages
+#RUN conda run -n $ENV_NAME pip install pybis==1.35 igor2 ipykernel sphinx dash dash-bootstrap-components
+
+# Add legacy acsm converter's requirements (This may downgrade main application env)
+#COPY requirements.txt /workspace/$MAIN_REPO/requirements.txt
+#RUN conda run -n $ENV_NAME pip install -r /workspace/$MAIN_REPO/requirements.txt
+#RUN conda run -n $ENV_NAME pip install graphviz
+
+# ---------- End definition of previous apog_penv --------------------------
+
+# ---------- Start creation of new apog_env ----------------------------------------
+RUN conda install -y -n base -c conda-forge mamba
+COPY environment.yml /workspace/$MAIN_REPO/environment.yml
+RUN mamba env create -y -n $ENV_NAME -c conda-forge -f /workspace/$MAIN_REPO/environment.yml && \
+    conda clean --all -y
+
+# Set the default environment when the container starts
+ENV CONDA_DEFAULT_ENV=$ENV_NAME
+ENV PATH=/opt/conda/envs/$ENV_NAME/bin:$PATH
+
+# Create a separate conda environment for legacy acsm converter
+COPY environment_legacy.yml /workspace/$MAIN_REPO/environment_legacy.yml
+RUN mamba env create -y -f /workspace/$MAIN_REPO/environment_legacy.yml && \
+    conda clean --all -y
+ENV LEGACY_PYTHON=/opt/conda/envs/acsm_legacy/bin/python
+
+# ---------- End creation of new apog_env
+
+
+
+# Create necessary directories for VOLUME
+RUN mkdir -p /workspace/$MAIN_REPO/data /workspace/$MAIN_REPO/figures /workspace/$MAIN_REPO/pipelines/params
+#RUN mkdir -p /mnt/lac_ord
+
+# Copy project files, excluding certain directories (handled via .dockerignore)
+#COPY . /workspace/$MAIN_REPO
+
+# Define volumes for excluded directories
+#VOLUME ["/workspace/$MAIN_REPO/data", "/workspace/$MAIN_REPO/figures", "/workspace/$MAIN_REPO/pipelines/params"]
+
+# Configure Jupyter-Server-Proxy
+# Copy config.py to /etc/jupyter (instead of /root/.jupyter/), as the directory is on every user's config path (Renku runs as UID 1000, which can't read /root/.jupyter)
+COPY app/config/jupyter-server-proxy/jupyter_server_config.py /etc/jupyter/jupyter_server_config.py
+# COPY app/config/jupyter-server-proxy/jupyter_server_config.py /root/.jupyter/jupyter_server_config.py
+
+#RUN pip install pipx
+#RUN pipx install renku
+# Add any other packages needed for JupyterLab
+#RUN pip install --no-cache-dir matplotlib scikit-learn
+
+# If you want to set JupyterLab as the default command
+#CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--NotebookApp.token='my-token'"]
+CMD ["/bin/bash"]
