@@ -5,9 +5,9 @@ FROM condaforge/miniforge3:latest
 # Define the name of the environment
 #ARG ENV_NAME=apog_penv
 ENV ENV_NAME=apog_penv
-
+ENV MAIN_REPO_NAME=acsm-fairifier
 # Set the working directory
-WORKDIR /acsmdc
+WORKDIR /$MAIN_REPO_NAME
 
 #RUN apt-get update && apt-get install -y cifs-utils
 # Install Graphviz system binaries
@@ -26,16 +26,16 @@ RUN apt-get update && apt-get install -y \
 #RUN conda run -n $ENV_NAME pip install pybis==1.35 igor2 ipykernel sphinx dash dash-bootstrap-components
 
 # Add legacy acsm converter's requirements (This may downgrade main application env)
-#COPY requirements.txt /acsmdc/requirements.txt
-#RUN conda run -n $ENV_NAME pip install -r /acsmdc/requirements.txt
+#COPY requirements.txt /$MAIN_REPO_NAME/requirements.txt
+#RUN conda run -n $ENV_NAME pip install -r /$MAIN_REPO_NAME/requirements.txt
 #RUN conda run -n $ENV_NAME pip install graphviz
 
 # ---------- End definition of previous apog_penv --------------------------
 
 # ---------- Start creation of new apog_env ----------------------------------------
 RUN conda install -y -n base -c conda-forge mamba
-COPY environment.yml /acsmdc/environment.yml
-RUN mamba env create -y -n $ENV_NAME -c conda-forge -f /acsmdc/environment.yml && \
+COPY environment.yml /$MAIN_REPO_NAME/environment.yml
+RUN mamba env create -y -n $ENV_NAME -c conda-forge -f /$MAIN_REPO_NAME/environment.yml && \
     conda clean --all -y
 
 # Set the default environment when the container starts
@@ -43,8 +43,8 @@ ENV CONDA_DEFAULT_ENV=$ENV_NAME
 ENV PATH=/opt/conda/envs/$ENV_NAME/bin:$PATH
 
 # Create a separate conda environment for legacy acsm converter
-COPY environment_legacy.yml /acsmdc/environment_legacy.yml
-RUN mamba env create -y -f /acsmdc/environment_legacy.yml && \
+COPY environment_legacy.yml /$MAIN_REPO_NAME/environment_legacy.yml
+RUN mamba env create -y -f /$MAIN_REPO_NAME/environment_legacy.yml && \
     conda clean --all -y
 ENV LEGACY_PYTHON=/opt/conda/envs/acsm_legacy/bin/python
 
@@ -53,16 +53,17 @@ ENV LEGACY_PYTHON=/opt/conda/envs/acsm_legacy/bin/python
 
 
 # Create necessary directories for VOLUME
-RUN mkdir -p /acsmdc/data /acsmdc/figures /acsmdc/pipelines/params
+RUN mkdir -p /$MAIN_REPO_NAME/data /$MAIN_REPO_NAME/figures /$MAIN_REPO_NAME/pipelines/params
 #RUN mkdir -p /mnt/lac_ord
 
 # Copy project files, excluding certain directories (handled via .dockerignore)
-#COPY . /acsmdc
+#COPY . /$MAIN_REPO_NAME
 
 # Define volumes for excluded directories
-#VOLUME ["/acsmdc/data", "/acsmdc/figures", "/acsmdc/pipelines/params"]
+#VOLUME ["/$MAIN_REPO_NAME/data", "/$MAIN_REPO_NAME/figures", "/$MAIN_REPO_NAME/pipelines/params"]
 
-# Add JupyterLab
+# Configure Jupyter-Server-Proxy
+COPY app/config/jupyter-server-proxy/jupyter_server_config.py /root/.jupyter/jupyter_server_config.py
 #RUN pip install pipx
 #RUN pipx install renku
 # Add any other packages needed for JupyterLab
