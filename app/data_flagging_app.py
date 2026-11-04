@@ -32,7 +32,7 @@ import io
 
 import app.data_flagging_utils as data_flagging_utils
 
-from dash import Dash, html, dcc, callback, Output, Input, State, dash_table
+from dash import Patch, Dash, html, dcc, callback, Output, Input, State, dash_table
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 import dash_bootstrap_components as dbc
@@ -71,9 +71,9 @@ EnableVisCheckbox = dbc.Col(dbc.Row([dbc.Col(dcc.Checklist(
                                     justify="center", align="center"),
                     width=12)
 
-FlagVisTable =  html.Div(dash_table.DataTable(data=[], 
+FlagVisTable =  html.Div(dash_table.DataTable(id='tbl', 
                                             columns=[{"name": i, "id": i} for i in ['id','startdate','enddate','description','parent_channel']], 
-                                            id='tbl',
+                                            data=[],
                                             style_header={'textAlign': 'center'},
                                             fixed_rows={'headers': True},  # Fixed table headers
                                             style_table={'height': '1000px'},  # Make table scrollable
@@ -141,7 +141,11 @@ DatePickerRange = dbc.Col([
 import dash_uploader as du
 #UPLOAD_FOLDER_ROOT = os.path.join(projectPath,'data','uploads')
 UPLOAD_FOLDER_ROOT = os.path.join(projectPath,'data')
-PREFIX = "/dash-app/"
+
+# Session base path on Renku (e.g. /sessions/<id>); empty locally
+_BASE = os.environ.get("RENKU_BASE_URL_PATH", "").rstrip("/")
+PREFIX = f"{_BASE}/dash-app/"
+
 #PREFIX = "/proxy/8050/"
 # Initialize Dash app with Bootstrap theme
 app = dash.Dash(
@@ -183,9 +187,11 @@ app.layout = dbc.Container([
                     html.Div(id='flag-mode-title', style={'whiteSpace': 'pre-line'}),
                     dcc.Loading(
                     type="circle",  # Spinner style
+                    delay_show=250,
                     children=[
                     dcc.Graph(id='timeseries-plot',
-                              style={'height': '1200px','width' : '100%'})])
+                              figure={},  # explicit empty figure, no initial render work
+                              style={'height': '950px','width' : '100%'})]) # fits the 1000px container
                     ],
                     style={'height': '1000px', 'overflowY': 'auto'})        
         ],  
@@ -393,17 +399,27 @@ def update_variable_dropdown(instFolderName, fileName, data):
     return [{"label": var_name, "value": var_name} for var_name in variableList] , False, variableList
 
 from datetime import datetime
-import numpy as np
 
-@app.callback(    
+
+_TIME_CACHE = {}   # process-level cache: (path, mtime, dataset_name) -> datetime64[ns] array
+
+
+@app.callback(
     Output('timeseries-plot', 'figure'),
-    Output('memory-output','data'),
+    Output('memory-output', 'data'),
     Input('instrument-dropdown', 'value'),
     Input('file-dropdown', 'value'),
     Input('sub-dropdown', 'value'),
+    # ======================================================================
+    # TODO (possible improvement): move the date range out of this callback.
+    # Replace these two Inputs with State, and add a separate `set_date_range`
+    # callback that only patches the x-axis ranges, so a date change no longer
+    # rebuilds and resends the whole figure.
+    # ----------------------------------------------------------------------
     Input('date-picker-range', 'start_date'),
     Input('date-picker-range', 'end_date'),
-    Input('memory-output', 'data'),
+    # ======================================================================
+    State('memory-output', 'data'),
     prevent_initial_call=True
 )
 def update_figure(instFolderName, fileName, variableList, start_date, end_date, data):
@@ -417,42 +433,46 @@ def update_figure(instFolderName, fileName, variableList, start_date, end_date, 
     if not path_to_file:
         return go.Figure(), dash.no_update
 
+    DataOps = None   # Avoids NameError in `finally` if the constructor fails
     try:
         DataOps = hdf5_ops.HDF5DataOpsManager(path_to_file)
         DataOps.load_file_obj()
 
         dataset_name = '/'.join([instFolderName, fileName, 'data_table'])
-        datetime_var, datetime_var_format = DataOps.infer_datetime_variable(dataset_name)
 
-        if not isinstance(data.get('time_cache'), dict):
-            data['time_cache'] = {}
+        # mtime in the key: a replaced/overwritten file never serves stale times.
+        # datetime_var / format are no longer in the key, so on a cache hit
+        # infer_datetime_variable is skipped entirely.
+        cache_key = (path_to_file, os.path.getmtime(path_to_file), dataset_name)
 
-        cache_key = f"{path_to_file}|{dataset_name}|{datetime_var}|{datetime_var_format}"
-
-        if cache_key in data['time_cache']:
-            time_column = np.array(data['time_cache'][cache_key])
+        if cache_key in _TIME_CACHE:
+            time_column = _TIME_CACHE[cache_key]   # already datetime64[ns]; treat as read-only
         else:
+            datetime_var, datetime_var_format = DataOps.infer_datetime_variable(dataset_name)
             time_column = DataOps.reformat_datetime_column(
                 dataset_name, datetime_var, datetime_var_format
             )
-            data['time_cache'][cache_key] = time_column.astype(str).tolist()
+            # Convert once, on a miss, handling NaNs or invalid entries
+            try:
+                time_column = np.array(time_column, dtype='datetime64[ns]')
+            except Exception:
+                time_column = pd.to_datetime(time_column, errors='coerce').to_numpy()
+            _TIME_CACHE[cache_key] = time_column
 
-        # Convert to datetime64, safely handling NaNs or invalid entries
-        try:
-            time_column = np.array(time_column, dtype='datetime64[ns]')
-        except Exception:
-            # If conversion fails (e.g. mixed formats), fall back to pandas
-            import pandas as pd
-            time_column = pd.to_datetime(time_column, errors='coerce').to_numpy()
+        # Exclude NaT values (creates a new array, so the cached one is not modified)
+        mask = ~np.isnat(time_column)
 
-        # Apply mask if date range provided
-        mask = ~np.isnat(time_column)  # Exclude NaT values
-
+        # ======================================================================
+        # TODO (possible improvement): remove this date mask block.
+        # With the date range handled by a separate `set_date_range` callback,
+        # the figure would always be built with the full time range, and the
+        # date picker would only move the x-axis ranges via Patch().
+        # ----------------------------------------------------------------------
         if start_date and end_date:
             start = np.datetime64(start_date)
             end = np.datetime64(end_date)
             mask &= (time_column >= start) & (time_column <= end)
-
+        # ======================================================================
 
         fig, channel_names = data_flagging_utils.create_loaded_file_figure(
             path_to_file, instFolderName, dataset_name, time_column, variableList, mask=mask
@@ -462,7 +482,11 @@ def update_figure(instFolderName, fileName, variableList, start_date, end_date, 
     except Exception as e:
         print(f'Error while processing file {path_to_file}: {e}')
     finally:
-        DataOps.unload_file_obj()
+        if DataOps is not None:
+            DataOps.unload_file_obj()
+
+    # Drop any old browser-stored cache so it stops riding along in memory-output
+    data.pop('time_cache', None)
 
     return fig, data
 
@@ -521,27 +545,26 @@ def load_data(filename, contents):
     Output('timeseries-plot', 'figure', allow_duplicate=True),
     Output('flag-mode-title','children'),
     Input('flag-button', 'n_clicks'),
-    State('timeseries-plot', 'figure'),
+    #State('timeseries-plot', 'figure'), No need to pull the state to update the layout, we'll send a Patch applied on the front end side
     State('memory-output', 'data'),
     prevent_initial_call=True,
 )
-def create_flag(n_clicks, fig, data):
+def create_flag(n_clicks, data):
     #if not data or not data.get('data_loaded_flag', False):
 
-    if not all([n_clicks, fig, data]):
+    if not all([n_clicks, data]):
         return dash.no_update, dash.no_update
     
-    fig['layout'].update({'dragmode' : 'select', 
-                          'activeselection' : dict(fillcolor='yellow'),
-                          'doubleClick' : 'reset'
-                          })
-    
-    #fig['layout'].update({'title':"Flagging Mode Enabled: Select ROI to Define Flagging Interval."})
+    #fig['layout'].update({'dragmode' : 'select', 
+    #                      'activeselection' : dict(fillcolor='yellow'),
+    #                      'doubleClick' : 'reset'
+    #                      })
+    fig_patch = Patch()
+    fig_patch['layout']['dragmode'] = 'select'
+    fig_patch['layout']['activeselection'] = dict(fillcolor='yellow')
 
-    #value = '{} amigos'.format(n_clicks)
     title = "Flagging Mode Enabled: Select ROI to Define Flagging Interval."
-    return fig, title
-    #return fig
+    return fig_patch, title
 
 #@app.callback(
 #    Output('timeseries-plot', 'figure', allow_duplicate=True),
@@ -585,50 +608,70 @@ def create_flag(n_clicks, fig, data):
 #    return fig, None #, f'You have entered: \n{value}'
 
 @app.callback(
-    [Output('timeseries-plot', 'selectedData'),
+     Output('timeseries-plot', 'selectedData'),
      Output('timeseries-plot', 'figure', allow_duplicate=True),
-     Output('flag-mode-title', 'children',allow_duplicate=True)],     
-    [Input('reset-flag-button', 'n_clicks'),
-     State('timeseries-plot', 'figure'),
-     State('memory-output', 'data')],
+     Output('flag-mode-title', 'children',allow_duplicate=True),     
+     Input('reset-flag-button', 'n_clicks'),
+     # State('timeseries-plot', 'figure'),
+     State('memory-output', 'data'),
      prevent_initial_call = True)
-def clear_flag(n_clicks, fig, data):    
+def clear_flag(n_clicks, data):#(n_clicks, fig, data):    
 
-    if n_clicks > 0 and data.get('data_loaded_flag', False):
-        # Clear selection
-        selected_data = None
-        fig['layout'].update({'dragmode': 'zoom', 'activeselection': None,
-                              'selections':{'line': None}})
-        instFolder =data['instFolder']
-        fig['layout'].update({'title': f'{instFolder}: Target and Diagnostic Channels'})
-        flagging_mode_message = ''
-        return selected_data, fig, flagging_mode_message
-    else:
+    if not n_clicks or not data or not data.get('data_loaded_flag', False):
         return dash.no_update, dash.no_update, dash.no_update
+
+    #if n_clicks > 0 and data.get('data_loaded_flag', False):       
+        
+    #fig['layout'].update({'dragmode': 'zoom', 'activeselection': None,
+    #                      'selections':{'line': None}})
+    #instFolder =data['instFolder']
+    #fig['layout'].update({'title': f'{instFolder}: Target and Diagnostic Channels'})
+    fig_patch = Patch()
+    fig_patch['layout']['dragmode'] = 'zoom'
+    fig_patch['layout']['activeselection'] = None
+    fig_patch['layout']['selections'] = []
+    fig_patch['layout']['title'] = f"{data['instFolder']}: Target and Diagnostic Channels"
+
+    selected_data = None # Clear selection
+    flagging_mode_message = '' # Clear title
+    
+    return selected_data, fig_patch, flagging_mode_message
+    #else:
+    #    return dash.no_update, dash.no_update, dash.no_update
     
 @app.callback(
-    [Output('timeseries-plot', 'figure', allow_duplicate=True),
+     Output('timeseries-plot', 'figure', allow_duplicate=True),
      Output('timeseries-plot', 'selectedData',allow_duplicate=True),
-     Output('flag-mode-title', 'children',allow_duplicate=True)],     
-    [Input('timeseries-plot', 'relayoutData'),
-     State('timeseries-plot', 'figure'),
-     State('memory-output', 'data')],
+     Output('flag-mode-title', 'children',allow_duplicate=True),     
+     Input('timeseries-plot', 'relayoutData'),
+     # State('timeseries-plot', 'figure'), # increases payload unnecessarily in this case, instead we can get drag_mode from relayoutData
+     State('memory-output', 'data'),
      prevent_initial_call = True)
-def clear_flag_mode_title(relayoutData, fig, data):   
-    if not all([relayoutData, fig, data]):
+def clear_flag_mode_title(relayoutData, data): # (relayoutData, fig, data): 
+    if not relayoutData or not data or not data.get('data_loaded_flag', False):  
+    #if not all([relayoutData, data]): # all([relayoutData, fig, data]):
         return dash.no_update, dash.no_update, dash.no_update
 
-    if data.get('data_loaded_flag', False) and not fig['layout'].get('dragmode',None) == 'select':
-        # Clear selection
-        selected_data = None
-        fig['layout'].update({'dragmode': 'zoom', 'activeselection': None,
-                              'selections':{'line': None}})
-        #instFolder =data['instfolder']
-        #fig['layout'].update({'title': f'{instFolder}: Target and Diagnostic Channels'})
-        flagging_mode_message = ''
-        return fig, selected_data, flagging_mode_message
-    else:
+    mode = relayoutData.get('dragmode') # this is equivalent to mode = fig['layout'].get('dragmode',None)
+    if mode in (None, 'select', 'lasso'):   # only act when the user picked another tool
         return dash.no_update, dash.no_update, dash.no_update
+    #if data.get('data_loaded_flag', False) and not mode == 'select':
+
+
+    #fig['layout'].update({'dragmode': 'zoom', 'activeselection': None,
+    #                      'selections':{'line': None}})
+    fig_patch = Patch()
+    fig_patch['layout']['dragmode'] = 'zoom'
+    fig_patch['layout']['activeselection'] = None
+    fig_patch['layout']['selections'] = []
+
+    #instFolder =data['instfolder']
+    #fig['layout'].update({'title': f'{instFolder}: Target and Diagnostic Channels'})
+    selected_data = None # Clear selection
+    flagging_mode_message = '' # Clear title
+    return fig_patch, selected_data, flagging_mode_message
+    #else: # zoom/pan/etc., or still in flag mode
+    #    return dash.no_update, dash.no_update, dash.no_update
 
 def extract_number(s):
     return int(s[1:])-1 if s[1:].isdigit() else 0
@@ -876,8 +919,10 @@ def main():
     # Start the browser-opening function in a separate thread
     threading.Thread(target=open_browser).start()
 
+    # Set DASH_DEBUG=0 for Renku deployment
+    debug = os.environ.get("DASH_DEBUG", "1") == "1"   # default on = old behav
     # Run the Dash app server on 0.0.0.0 to allow external access
-    app.run(host="0.0.0.0", port=8050, debug=True, use_reloader=False)
+    app.run(host="0.0.0.0", port=8050, debug=debug, use_reloader=False)
 
 if __name__ == '__main__':
     main()
