@@ -82,12 +82,19 @@ def create_loaded_file_figure(file_path, instFolder, dataset_name, time_column, 
 
         x = time_column[start_idx:end_idx]
         y = dataset[variables[i]][start_idx:end_idx]
-        
+
+        if y.size:
+            y_min, y_max = float(y.min()), float(y.max())
+            pad = 0.05 * (y_max - y_min) or 1.0   # 5% padding, 1.0 if the series is constant
+            y_range = [y_min - pad, y_max + pad]
+        else:
+            y_range = [0, 1]  
+                
         fig.add_trace(go.Scatter(x = x,
                                 y = y,
                                 mode = 'lines',
                                 name = variables[i]), row=trace_idx, col=1)
-        fig.update_yaxes(title_text= variables[i], row=trace_idx, col=1)
+        fig.update_yaxes(title_text= variables[i], range=y_range, row=trace_idx, col=1)
         trace_idx = trace_idx + 1
         
     #dataset = DataOpsAPI.file_obj[diagnostic_loc]
