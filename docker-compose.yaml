@@ -18,6 +18,8 @@ services:
     environment:
       - DOCKER_CONTAINER=1
       - NETWORK_MOUNT=/acsm-fairifier/data
+      - APP_SHARED_MODE=1
+      - DASH_DEBUG=1
     volumes:
       - ./:/workspace/acsm-fairifier
 
@@ -27,6 +29,8 @@ services:
     environment:
       - DOCKER_CONTAINER=1
       - NETWORK_MOUNT=/mnt/network_mount
+      - APP_SHARED_MODE=1
+      - DASH_DEBUG=1
     volumes:
       - ./:/acsm-fairifier
       - network_mount:/mnt/network_mount:rw

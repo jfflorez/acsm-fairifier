@@ -31,7 +31,7 @@ import io
 
 
 import app.data_flagging_utils as data_flagging_utils
-
+import dash_uploader as du
 from dash import Patch, Dash, html, dcc, callback, Output, Input, State, dash_table
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
@@ -52,7 +52,7 @@ from time import sleep
 
 from app.components.instrument_dashboard import instrument_dashboard
 from app.components.flagging_dashboard import flagging_dashboard
-from app.components.upload_component import create_upload_component #upload_component
+from app.components.upload_component import create_upload_component, list_h5_files #upload_component
 
 import yaml
 with open(os.path.join(projectPath,'app/flags/ebas_dict.yaml')) as stream:
@@ -138,13 +138,20 @@ DatePickerRange = dbc.Col([
     )
 ])
 
-import dash_uploader as du
-#UPLOAD_FOLDER_ROOT = os.path.join(projectPath,'data','uploads')
-UPLOAD_FOLDER_ROOT = os.path.join(projectPath,'data')
+from dotenv import load_dotenv
+load_dotenv(os.path.join(projectPath, '.env'))   # must run before any os.environ.get(...) is read
 
 # Session base path on Renku (e.g. /sessions/<id>); empty locally
 _BASE = os.environ.get("RENKU_BASE_URL_PATH", "").rstrip("/")
 PREFIX = f"{_BASE}/dash-app/"
+
+# Relative values resolve from projectPath; absolute values win (os.path.join drops projectPath).
+DATA_DIR = os.path.join(projectPath, os.environ.get('APP_DATA_DIR', 'data'))
+if not os.path.isdir(DATA_DIR):
+    raise RuntimeError(f"APP_DATA_DIR does not exist: {DATA_DIR}")
+
+SERVER_FOLDER = DATA_DIR if os.environ.get('APP_SHARED_MODE', '0') == '1' else None
+UPLOAD_FOLDER_ROOT = DATA_DIR
 
 #PREFIX = "/proxy/8050/"
 # Initialize Dash app with Bootstrap theme
@@ -167,7 +174,7 @@ du.configure_upload(
 
 
 print("Dash prefix:", app.config.requests_pathname_prefix)
-
+print("Dash shared data folder:", SERVER_FOLDER)
 #df = pd.DataFrame.empty()
 
 app.layout = dbc.Container([
@@ -177,7 +184,7 @@ app.layout = dbc.Container([
                 html.H6('All measurements are assumed valid unless checked otherwise.')
                 ]
             )],style={'textAlign': 'center'}),
-    create_upload_component(),
+    create_upload_component(SERVER_FOLDER),
     instrument_dashboard,
     flagging_dashboard,
     
@@ -223,35 +230,13 @@ app.layout = dbc.Container([
     ],justify="center", align="center"),
 ],  
 )
-
-#@app.callback()
-
-@app.callback(
-    Output('memory-output','data', allow_duplicate=True),
-    Output("instrument-dropdown", "options"),
-    Output("instrument-dropdown", "disabled"),
-    Input('upload-image', 'isCompleted'),
-    State('upload-image', 'fileNames'),
-    State('upload-image', 'upload_id'),
-    #[Input('upload-image','filename'),
-    #Input('upload-image','contents')],
-    prevent_initial_call=True
-)
-def load_data(is_completed, filenames, upload_id):#(filename, contents):
+# Supports file picker and data upload callbacks
+def load_file(path_to_file : str):
+    """Open the HDF5 file, read its metadata, and build what the UI needs.
+    Shared by both modes. Returns (memory-output data, instrument options, disabled)."""
     data = {'data_loaded_flag': False}
-    if not is_completed:
-        return data, [], False  # handle no upload case
-    
-    #if filename and contents and filename.endswith('.h5'):
-
-    try:
-        #path_to_file = data_flagging_utils.save_file(filename,contents)
-
-        # Build the file path manually
-        filename = filenames[0] if filenames else None
-        #path_to_file = os.path.join(UPLOAD_FOLDER_ROOT, upload_id, filename)
-        path_to_file = os.path.join(UPLOAD_FOLDER_ROOT, filename)# upload_id, filename)
-
+    DataOps = None
+    try:    
         DataOps = hdf5_ops.HDF5DataOpsManager(path_to_file)
         DataOps.load_file_obj()
 
@@ -282,21 +267,68 @@ def load_data(is_completed, filenames, upload_id):#(filename, contents):
 
         data['instFolder'] = instFolderName
         #data['channel_names'] = channel_names
-
-        
-
-        
-
         return data, instrument_list, False
     
-    except Exception as e:     
+    except Exception as e:
         print(f"Error processing file: {e}")
         return data, [], False
     finally:
-        DataOps.unload_file_obj()
-        
+        if DataOps is not None:
+            DataOps.unload_file_obj()    
 
-    return data, [], False
+if SERVER_FOLDER:
+    # ---- No data upload, assumes PROJECT_PATH/data folder hosts already the file on disk ----
+    @app.callback(
+        Output('memory-output', 'data', allow_duplicate=True),
+        Output('instrument-dropdown', 'options'),
+        Output('instrument-dropdown', 'disabled'),
+        Input('file-picker', 'value'),
+        prevent_initial_call=True,
+    )
+    def load_data_from_folder(name):
+        if not name:
+            return dash.no_update, dash.no_update, dash.no_update
+        path_to_file = os.path.join(SERVER_FOLDER, os.path.basename(name))  # basename blocks '../'
+        if not os.path.isfile(path_to_file):
+            return dash.no_update, dash.no_update, dash.no_update
+        return load_file(path_to_file)
+
+    @app.callback(
+        Output('file-picker', 'options'),
+        Input('refresh-files', 'n_clicks'),
+        prevent_initial_call=True,
+    )
+    def refresh_file_list(n_clicks):
+        return list_h5_files(SERVER_FOLDER)
+
+else:
+    @app.callback(
+        Output('memory-output','data', allow_duplicate=True),
+        Output("instrument-dropdown", "options"),
+        Output("instrument-dropdown", "disabled"),
+        Input('upload-image', 'isCompleted'),
+        State('upload-image', 'fileNames'),
+        State('upload-image', 'upload_id'),
+        #[Input('upload-image','filename'),
+        #Input('upload-image','contents')],
+        prevent_initial_call=True
+    )
+    def load_data(is_completed, filenames, upload_id):#(filename, contents):
+        data = {'data_loaded_flag': False}
+        if not is_completed:
+            return data, [], False  # handle no upload case
+        
+        # Build the file path manually
+        filename = filenames[0] if filenames else None
+        if not filename:
+            return {'data_loaded_flag': False}, [], False
+        #path_to_file = os.path.join(DEFAULT_APP_DATA_DIR, upload_id, filename)
+        path_to_file = os.path.join(UPLOAD_FOLDER_ROOT, filename)# upload_id, filename)
+
+        return load_file(path_to_file)
+
+
+
 
 @app.callback(
     Output("file-dropdown", "options"),
@@ -827,11 +859,13 @@ def visualize_flag_on_figure(active_cell, value, figure, data):
             #y_max = figure['layout'].get(yaxis_key, {}).get('range', [0, 1])[1]
 
             # Add a vertical region to the specified subplot
+            xref=xaxis_key.replace('axis', ''),
+            yref=yaxis_key.replace('axis', ''),
             figure['layout']['shapes'] = figure['layout'].get('shapes', []) + [
                 dict(
                     type="rect",
-                    xref=xaxis_key.replace('axis', ''),
-                    yref=yaxis_key.replace('axis', ''),
+                    xref=xref,
+                    yref=yref,
                     x0=startdate,
                     x1=enddate,
                     y0=figure['layout'][yaxis_key]['range'][0],
