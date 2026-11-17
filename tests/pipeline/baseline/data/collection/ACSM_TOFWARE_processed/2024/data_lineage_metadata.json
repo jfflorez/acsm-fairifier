@@ -1,0 +1,23 @@
+{
+    "ACSM_JFJ_2024_timeseries_calibrated.csv": {
+        "actris_level": 1,
+        "processing_script": "../../../../../workspace/acsm-fairifier/pipelines/steps/apply_calibration_factors.py",
+        "processing_date": "2026-11-17 13:14:06",
+        "datetime_var": "t_start_Buf",
+        "suffix": "calibrated.csv"
+    },
+    "ACSM_JFJ_2024_timeseries_calibrated_err.csv": {
+        "actris_level": 1,
+        "processing_script": "../../../../../workspace/acsm-fairifier/pipelines/steps/apply_calibration_factors.py",
+        "processing_date": "2026-11-17 13:14:06",
+        "datetime_var": "t_start_Buf",
+        "suffix": "calibrated_err.csv"
+    },
+    "ACSM_JFJ_2024_timeseries_calibration_factors.csv": {
+        "actris_level": 1,
+        "processing_script": "../../../../../workspace/acsm-fairifier/pipelines/steps/apply_calibration_factors.py",
+        "processing_date": "2026-11-17 13:14:06",
+        "datetime_var": "t_start_Buf",
+        "suffix": "calibration_factors.csv"
+    }
+}

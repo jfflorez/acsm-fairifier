@@ -1,0 +1,23 @@
+{
+    "ACSM_JFJ_2024_meta_flags.csv": {
+        "actris_level": 1,
+        "processing_script": "../../../../../workspace/acsm-fairifier/pipelines/steps/generate_flags.py",
+        "processing_date": "2026-11-17 13:14:06",
+        "flag_type": "diagnostics",
+        "datetime_var": "t_base"
+    },
+    "CH0001G.20240101000000.20250430141458.cpc.particle_number_concentration.aerosol.1y.1mn.CH02L_TSI_3772_JFJ.CH02L_CPC.lev1_flags.csv": {
+        "actris_level": 1,
+        "processing_script": "../../../../../workspace/acsm-fairifier/pipelines/steps/generate_flags.py",
+        "processing_date": "2026-11-17 13:14:06",
+        "flag_type": "cpc",
+        "datetime_var": "end_time"
+    },
+    "ACSM_JFJ_2024_timeseries_flags.csv": {
+        "actris_level": 1,
+        "processing_script": "../../../../../workspace/acsm-fairifier/pipelines/steps/generate_flags.py",
+        "processing_date": "2026-11-17 13:14:06",
+        "flag_type": "species",
+        "datetime_var": "t_start_Buf"
+    }
+}
