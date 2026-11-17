@@ -8,6 +8,6 @@ c.ServerProxy.servers = {
             'enabled': True,
             'title': 'Data Flagging App',
         },
-#        'new_browser_tab': False
+        'new_browser_tab': False
     }
 }
