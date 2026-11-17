@@ -5,6 +5,8 @@
 - **EBAS-compliant outputs**, with appropriate metadata and file structure  
 - **Self-describing HDF5 files**, containing final and intermediate data products for transparent, reusable, and reproducible science
 
+> **Try it without installing anything:** the toolkit runs in your browser on [Renku](https://renkulab.io/p/juanflo16/acsm-fairifier-workbench). See [Choose How to Run](#choose-how-to-run) and the [Renku guide](docs/renku-deployment/README_renku.md).
+
 ---
 
 ### Key Features
@@ -41,6 +43,19 @@ NETWORK_MOUNT/Data/JFJ/ACSM_TOFWARE/2024/
     ├── limits_of_detection.yaml
     └── validity_thresholds.yaml
 ```
+
+The input directory does not have to be a network drive: a local folder works too, e.g. `input_file_directory: '../data/<your_folder>/'` (relative to `notebooks/`).
+
+### Sample Data
+
+To try the toolkit without access to station data, download the sample campaign:
+
+```bash
+python scripts/get_sample_data.py
+```
+
+The script downloads the archive set in `SAMPLE_DATA_URL`, verifies it against `SAMPLE_DATA_MD5`, unpacks it into `data/sample/`, and checks the folder structure above. Then use `campaignDescriptor.sample.yaml` instead of `campaignDescriptor.yaml` in the main notebook.
+
 ### Output Formats
 
 - **NAS EBAS-compliant files**, structured and metadata-rich for archive submission  
@@ -81,41 +96,60 @@ While designed for ACSM datasets, the FAIRifier framework is modular and adaptab
    - `dima/` — Submodule supporting HDF5 metadata structure
    - `notebooks/` — Jupyter notebooks for stepwise FAIRification and submission preparation
    - `pipelines/` — Data chain scripts powering the transformation workflow
-   - `docs/` — Additional documentation resources
+   - `scripts/` — Helper scripts (e.g., `get_sample_data.py`)
+   - `docs/` — Additional documentation resources, including:
+     - `docs/renku-deployment/` — Renku user guide (`README_renku.md`) and deployment instructions for maintainers (`instructions.md`)
+     - `docs/data-flow-architecture/` — Architecture notes (e.g., serving the Dash app through Jupyter Server Proxy)
    - `figures/` — Generated plots and visualizations
+   - `tests/` — Baseline tests for the legacy converter and the pipeline (see [Testing](#testing))
    - `third_party/` — External code dependencies
-   - `workflows/` — Workflow automation (e.g., CI/CD pipelines)
+   - `workflows/` — Workflow (provenance) YAML files describing data processing chains, in Renku workflow format
    - Configuration files:  
-   - `Dockerfile.acsmchain` for container builds  
-   - `docker-compose.yaml` for orchestrating multi-container setups  
-   - `env_setup.sh` to bootstrap local environment  
-   - Project metadata files: `README.md`, `LICENSE`, `CITATION.cff`, `TODO.md`, and `campaigndescriptor.yaml`.
+     - `Dockerfile.acsmchain.renku` for container builds (local Docker and Renku)  
+     - `Dockerfile.acsmchain` for the earlier local-only container build  
+     - `docker-compose.yaml` for running the container locally  
+     - `env_setup.sh` to bootstrap local environment  
+   - Project metadata files: `README.md`, `LICENCE`, `CITATION.cff`, `CHANGELOG.md`, `TODO.md`, `campaignDescriptor.yaml`, and `campaignDescriptor.sample.yaml`.
 
 </details>
 
 ## Getting Started
 
+### Choose How to Run
+
+| Option | Best for | You need | Data access | Instructions |
+|---|---|---|---|---|
+| **Renku** (browser) | Trying the toolkit, sharing with collaborators | A web browser | Sample data or files uploaded into the session | [Renku guide](docs/renku-deployment/README_renku.md) |
+| **Docker** (local) | Regular processing on your own machine | Docker Desktop, Git Bash | Local folders, or the PSI network drive | [Run the ACSM FAIRifier Toolkit](#run-the-acsm-fairifier-toolkit) |
+| **Conda** (local, no Docker) | Development and debugging | Miniforge | Local folders, or the PSI network drive | [Set Up the Python Environment](#optional-set-up-the-python-environment) |
+
 ### Requirements
 
-For Windows users, the following are required:
+The following apply to the local options (Docker and Conda). For Windows users, the following are required:
 
 1. **Docker Desktop**: Required to run the toolkit using containers. [Download and install Docker Desktop](https://www.docker.com/products/docker-desktop/).
 
 2. **Git Bash**: Used to run shell scripts (`.sh` files).
 
-3. **Miniforge (Optional)**: Install [Miniforge](https://conda-forge.org/download/). Required only if you plan to run the toolkit **outside of Docker**.¨
+3. **Miniforge (Optional)**: Install [Miniforge](https://conda-forge.org/download/). Required only if you plan to run the toolkit **outside of Docker**.
 
-4. **Graphviz (for workflow visualizations)** : Install [Graphviz for Windows](https://graphviz.gitlab.io/_pages/Download/Download_windows.html). Needed to render workflow `.yaml` files as graphs. After installation, add the `Graphviz/bin` folder (e.g. `C:\Program Files\Graphviz\bin`) to your system **PATH**.
+4. **Graphviz (for workflow visualizations)**: Install [Graphviz for Windows](https://graphviz.gitlab.io/_pages/Download/Download_windows.html). Needed to render workflow `.yaml` files as graphs. After installation, add the `Graphviz/bin` folder (e.g. `C:\Program Files\Graphviz\bin`) to your system **PATH**. Not needed with Docker or Renku, where Graphviz is included in the image.
 
-4. **PSI Network Access** *(for data retrieval)*: Needed only if accessing live data from a PSI network-mounted drive.
+5. **PSI Network Access** *(for data retrieval)*: Needed only if accessing live data from a PSI network-mounted drive.
 
 ## Clone the Repository
 
-Open **Git Bash** and run:
+> **Two repositories:** The toolkit is developed at PSI ([gitea.psi.ch/apog/acsm-fairifier](https://gitea.psi.ch/apog/acsm-fairifier)) and mirrored on GitHub ([github.com/jfflorez/acsm-fairifier](https://github.com/jfflorez/acsm-fairifier)), where the Renku deployment is maintained on the `main-renku` branch. PSI users can clone either; external users should use GitHub. The `dima` submodule is hosted on PSI's public Gitea and is reachable from both.
+
+Open **Git Bash** and run one of the following:
 
 ```bash
-cd Gitea
+# PSI (Gitea)
 git clone --recurse-submodules https://gitea.psi.ch/apog/acsm-fairifier.git
+
+# GitHub mirror (includes the Renku deployment)
+git clone --recurse-submodules --branch main-renku https://github.com/jfflorez/acsm-fairifier.git
+
 cd acsm-fairifier
 ```
 
@@ -136,32 +170,47 @@ This toolkit includes a containerized JupyterLab environment for executing the d
    - Ensure the file is excluded from version control by adding .env to your .gitignore and .dockerignore files.
 4. Open **Docker Desktop**, then build the container image:
    ```bash
-   docker build -f Dockerfile.acsmchain -t datachain_processor .
+   docker build -f Dockerfile.acsmchain.renku -t datachain_processor .
    ```
+   The same image definition is used locally and on Renku. It contains the environments only; your cloned code is mounted into the container at start.
 5. Start the toolkit:
 
-- **Locally without network drive mount:**
+   - **Locally without network drive mount:**
 
-  ```bash
-  docker compose up datachain_processor
+     ```bash
+     docker compose up datachain_processor
+     ```
 
-- **With network drive mount:**
+   - **With network drive mount:**
 
-  ```bash
-  docker compose up datachain_processor_networked
+     ```bash
+     docker compose up datachain_processor_networked
+     ```
 
 6. Access:
    - **Jupyter Lab**: [http://localhost:8889/lab/](http://localhost:8889/lab/)
+   - **Data Flagging App**: starts automatically with Jupyter Lab; open it from the *Data Flagging App* tile in the Jupyter Lab launcher
 
 7. Stop the app:
    In the previously open PowerShell terminal, enter:
    ```bash
    Ctrl + C
    ```
-   After the container is properly Stopped, remove the container process as: 
+   After the container is properly stopped, remove it with: 
    ```bash
-   docker rm $(docker ps -aq --filter ancestor=datachain_processor)
+   docker compose down
    ```
+## Testing
+
+Check some of the repo's key functionalities by following [`/docs/testing/testing-acsm-fairifier.md`](/docs/testing/testing-acsm-fairifier.md). The tests check that the code still produces the same outputs as before a change. They compare a fresh run with a stored baseline of outputs that were
+checked by hand.
+
+| Test | What it covers | Input |
+|---|---|---|
+| `tests/legacy_converter/` | the legacy EBAS converter | `tests/legacy_converter/data/` |
+| `tests/pipeline/` | the whole ACSM pipeline, as in `notebooks/demo_acsm_pipeline.ipynb` | a few days of real data in `tests/pipeline/fixtures/raw/` (or a full year, see below) |
+
+
 
 
 ## (Optional) Set Up the Python Environment
@@ -201,7 +250,7 @@ We now make the previously installed Python environment `acsmnode_env` selectabl
 
 
 ## (Optional) Run the Dashboard App
-Run the following command to start the dashboard app:
+With Docker or Renku, the dashboard starts automatically (see above). Outside Docker, run the following command from the `app/` folder to start the dashboard app:
 
    ```bash
    python data_flagging_app.py
@@ -247,3 +296,4 @@ which is described in more detail at the [ORD Program project portal](https://op
 
 
 ---
+
