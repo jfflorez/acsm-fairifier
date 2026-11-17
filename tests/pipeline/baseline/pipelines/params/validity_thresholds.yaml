@@ -1,0 +1,18 @@
+calibration_params:
+  path_to_file: pipelines/params/calibration_params.yaml
+validity_thresholds:
+  description: Defines the value range of a particular variable
+  variables:
+    ABsamp:
+      lower_lim: 20000
+      upper_lim: 500000
+    FilamentEmission_mA:
+      lower_lim: 0.75
+      upper_lim: 1.5
+    FlowRate_ccs:
+      lower_lim: 2.1
+      upper_lim: 2.55
+    VaporizerTemp_C:
+      description: heater temperature
+      lower_lim: 538
+      upper_lim: 600

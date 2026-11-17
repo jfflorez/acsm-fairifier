@@ -1,0 +1,40 @@
+input_file_directory: ../data/collection_1_JFJ_2024_2025-09-23
+output_file_directory: ../data/
+project: Building FAIR data chains for atmospheric observations in the ACTRIS Switzerland
+  Network
+contact: LeilaS
+group_id: '5502'
+experiment: acsm_campaign
+dataset_startdate: null
+dataset_enddate: null
+actris_level: '1'
+data_level: 0
+station_abbr: JFJ
+year: '2024'
+instrument_name: ACSM-017
+filename_format: station_abbr, year
+instrument_datafolder:
+- ACSM_TOFWARE/2024
+integration_mode: collection
+datetime_steps: []
+originator:
+  name: Simon, Leïla
+  email: leila.simon@psi.ch
+  affiliation: Paul Scherrer Institute, PSI
+  department: Laboratory of Atmospheric Chemistry
+  address_line_1: ''
+  address_line_2: ''
+  postal_code: 5232
+  city: Villigen PSI
+  country: Switzerland
+submitter:
+  name: Simon, Leïla
+  email: leila.simon@psi.ch
+  affiliation: Paul Scherrer Institute, PSI
+  department: Laboratory of Atmospheric Chemistry
+  address_line_1: ''
+  address_line_2: ''
+  postal_code: 5232
+  city: Villigen PSI
+  country: Switzerland
+test_month_range: 5-5

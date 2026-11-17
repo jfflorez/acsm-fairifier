@@ -1,0 +1,15 @@
+LOD:
+  datetime: '2024-12-09'
+  description: Limit of detection for various variables, at different temporal resolutions
+  standard_name: limit_of_detection
+  variables:
+    Chl_11000_LOD_1h: 0.002
+    Chl_11000_LOD_4min: 0.007
+    NH4_11000_LOD_1h: 0.036
+    NH4_11000_LOD_4min: 0.068
+    NO3_11000_LOD_1h: 0.003
+    NO3_11000_LOD_4min: 0.01
+    Org_11000_LOD_1h: 0.029
+    Org_11000_LOD_4min: 0.063
+    SO4_11000_LOD_1h: 0.004
+    SO4_11000_LOD_4min: 0.01

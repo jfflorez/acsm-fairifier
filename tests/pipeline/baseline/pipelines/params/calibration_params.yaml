@@ -1,0 +1,60 @@
+calibration_intervals:
+  interval_1:
+    ABRefWave_tofware: 174139
+    AB_ref_correct: 117359
+    CE_correct: 1.0
+    CE_tofware: 1.0
+    IE_correct: 238.85
+    IE_tofware: 183.1
+    RIE_Chl_correct: 1.0
+    RIE_Chl_tofware: 1.0
+    RIE_NH4_correct: 2.895
+    RIE_NH4_tofware: 3.183
+    RIE_NO3_correct: 1.05
+    RIE_NO3_tofware: 1.05
+    RIE_Org_correct: 1.4
+    RIE_Org_tofware: 1.4
+    RIE_SO4_correct: 0.915
+    RIE_SO4_tofware: 0.88
+    end_datetime: 2024-12-09 14-00-00
+    start_datetime: 2024-01-01 00-00-00
+  interval_2:
+    ABRefWave_tofware: 174139
+    AB_ref_correct: 347000
+    CE_correct: 1.0
+    CE_tofware: 1.0
+    IE_correct: 206.3
+    IE_tofware: 183.1
+    RIE_Chl_correct: 1.0
+    RIE_Chl_tofware: 1.0
+    RIE_NH4_correct: 3.76
+    RIE_NH4_tofware: 3.183
+    RIE_NO3_correct: 1.05
+    RIE_NO3_tofware: 1.05
+    RIE_Org_correct: 1.4
+    RIE_Org_tofware: 1.4
+    RIE_SO4_correct: 0.81
+    RIE_SO4_tofware: 0.88
+    end_datetime: 2024-12-31 23-59-59
+    start_datetime: 2024-12-09 14-00-01
+default_params:
+  ABRefWave_tofware: 174139
+  CE_tofware: 1.0
+  IE_tofware: 183.1
+  RIE_Chl_tofware: 1.0
+  RIE_NH4_tofware: 3.183
+  RIE_NO3_tofware: 1.05
+  RIE_Org_tofware: 1.4
+  RIE_SO4_tofware: 0.88
+variables:
+  diagnostics:
+  - FilamentEmission_mA
+  - VaporizerTemp_C
+  - FlowRate_ccs
+  - ABsamp
+  species:
+  - Chl_11000
+  - NH4_11000
+  - SO4_11000
+  - NO3_11000
+  - Org_11000
