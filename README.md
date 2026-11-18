@@ -5,7 +5,8 @@
 - **EBAS-compliant outputs**, with appropriate metadata and file structure  
 - **Self-describing HDF5 files**, containing final and intermediate data products for transparent, reusable, and reproducible science
 
-> **Try it without installing anything:** the toolkit runs in your browser on [Renku](https://renkulab.io/p/juanflo16/acsm-fairifier-workbench). See [Choose How to Run](#choose-how-to-run) and the [Renku guide](docs/renku-deployment/README_renku.md).
+> **Try it without installing anything:** the toolkit runs in your browser on [Renku](https://renkulab.io/p/juanflo16/acsm-fairifier-workbench). \
+See [Choose How to Run](#choose-how-to-run) and the [Renku guide](docs/renku-deployment/instructions.md).
 
 ---
 
@@ -119,7 +120,7 @@ While designed for ACSM datasets, the FAIRifier framework is modular and adaptab
 
 | Option | Best for | You need | Data access | Instructions |
 |---|---|---|---|---|
-| **Renku** (browser) | Trying the toolkit, sharing with collaborators | A web browser | Sample data or files uploaded into the session | [Renku guide](docs/renku-deployment/README_renku.md) |
+| **Renku** (browser) | Trying the toolkit, sharing with collaborators | A web browser | Sample data or files uploaded into the session | [Renku guide](docs/renku-deployment/instructions.md) |
 | **Docker** (local) | Regular processing on your own machine | Docker Desktop, Git Bash | Local folders, or the PSI network drive | [Run the ACSM FAIRifier Toolkit](#run-the-acsm-fairifier-toolkit) |
 | **Conda** (local, no Docker) | Development and debugging | Miniforge | Local folders, or the PSI network drive | [Set Up the Python Environment](#optional-set-up-the-python-environment) |
 
